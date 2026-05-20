@@ -14,15 +14,15 @@ The service has two main tiers:
 - Paid subscribers get an expanded template library and photo-based character
   personalization.
 
-Initial conservative defaults:
+Initial MVP decisions:
 
-- Free tier: limited free templates and monthly generation quota.
-- Paid tier: expanded templates, higher quota, photo upload, generated
-  illustrations, and book history.
-- Uploaded child photos require explicit parental consent and must be stored
-  privately.
-- Stripe is the default payment provider unless the product requires another
-  provider later.
+- Free tier: 5 free templates and 3 generated books per month.
+- Paid tier: all templates, photo personalization, generated illustrations, book
+  history, and 10 generated books per month.
+- Paid billing: monthly subscription through Stripe; do not use credits in the
+  MVP.
+- Uploaded child photos require explicit parental consent, must be stored
+  privately, and original uploads are deleted after successful generation.
 
 ## Technical Baseline
 
@@ -60,6 +60,18 @@ Goal: define product boundaries before implementation.
 - Define the child photo retention policy, deletion behavior, and parental
   consent flow.
 - Confirm the payment provider and subscription model.
+
+Decisions:
+
+- Free users can access 5 free templates and generate 3 books per month.
+- Paid subscribers can access all templates, generate 10 books per month, use
+  photo personalization, and view book history.
+- Billing uses Stripe monthly subscriptions. The MVP does not use credits.
+- Uploaded child photos require explicit parental consent. Original uploaded
+  photos are deleted after successful generation; generated book files remain
+  available until the user deletes them or deletes the account.
+- Free books do not define watermarking yet. Add it only if product or cost
+  controls require it.
 
 Success criteria: the MVP, tariffs, limits, and media retention policy are
 documented.
@@ -221,13 +233,13 @@ duplicate requests do not create duplicate expensive work.
 The first release should include:
 
 - Google login.
-- Free templates with a generation limit.
+- 5 free templates and 3 generated books per month for free users.
 - Form fields for child name, age, goal, and template.
 - Template-based story generation without photo personalization.
 - Asynchronous PDF generation.
 - PDF storage in MinIO or S3.
 - User account area with book history.
-- Basic limits and generation statuses.
+- Generation statuses and monthly limit enforcement.
 
 The first release should not include:
 
