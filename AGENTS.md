@@ -9,7 +9,8 @@ Before making changes:
 
 1. Read `README.md` for project purpose and operational commands.
 2. Read `CONVENTIONS.md` for project conventions and constraints.
-3. Inspect the relevant source and tests before deciding on an implementation.
+3. Read `ROADMAP.md` when the task affects product scope, architecture, or delivery stages.
+4. Inspect the relevant source and tests before deciding on an implementation.
 
 ## Core Behavior
 
@@ -62,7 +63,7 @@ The test: Every changed line should trace directly to the user's request.
 Transform tasks into verifiable goals:
 
 - "Add validation" -> "Write tests for invalid inputs, then make them pass"
-- t"Fix the bug" -> "Write a test that reproduces it, then make it pass"
+- "Fix the bug" -> "Write a test that reproduces it, then make it pass"
 - "Refactor X" -> "Ensure tests pass before and after"
 
 For multi-step tasks, state a brief plan:
@@ -85,6 +86,7 @@ implementation rather than after mistakes.
 - Do not add dependencies, build tools, or configuration files without explicit approval.
 - Prefer extending existing functionality over duplicating it.
 - Update `CONVENTIONS.md` when changing project conventions, structure, dependencies, or architectural decisions.
+- Update `ROADMAP.md` when changing planned product stages, MVP scope, or delivery order.
 - Never commit secrets, credentials, local environment files, or generated private artifacts.
 
 ## Validation

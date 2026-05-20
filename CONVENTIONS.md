@@ -6,9 +6,21 @@ choices, and design decisions.
 
 ## Current State
 
-The project does not yet define an application stack, package manager, runtime,
-source layout, test framework, or build process. Do not assume one without an
-explicit project decision.
+The project roadmap defines the target stack and delivery sequence:
+
+- Backend: Laravel API.
+- Frontend: Next.js.
+- Database: PostgreSQL.
+- Cache and queues: Redis.
+- Queue runtime: Laravel Queue with Redis, monitored by Laravel Horizon.
+- Local development: Docker Compose.
+- Local object storage: MinIO.
+- Production object storage: S3-compatible cloud storage.
+- Authentication: Google OAuth.
+
+Runtime commands, package managers, test commands, and source layout are not
+implemented yet. Add them deliberately when introducing the application
+skeleton.
 
 ## General Rules
 
@@ -23,10 +35,16 @@ explicit project decision.
 - Prefer shared helpers or existing patterns over duplicated functionality.
 - Ensure generated code compiles cleanly and passes available validation checks.
 
+## PHP Rules
+
+- Write PHP code according to PSR-12.
+
 ## Documentation Rules
 
 - Update this file when adding or changing conventions, dependencies, folder
   structure, tooling, or architectural decisions.
+- Update `ROADMAP.md` when changing planned product stages, MVP scope, delivery
+  order, or product risks.
 - Keep documentation concise and specific.
 - Prefer durable rules over tool-specific instructions.
 - Keep AI-agent workflow guidance in `AGENTS.md`.
@@ -37,6 +55,7 @@ explicit project decision.
 .
 ├── AGENTS.md
 ├── CONVENTIONS.md
+├── ROADMAP.md
 ├── README.md
 └── .gitignore
 ```
