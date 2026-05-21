@@ -13,12 +13,17 @@ The project roadmap defines the target stack and delivery sequence:
 - Database: PostgreSQL.
 - Cache and queues: Redis.
 - Queue runtime: Laravel Queue with Redis, monitored by Laravel Horizon.
-- Local development: Docker Compose.
+- Local development: Docker Compose. Backend PHP and Composer commands run in
+  the backend Docker image, not on the host machine.
+- Backend web runtime: Alpine-based FrankenPHP on PHP 8.5 with required Laravel
+  extensions installed.
+- Backend CLI workloads such as Composer, Artisan, tests, and queue workers run
+  in the same backend Docker image.
 - Local object storage: MinIO.
 - Production object storage: S3-compatible cloud storage.
 - Authentication: Google OAuth.
 
-Runtime commands, package managers, test commands, and source layout are not
+Runtime commands, package managers, test commands, and source layout are
 documented in `README.md`.
 
 ## Source Layout

@@ -24,11 +24,20 @@ cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env.local
 ```
 
+Install backend dependencies through Docker:
+
+```sh
+docker compose build backend
+docker compose run --rm --no-deps backend composer install
+```
+
 Run the local stack:
 
 ```sh
 docker compose up --build
 ```
+
+The Laravel API is served by FrankenPHP from `backend/public`.
 
 Service URLs:
 
@@ -40,8 +49,10 @@ Service URLs:
 Validation commands:
 
 ```sh
-cd backend && composer lint && composer test
-cd frontend && npm run lint && npm run typecheck && npm run build
+docker compose run --rm --no-deps backend ./vendor/bin/pint --test
+docker compose run --rm --no-deps backend php artisan test
+docker compose run --rm --no-deps frontend npm run lint
+docker compose run --rm --no-deps frontend npm run build
 ```
 
 ## Contributing

@@ -2,6 +2,8 @@ services:
   backend:
     build:
       context: ./backend
+      dockerfile: Dockerfile
+    image: book-generator-backend:local
     working_dir: /app
     volumes:
       - ./backend:/app
@@ -33,11 +35,10 @@ services:
       AWS_BUCKET: book-generator-local
       AWS_ENDPOINT: http://minio:9000
       AWS_USE_PATH_STYLE_ENDPOINT: "true"
-    command: sh -c "composer install && php artisan key:generate --force && php artisan serve --host=0.0.0.0 --port=8000"
+    command: sh -c "composer install && php artisan key:generate --force && frankenphp php-server --listen :8000 --root public"
 
   queue:
-    build:
-      context: ./backend
+    image: book-generator-backend:local
     working_dir: /app
     volumes:
       - ./backend:/app
@@ -58,8 +59,7 @@ services:
     command: sh -c "composer install && php artisan queue:work redis --queue=default,generation-text,generation-image,generation-pdf,mail --tries=3"
 
   frontend:
-    build:
-      context: ./frontend
+    image: node:22-alpine
     working_dir: /app
     volumes:
       - ./frontend:/app
