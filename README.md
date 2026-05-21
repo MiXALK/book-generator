@@ -15,9 +15,34 @@ photo so generated illustrations can use a similar-looking character.
 
 ## Development
 
-See `CONVENTIONS.md` for the selected stack and repository structure. Canonical
-install, run, test, lint, and build commands will be documented here when the
-application skeleton is introduced.
+See `CONVENTIONS.md` for the selected stack and repository structure.
+
+Copy environment examples before starting local services:
+
+```sh
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
+```
+
+Run the local stack:
+
+```sh
+docker compose up --build
+```
+
+Service URLs:
+
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:8000/api`
+- Backend health check: `http://localhost:8000/api/health`
+- MinIO console: `http://localhost:9001`
+
+Validation commands:
+
+```sh
+cd backend && composer lint && composer test
+cd frontend && npm run lint && npm run typecheck && npm run build
+```
 
 ## Contributing
 

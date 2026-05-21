@@ -19,8 +19,14 @@ The project roadmap defines the target stack and delivery sequence:
 - Authentication: Google OAuth.
 
 Runtime commands, package managers, test commands, and source layout are not
-implemented yet. Add them deliberately when introducing the application
-skeleton.
+documented in `README.md`.
+
+## Source Layout
+
+- `backend/` contains the Laravel API.
+- `frontend/` contains the Next.js application.
+- `docker-compose.yml` defines the local development services.
+- `.github/workflows/ci.yml` defines initial backend and frontend validation.
 
 ## General Rules
 
@@ -57,6 +63,10 @@ skeleton.
 ├── CONVENTIONS.md
 ├── ROADMAP.md
 ├── README.md
+├── backend/
+├── docker-compose.yml
+├── frontend/
+├── .github/
 └── .gitignore
 ```
 
@@ -65,6 +75,6 @@ additional documentation.
 
 ## Validation
 
-No validation commands are defined yet. When tooling is introduced, add the
-canonical commands to `README.md` and keep this section focused on validation
-expectations.
+Use the canonical validation commands in `README.md`. Backend PHP must satisfy
+PSR-12 through Laravel Pint, and frontend code must pass linting, type checking,
+and production build checks.

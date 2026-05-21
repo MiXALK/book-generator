@@ -1,4 +1,5 @@
 /vendor/
+backend/vendor/
 node_modules/
 npm-debug.log
 yarn-error.log
@@ -29,3 +30,8 @@ Homestead.json
 .phpactor.json
 auth.json
 .idea/
+backend/.env
+frontend/.env
+frontend/.env.local
+frontend/.next/
+frontend/out/
