@@ -7,9 +7,9 @@ tool-agnostic and applies to any assistant that edits or reviews the code.
 
 Before making changes:
 
-1. Read `README.md` for project purpose and operational commands.
-2. Read `CONVENTIONS.md` for project conventions and constraints.
-3. Read `ROADMAP.md` when the task affects product scope, architecture, or delivery stages.
+1. Read `@README.md` for project purpose and operational commands.
+2. Read `@CONVENTIONS.md` for project conventions and constraints.
+3. Read `@ROADMAP.md` when the task affects product scope, architecture, or delivery stages.
 4. Inspect the relevant source and tests before deciding on an implementation.
 
 ## Core Behavior
@@ -85,8 +85,8 @@ implementation rather than after mistakes.
 
 - Do not add dependencies, build tools, or configuration files without explicit approval.
 - Prefer extending existing functionality over duplicating it.
-- Update `CONVENTIONS.md` when changing project conventions, structure, dependencies, or architectural decisions.
-- Update `ROADMAP.md` when changing planned product stages, MVP scope, or delivery order.
+- Update `@CONVENTIONS.md` when changing project conventions, structure, dependencies, or architectural decisions.
+- Update `@ROADMAP.md` when changing planned product stages, MVP scope, or delivery order.
 - Never commit secrets, credentials, local environment files, or generated private artifacts.
 
 ## Validation
@@ -95,7 +95,7 @@ Run the narrowest useful checks after editing. If no commands are defined yet,
 state that validation could not be run because project tooling has not been
 introduced.
 
-When adding tooling later, document the canonical commands in `README.md`.
+When adding tooling later, document the canonical commands in `@README.md`.
 
 ## Git Safety
 

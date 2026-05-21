@@ -7,15 +7,15 @@ photo so generated illustrations can use a similar-looking character.
 
 ## Project Documentation
 
-- `AGENTS.md` describes how AI coding agents should work in this repository.
-- `CONVENTIONS.md` is the authoritative source for project conventions,
+- `@AGENTS.md` describes how AI coding agents should work in this repository.
+- `@CONVENTIONS.md` is the authoritative source for project conventions,
   structure, constraints, and design decisions.
-- `ROADMAP.md` captures the product roadmap, MVP boundary, delivery stages, and
+- `@ROADMAP.md` captures the product roadmap, MVP boundary, delivery stages, and
   major implementation risks.
 
 ## Development
 
-See `CONVENTIONS.md` for the selected stack and repository structure.
+See `@CONVENTIONS.md` for the selected stack and repository structure.
 
 Copy environment examples before starting local services:
 
@@ -57,6 +57,6 @@ docker compose run --rm --no-deps frontend npm run build
 
 ## Contributing
 
-Keep changes small, intentional, and aligned with `CONVENTIONS.md`. If a change
-introduces or modifies a project convention, update `CONVENTIONS.md` in the same
+Keep changes small, intentional, and aligned with `@CONVENTIONS.md`. If a change
+introduces or modifies a project convention, update `@CONVENTIONS.md` in the same
 change.

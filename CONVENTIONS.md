@@ -1,6 +1,6 @@
 # Project Conventions
 
-`CONVENTIONS.md` serves the same purpose as `project-specs.md`: it is the
+`@CONVENTIONS.md` serves the same purpose as `@project-specs.md`: it is the
 authoritative source for project conventions, folder structure, technology
 choices, and design decisions.
 
@@ -24,7 +24,7 @@ The project roadmap defines the target stack and delivery sequence:
 - Authentication: Google OAuth.
 
 Runtime commands, package managers, test commands, and source layout are
-documented in `README.md`.
+documented in `@README.md`.
 
 ## Source Layout
 
@@ -54,11 +54,11 @@ documented in `README.md`.
 
 - Update this file when adding or changing conventions, dependencies, folder
   structure, tooling, or architectural decisions.
-- Update `ROADMAP.md` when changing planned product stages, MVP scope, delivery
+- Update `@ROADMAP.md` when changing planned product stages, MVP scope, delivery
   order, or product risks.
 - Keep documentation concise and specific.
 - Prefer durable rules over tool-specific instructions.
-- Keep AI-agent workflow guidance in `AGENTS.md`.
+- Keep AI-agent workflow guidance in `@AGENTS.md`.
 
 ## Repository Structure
 
@@ -80,6 +80,6 @@ additional documentation.
 
 ## Validation
 
-Use the canonical validation commands in `README.md`. Backend PHP must satisfy
+Use the canonical validation commands in `@README.md`. Backend PHP must satisfy
 PSR-12 through Laravel Pint, and frontend code must pass linting, type checking,
 and production build checks.
