@@ -84,11 +84,11 @@ Goal: create the application foundation without complex business logic.
   Next.js.
 - [x] Add Docker Compose for Laravel, Next.js, PostgreSQL, Redis, and MinIO.
 - [x] Add `.env.example` files for backend and frontend without secrets.
-- [ ] Configure Laravel API, CORS, health endpoint, PostgreSQL, Redis, queue
+- [x] Configure Laravel API, CORS, health endpoint, PostgreSQL, Redis, queue
   connection, and S3-compatible filesystem disk.
-- [ ] Configure a minimal Next.js app shell with landing page, auth entry points,
+- [x] Configure a minimal Next.js app shell with landing page, auth entry points,
   and basic route structure.
-- [ ] Add initial CI checks for backend tests/lint and frontend lint/typecheck/build.
+- [x] Add initial CI checks for backend tests/lint and frontend lint/typecheck/build.
 
 Success criteria: the project starts locally with one command, the health
 endpoint responds, and the frontend can reach the backend API.

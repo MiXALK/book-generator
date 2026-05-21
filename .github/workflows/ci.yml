@@ -14,14 +14,22 @@ jobs:
         working-directory: backend
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
+      
+      - name: Setup PHP 8.5
+        uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
-          extensions: pdo_pgsql, redis
+          php-version: '8.5'
+          extensions: pdo_pgsql, redis, bcmath, intl, pcntl, zip
           coverage: none
-      - run: composer install --no-interaction --prefer-dist
-      - run: composer lint
-      - run: composer test
+
+      - name: Install Composer Dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run Pint (Linter)
+        run: ./vendor/bin/pint --test
+
+      - name: Run Tests
+        run: php artisan test
 
   frontend:
     runs-on: ubuntu-latest
@@ -30,10 +38,22 @@ jobs:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run build
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Node Dependencies
+        run: npm install
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run Typecheck
+        run: npm run typecheck
+
+      - name: Run Build
+        run: npm run build
