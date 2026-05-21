@@ -10,67 +10,67 @@ paid users, can visually resemble the child based on an uploaded photo.
 
 The service has two main tiers:
 
-- Free users can generate books from a limited set of prepared templates.
-- Paid subscribers get an expanded template library and photo-based character
+- [x] Free users can generate books from a limited set of prepared templates.
+- [x] Paid subscribers get an expanded template library and photo-based character
   personalization.
 
 Initial MVP decisions:
 
-- Free tier: 5 free templates and 3 generated books per month.
-- Paid tier: all templates, photo personalization, generated illustrations, book
+- [x] Free tier: 5 free templates and 3 generated books per month.
+- [x] Paid tier: all templates, photo personalization, generated illustrations, book
   history, and 10 generated books per month.
-- Paid billing: monthly subscription through Stripe; do not use credits in the
+- [x] Paid billing: monthly subscription through Stripe; do not use credits in the
   MVP.
-- Uploaded child photos require explicit parental consent, must be stored
+- [x] Uploaded child photos require explicit parental consent, must be stored
   privately, and original uploads are deleted after successful generation.
 
 ## Technical Baseline
 
-- Backend: Laravel API.
-- Frontend: Next.js.
-- Database: PostgreSQL.
-- Cache and queues: Redis.
-- Queue runtime: Laravel Queue with Redis, with Laravel Horizon for monitoring.
-- Local development: Docker Compose.
-- Local object storage: MinIO.
-- Production object storage: S3-compatible cloud storage.
-- Authentication: Google OAuth.
+- [x] Backend: Laravel API.
+- [x] Frontend: Next.js.
+- [x] Database: PostgreSQL.
+- [x] Cache and queues: Redis.
+- [ ] Queue runtime: Laravel Queue with Redis, with Laravel Horizon for monitoring.
+- [x] Local development: Docker Compose.
+- [x] Local object storage: MinIO.
+- [x] Production object storage: S3-compatible cloud storage.
+- [ ] Authentication: Google OAuth.
 
 ## Queue Strategy
 
 Use Laravel Queue backed by Redis. Split work by queue name so workers can scale
 independently:
 
-- `default` for light background work.
-- `generation-text` for story text generation.
-- `generation-image` for illustration generation.
-- `generation-pdf` for PDF rendering.
-- `mail` for email notifications.
+- [x] `default` for light background work.
+- [ ] `generation-text` for story text generation.
+- [ ] `generation-image` for illustration generation.
+- [ ] `generation-pdf` for PDF rendering.
+- [ ] `mail` for email notifications.
 
 ## Stage 0: Product Discovery And Constraints
 
 Goal: define product boundaries before implementation.
 
-- Describe user scenarios: free user, paid user, repeat generation, PDF
+- [x] Describe user scenarios: free user, paid user, repeat generation, PDF
   download, and account deletion.
-- Define free limits: available templates, generation quota, and whether free
+- [x] Define free limits: available templates, generation quota, and whether free
   books include branding or watermarking.
-- Define paid capabilities: expanded templates, photo upload, similar character
+- [x] Define paid capabilities: expanded templates, photo upload, similar character
   generation, and generation history.
-- Define the child photo retention policy, deletion behavior, and parental
+- [x] Define the child photo retention policy, deletion behavior, and parental
   consent flow.
-- Confirm the payment provider and subscription model.
+- [x] Confirm the payment provider and subscription model.
 
 Decisions:
 
-- Free users can access 5 free templates and generate 3 books per month.
-- Paid subscribers can access all templates, generate 10 books per month, use
+- [x] Free users can access 5 free templates and generate 3 books per month.
+- [x] Paid subscribers can access all templates, generate 10 books per month, use
   photo personalization, and view book history.
-- Billing uses Stripe monthly subscriptions. The MVP does not use credits.
-- Uploaded child photos require explicit parental consent. Original uploaded
+- [x] Billing uses Stripe monthly subscriptions. The MVP does not use credits.
+- [x] Uploaded child photos require explicit parental consent. Original uploaded
   photos are deleted after successful generation; generated book files remain
   available until the user deletes them or deletes the account.
-- Free books do not define watermarking yet. Add it only if product or cost
+- [x] Free books do not define watermarking yet. Add it only if product or cost
   controls require it.
 
 Success criteria: the MVP, tariffs, limits, and media retention policy are
@@ -80,15 +80,15 @@ documented.
 
 Goal: create the application foundation without complex business logic.
 
-- Use a single repository with `backend/` for Laravel and `frontend/` for
+- [x] Use a single repository with `backend/` for Laravel and `frontend/` for
   Next.js.
-- Add Docker Compose for Laravel, Next.js, PostgreSQL, Redis, and MinIO.
-- Add `.env.example` files for backend and frontend without secrets.
-- Configure Laravel API, CORS, health endpoint, PostgreSQL, Redis, queue
+- [x] Add Docker Compose for Laravel, Next.js, PostgreSQL, Redis, and MinIO.
+- [x] Add `.env.example` files for backend and frontend without secrets.
+- [ ] Configure Laravel API, CORS, health endpoint, PostgreSQL, Redis, queue
   connection, and S3-compatible filesystem disk.
-- Configure a minimal Next.js app shell with landing page, auth entry points,
+- [ ] Configure a minimal Next.js app shell with landing page, auth entry points,
   and basic route structure.
-- Add initial CI checks for backend tests/lint and frontend lint/typecheck/build.
+- [ ] Add initial CI checks for backend tests/lint and frontend lint/typecheck/build.
 
 Success criteria: the project starts locally with one command, the health
 endpoint responds, and the frontend can reach the backend API.
@@ -97,11 +97,11 @@ endpoint responds, and the frontend can reach the backend API.
 
 Goal: support Google login and a basic account model.
 
-- Implement Google OAuth.
-- Create user, plan, and subscription models or provider-backed equivalents.
-- Configure authenticated API access between Next.js and Laravel.
-- Add middleware for authenticated routes.
-- Add a basic account area with profile, subscription status, and generation
+- [ ] Implement Google OAuth.
+- [ ] Create user, plan, and subscription models or provider-backed equivalents.
+- [ ] Configure authenticated API access between Next.js and Laravel.
+- [ ] Add middleware for authenticated routes.
+- [ ] Add a basic account area with profile, subscription status, and generation
   history placeholder.
 
 Success criteria: a user can sign in with Google, Laravel creates or updates the
@@ -111,15 +111,15 @@ account, and Next.js can render authenticated state.
 
 Goal: ship the first MVP without photo personalization.
 
-- Create template entities such as `BookTemplate`, `StoryGoal`, `AgeRange`, and
+- [ ] Create template entities such as `BookTemplate`, `StoryGoal`, `AgeRange`, and
   `TemplateScene`.
-- Mark templates as free or paid.
-- Seed an initial template set or add a simple management path.
-- Add the generation form: child name, age, goal, and template.
-- Enforce free-tier limits on the backend.
-- Generate story text from prepared templates by substituting the child's name,
+- [ ] Mark templates as free or paid.
+- [ ] Seed an initial template set or add a simple management path.
+- [ ] Add the generation form: child name, age, goal, and template.
+- [ ] Enforce free-tier limits on the backend.
+- [ ] Generate story text from prepared templates by substituting the child's name,
   age, and goal.
-- Persist `BookGeneration` records with statuses such as `draft`, `queued`,
+- [ ] Persist `BookGeneration` records with statuses such as `draft`, `queued`,
   `processing`, `completed`, and `failed`.
 
 Success criteria: a free user can pick an available template and receive
@@ -129,13 +129,13 @@ personalized story text without paying.
 
 Goal: convert generated stories into downloadable PDF books.
 
-- Move PDF rendering to the `generation-pdf` queue.
-- Render the book from an HTML template.
-- Use a browser-based renderer such as Playwright or Browsershot for design-heavy
+- [ ] Move PDF rendering to the `generation-pdf` queue.
+- [ ] Render the book from an HTML template.
+- [ ] Use a browser-based renderer such as Playwright or Browsershot for design-heavy
   PDFs, or a simpler renderer if the layout stays basic.
-- Store PDFs in S3 or MinIO through Laravel Filesystem.
-- Serve downloads through signed URLs or protected download endpoints.
-- Add a generation status page and download action.
+- [ ] Store PDFs in S3 or MinIO through Laravel Filesystem.
+- [ ] Serve downloads through signed URLs or protected download endpoints.
+- [ ] Add a generation status page and download action.
 
 Success criteria: after submitting the form, the user sees progress and can
 download the generated PDF when it is ready.
@@ -144,12 +144,12 @@ download the generated PDF when it is ready.
 
 Goal: monetize the expanded product surface.
 
-- Integrate Stripe Checkout or the selected payment provider.
-- Handle subscription webhooks.
-- Restrict paid templates to active subscribers.
-- Enforce generation quotas for free and paid plans.
-- Add subscription management UI.
-- Prevent duplicate or excessive generation requests above plan limits.
+- [ ] Integrate Stripe Checkout or the selected payment provider.
+- [ ] Handle subscription webhooks.
+- [ ] Restrict paid templates to active subscribers.
+- [ ] Enforce generation quotas for free and paid plans.
+- [ ] Add subscription management UI.
+- [ ] Prevent duplicate or excessive generation requests above plan limits.
 
 Success criteria: free users see paid templates as locked, and paid users can use
 the expanded catalog.
@@ -158,15 +158,15 @@ the expanded catalog.
 
 Goal: add the key paid feature.
 
-- Allow photo upload only for paid users.
-- Validate image size, MIME type, dimensions, and parental consent.
-- Store original uploads under private S3 prefixes.
-- Run illustration generation through the `generation-image` queue.
-- Model relationships between `ChildProfile`, `UploadedPhoto`,
+- [ ] Allow photo upload only for paid users.
+- [ ] Validate image size, MIME type, dimensions, and parental consent.
+- [ ] Store original uploads under private S3 prefixes.
+- [ ] Run illustration generation through the `generation-image` queue.
+- [ ] Model relationships between `ChildProfile`, `UploadedPhoto`,
   `GeneratedCharacter`, and `BookGeneration`.
-- Decide whether a generated character is reused per child profile or generated
+- [ ] Decide whether a generated character is reused per child profile or generated
   per book.
-- Provide retry and clear failure states for image generation.
+- [ ] Provide retry and clear failure states for image generation.
 
 Success criteria: a paid user uploads a photo and receives a book with
 illustrations where the character resembles the child.
@@ -175,13 +175,13 @@ illustrations where the character resembles the child.
 
 Goal: reduce risk when processing child-related data.
 
-- Minimize collected data: child name, age, goal, and photo only when needed.
-- Require explicit parental consent before photo processing.
-- Support account deletion and deletion of photos and generated books.
-- Keep S3 objects private and use short-lived signed URLs.
-- Avoid logging personal data or private file URLs.
-- Add retention cleanup for temporary files and failed generations.
-- Protect upload endpoints with MIME validation, file size limits, and rate
+- [ ] Minimize collected data: child name, age, goal, and photo only when needed.
+- [ ] Require explicit parental consent before photo processing.
+- [ ] Support account deletion and deletion of photos and generated books.
+- [ ] Keep S3 objects private and use short-lived signed URLs.
+- [ ] Avoid logging personal data or private file URLs.
+- [ ] Add retention cleanup for temporary files and failed generations.
+- [ ] Protect upload endpoints with MIME validation, file size limits, and rate
   limits.
 
 Success criteria: users can delete their data, private files are not directly
@@ -191,12 +191,12 @@ public, and logs avoid personally identifiable information.
 
 Goal: make generation failures and bottlenecks visible.
 
-- Add Laravel Horizon for queue monitoring.
-- Add structured logs and a correlation ID per book generation.
-- Track latency for text generation, image generation, and PDF rendering.
-- Add retry and backoff policies for external AI or rendering services.
-- Monitor failed jobs.
-- Add email or in-app notifications when a book is ready.
+- [ ] Add Laravel Horizon for queue monitoring.
+- [ ] Add structured logs and a correlation ID per book generation.
+- [ ] Track latency for text generation, image generation, and PDF rendering.
+- [ ] Add retry and backoff policies for external AI or rendering services.
+- [ ] Monitor failed jobs.
+- [ ] Add email or in-app notifications when a book is ready.
 
 Success criteria: operators can see where a generation stalled and why jobs are
 failing.
@@ -205,11 +205,11 @@ failing.
 
 Goal: manage templates without code changes.
 
-- Add an admin role.
-- Add CRUD for goals, age groups, templates, scenes, and free/paid availability.
-- Add template preview.
-- Version templates so old generations remain reproducible.
-- Add moderation or manual review before publishing new templates.
+- [ ] Add an admin role.
+- [ ] Add CRUD for goals, age groups, templates, scenes, and free/paid availability.
+- [ ] Add template preview.
+- [ ] Version templates so old generations remain reproducible.
+- [ ] Add moderation or manual review before publishing new templates.
 
 Success criteria: a content manager can add and preview a new template without a
 developer changing code.
@@ -218,12 +218,12 @@ developer changing code.
 
 Goal: prepare the product for growth after demand is validated.
 
-- Split worker pools by queue and resource requirements.
-- Cache the template catalog in Redis.
-- Store generation results and avoid regenerating unchanged PDFs.
-- Add idempotency keys for generation requests.
-- Add quotas and throttling for expensive AI operations.
-- Track per-book cost: text, images, PDF rendering, storage, and bandwidth.
+- [ ] Split worker pools by queue and resource requirements.
+- [ ] Cache the template catalog in Redis.
+- [ ] Store generation results and avoid regenerating unchanged PDFs.
+- [ ] Add idempotency keys for generation requests.
+- [ ] Add quotas and throttling for expensive AI operations.
+- [ ] Track per-book cost: text, images, PDF rendering, storage, and bandwidth.
 
 Success criteria: generation cost is measurable, queues scale independently, and
 duplicate requests do not create duplicate expensive work.
@@ -232,30 +232,30 @@ duplicate requests do not create duplicate expensive work.
 
 The first release should include:
 
-- Google login.
-- 5 free templates and 3 generated books per month for free users.
-- Form fields for child name, age, goal, and template.
-- Template-based story generation without photo personalization.
-- Asynchronous PDF generation.
-- PDF storage in MinIO or S3.
-- User account area with book history.
-- Generation statuses and monthly limit enforcement.
+- [ ] Google login.
+- [x] 5 free templates and 3 generated books per month for free users.
+- [ ] Form fields for child name, age, goal, and template.
+- [ ] Template-based story generation without photo personalization.
+- [ ] Asynchronous PDF generation.
+- [ ] PDF storage in MinIO or S3.
+- [ ] User account area with book history.
+- [ ] Generation statuses and monthly limit enforcement.
 
 The first release should not include:
 
-- Photo personalization.
-- Complex admin panel if template seeding is enough.
-- Multiple payment providers.
-- Deep character customization.
-- Native mobile applications.
+- [x] Photo personalization.
+- [x] Complex admin panel if template seeding is enough.
+- [x] Multiple payment providers.
+- [x] Deep character customization.
+- [x] Native mobile applications.
 
 ## Main Risks
 
-- Processing photos of children requires strict privacy, deletion, consent, and
+- [x] Processing photos of children requires strict privacy, deletion, consent, and
   logging rules.
-- Photo-based character generation can be expensive and unreliable, so it should
+- [x] Photo-based character generation can be expensive and unreliable, so it should
   follow paid validation.
-- Browser-based PDF rendering needs separate worker resources.
-- Free-tier limits must exist early to control generation costs.
-- Content must remain safe for children, especially if free-form AI text
+- [x] Browser-based PDF rendering needs separate worker resources.
+- [x] Free-tier limits must exist early to control generation costs.
+- [x] Content must remain safe for children, especially if free-form AI text
   generation is introduced later.
