@@ -3,7 +3,7 @@
 This roadmap captures the planned development stages for a SaaS product that
 generates personalized children's books. A parent enters the child's name, age,
 and a goal such as "stop being afraid of the dark" or "learn to share." The
-output is a PDF story where the main character uses the child's name and, for
+output is a paginated HTML digital storybook where the main character uses the child's name and, for
 paid users, can visually resemble the child based on an uploaded photo.
 
 ## Product Scope
@@ -44,15 +44,15 @@ independently:
 - [x] `default` for light background work.
 - [ ] `generation-text` for story text generation.
 - [ ] `generation-image` for illustration generation.
-- [ ] `generation-pdf` for PDF rendering.
+- [ ] `generation-layout` for paginating book pages.
 - [ ] `mail` for email notifications.
 
 ## Stage 0: Product Discovery And Constraints
 
 Goal: define product boundaries before implementation.
 
-- [x] Describe user scenarios: free user, paid user, repeat generation, PDF
-  download, and account deletion.
+- [x] Describe user scenarios: free user, paid user, repeat generation, paginated
+  in-browser reading, and account deletion.
 - [x] Define free limits: available templates, generation quota, and whether free
   books include branding or watermarking.
 - [x] Define paid capabilities: expanded templates, photo upload, similar character
@@ -125,20 +125,18 @@ Goal: ship the first MVP without photo personalization.
 Success criteria: a free user can pick an available template and receive
 personalized story text without paying.
 
-## Stage 4: PDF Pipeline
+## Stage 4: Paginated HTML Reader Pipeline
 
-Goal: convert generated stories into downloadable PDF books.
+Goal: create an interactive paginated HTML book reader with strict visual-to-text layout and character limit constraints.
 
-- [ ] Move PDF rendering to the `generation-pdf` queue.
-- [ ] Render the book from an HTML template.
-- [ ] Use a browser-based renderer such as Playwright or Browsershot for design-heavy
-  PDFs, or a simpler renderer if the layout stays basic.
-- [ ] Store PDFs in S3 or MinIO through Laravel Filesystem.
-- [ ] Serve downloads through signed URLs or protected download endpoints.
-- [ ] Add a generation status page and download action.
+- [ ] Implement backend pagination and text division (splitting story content into pages of maximum 80 symbols/characters).
+- [ ] Render the pages on the Next.js frontend with pagination controls (Next/Prev buttons or swipe gestures).
+- [ ] Ensure strict adherence to layout constraints: 80% picture (illustration) space and 20% text container.
+- [ ] Store generated illustrations and metadata in S3 or MinIO through Laravel Filesystem.
+- [ ] Add transition animations and a beautiful reading mode interface on the frontend.
+- [ ] Add a generation status page that navigates directly to the HTML book reader when complete.
 
-Success criteria: after submitting the form, the user sees progress and can
-download the generated PDF when it is ready.
+Success criteria: after submitting the form, the user sees progress and can read their beautifully laid out, paginated book directly in the browser.
 
 ## Stage 5: Subscriptions And Access Limits
 
@@ -193,7 +191,7 @@ Goal: make generation failures and bottlenecks visible.
 
 - [ ] Add Laravel Horizon for queue monitoring.
 - [ ] Add structured logs and a correlation ID per book generation.
-- [ ] Track latency for text generation, image generation, and PDF rendering.
+- [ ] Track latency for text generation, image generation, and paginated HTML assembly.
 - [ ] Add retry and backoff policies for external AI or rendering services.
 - [ ] Monitor failed jobs.
 - [ ] Add email or in-app notifications when a book is ready.
@@ -220,10 +218,10 @@ Goal: prepare the product for growth after demand is validated.
 
 - [ ] Split worker pools by queue and resource requirements.
 - [ ] Cache the template catalog in Redis.
-- [ ] Store generation results and avoid regenerating unchanged PDFs.
+- [ ] Store generation results and avoid regenerating unchanged paginated HTML storybook layouts.
 - [ ] Add idempotency keys for generation requests.
 - [ ] Add quotas and throttling for expensive AI operations.
-- [ ] Track per-book cost: text, images, PDF rendering, storage, and bandwidth.
+- [ ] Track per-book cost: text, images, layout assembly, storage, and bandwidth.
 
 Success criteria: generation cost is measurable, queues scale independently, and
 duplicate requests do not create duplicate expensive work.
@@ -236,8 +234,8 @@ The first release should include:
 - [x] 5 free templates and 3 generated books per month for free users.
 - [ ] Form fields for child name, age, goal, and template.
 - [ ] Template-based story generation without photo personalization.
-- [ ] Asynchronous PDF generation.
-- [ ] PDF storage in MinIO or S3.
+- [ ] Asynchronous book layout generation and pagination.
+- [ ] Illustration storage in MinIO or S3.
 - [ ] User account area with book history.
 - [ ] Generation statuses and monthly limit enforcement.
 
@@ -255,7 +253,7 @@ The first release should not include:
   logging rules.
 - [x] Photo-based character generation can be expensive and unreliable, so it should
   follow paid validation.
-- [x] Browser-based PDF rendering needs separate worker resources.
+- [x] Computationally expensive image/illustration generation needs separate worker resources.
 - [x] Free-tier limits must exist early to control generation costs.
 - [x] Content must remain safe for children, especially if free-form AI text
   generation is introduced later.

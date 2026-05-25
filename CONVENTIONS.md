@@ -46,6 +46,14 @@ documented in `@README.md`.
 - Prefer shared helpers or existing patterns over duplicated functionality.
 - Ensure generated code compiles cleanly and passes available validation checks.
 
+## Book Design & Layout Decisions
+
+To maximize children's engagement and ensure readability, we adhere to a paginated digital format instead of standard downloadable PDFs:
+
+- **No PDF Generation**: Books are delivered entirely as interactive, paginated HTML/CSS experiences rendered on the Next.js frontend.
+- **Page Layout Ratio**: Each page layout must strictly allocate **80% of its visual space to the picture/illustration**, and **20% to the text container**.
+- **Character Constraint**: The text content on any single page must be strictly limited to a maximum of **80 characters (symbols)**, including letters, spaces, and punctuation, to ensure early developmental focus.
+
 ## PHP Rules
 
 - Write PHP code according to PSR-12.

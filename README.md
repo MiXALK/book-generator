@@ -2,7 +2,7 @@
 
 Book Generator is a SaaS project for generating personalized children's books.
 Parents provide a child's name, age, and developmental goal; the service returns
-a personalized PDF story. Paid subscribers will also be able to upload a child
+a personalized paginated HTML digital storybook. Paid subscribers will also be able to upload a child
 photo so generated illustrations can use a similar-looking character.
 
 ## Project Documentation
