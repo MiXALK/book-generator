@@ -1,11 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
 import styles from "./page.module.css";
 
 export default function Home() {
+  const router = useRouter();
+  const { user, loading, getGoogleAuthUrl } = useAuth();
   const [apiStatus, setApiStatus] = useState<"loading" | "connected" | "failed">("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
 
   useEffect(() => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
@@ -32,6 +37,20 @@ export default function Home() {
       });
   }, []);
 
+  const handleSignIn = async () => {
+    if (authLoading) return;
+    setAuthLoading(true);
+    try {
+      const authUrl = await getGoogleAuthUrl();
+      window.location.href = authUrl;
+    } catch (err: unknown) {
+      console.error("Failed to initiate Google OAuth redirect:", err);
+      const msg = err instanceof Error ? err.message : "OAuth service currently unavailable. Please verify client configurations.";
+      alert(msg);
+      setAuthLoading(false);
+    }
+  };
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -39,9 +58,19 @@ export default function Home() {
           <span className={styles.logoText}>📖 StorySprout</span>
         </div>
         <div className={styles.navActions}>
-          <button className={styles.signInButton} onClick={() => alert("Google OAuth will be configured in Stage 2")}>
-            Sign In with Google
-          </button>
+          {loading ? (
+            <button className={styles.signInButton} disabled>
+              Loading...
+            </button>
+          ) : user ? (
+            <button className={styles.signInButton} onClick={() => router.push("/dashboard")}>
+              Go to Dashboard
+            </button>
+          ) : (
+            <button className={styles.signInButton} onClick={handleSignIn} disabled={authLoading}>
+              {authLoading ? "Redirecting..." : "Sign In with Google"}
+            </button>
+          )}
         </div>
       </header>
 
@@ -69,9 +98,19 @@ export default function Home() {
           </div>
 
           <div className={styles.ctaGroup}>
-            <button className={styles.primaryCta} onClick={() => alert("Google OAuth will be configured in Stage 2")}>
-              Get Started Free
-            </button>
+            {loading ? (
+              <button className={styles.primaryCta} disabled>
+                Checking Session...
+              </button>
+            ) : user ? (
+              <button className={styles.primaryCta} onClick={() => router.push("/dashboard")}>
+                Go to Dashboard
+              </button>
+            ) : (
+              <button className={styles.primaryCta} onClick={handleSignIn} disabled={authLoading}>
+                {authLoading ? "Preparing Google Consent..." : "Get Started Free"}
+              </button>
+            )}
           </div>
         </div>
 

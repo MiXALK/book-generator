@@ -1,0 +1,142 @@
+"use client";
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useRouter } from "next/navigation";
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  avatar_url: string | null;
+  plan: "free" | "paid";
+  subscription_status: "active" | "inactive";
+}
+
+interface AuthContextType {
+  user: User | null;
+  token: string | null;
+  loading: boolean;
+  login: (token: string, user: User) => void;
+  logout: () => Promise<void>;
+  getGoogleAuthUrl: () => Promise<string>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("auth_user");
+      try {
+        return stored ? JSON.parse(stored) : null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+  const [token, setToken] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("auth_token");
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== "undefined") {
+      return !!localStorage.getItem("auth_token");
+    }
+    return false;
+  });
+  const router = useRouter();
+
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
+
+  useEffect(() => {
+    const storedToken = token;
+
+    if (storedToken) {
+      // Verify token integrity with backend
+      fetch(`${apiBaseUrl}/user`, {
+        headers: {
+          Authorization: `Bearer ${storedToken}`,
+        },
+      })
+        .then((res) => {
+          if (res.ok) {
+            return res.json();
+          }
+          throw new Error("Invalid session token");
+        })
+        .then((data) => {
+          if (data.user) {
+            setUser(data.user);
+            localStorage.setItem("auth_user", JSON.stringify(data.user));
+          }
+        })
+        .catch((err) => {
+          console.error("Token verification failed:", err);
+          // Token is invalid/expired; clear local session
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem("auth_user");
+          setToken(null);
+          setUser(null);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [apiBaseUrl, token]);
+
+  const login = (newToken: string, newUser: User) => {
+    localStorage.setItem("auth_token", newToken);
+    localStorage.setItem("auth_user", JSON.stringify(newUser));
+    setToken(newToken);
+    setUser(newUser);
+  };
+
+  const logout = async () => {
+    const currentToken = token || localStorage.getItem("auth_token");
+    
+    if (currentToken) {
+      try {
+        await fetch(`${apiBaseUrl}/auth/logout`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${currentToken}`,
+          },
+        });
+      } catch (err) {
+        console.error("Failed to invalidate session token on backend:", err);
+      }
+    }
+
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_user");
+    setToken(null);
+    setUser(null);
+    router.push("/");
+  };
+
+  const getGoogleAuthUrl = async (): Promise<string> => {
+    const res = await fetch(`${apiBaseUrl}/auth/google/url`);
+    if (!res.ok) {
+      throw new Error("Failed to fetch authorization URL from server.");
+    }
+    const data = await res.json();
+    return data.url;
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, token, loading, login, logout, getGoogleAuthUrl }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+}

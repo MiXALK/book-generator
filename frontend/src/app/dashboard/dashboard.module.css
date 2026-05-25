@@ -1,0 +1,458 @@
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 1.5rem;
+  background-color: #fafafa;
+  color: #64748b;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid #e2e8f0;
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.container {
+  --background: #fafafa;
+  --foreground: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --primary-color: #4f46e5;
+  --primary-hover: #4338ca;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: var(--foreground);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo {
+  font-size: 1.5rem;
+}
+
+.logoText {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatarPlaceholder {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: #e0e7ff;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.userMeta {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.planBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  width: fit-content;
+}
+
+.freeBadge {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.paidBadge {
+  background-color: #e0e7ff;
+  color: var(--primary-color);
+}
+
+.logoutButton {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logoutButton:hover {
+  background-color: #fee2e2;
+  color: #ef4444;
+  border-color: #fecaca;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.welcomeBanner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: #ffffff;
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.15);
+}
+
+.welcomeText h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.welcomeText p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.primaryCta {
+  background-color: #ffffff;
+  color: var(--primary-color);
+  border: none;
+  padding: 0.875rem 1.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.1s;
+}
+
+.primaryCta:hover {
+  transform: translateY(-2px);
+}
+
+.primaryCta:active {
+  transform: translateY(0);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.card {
+  background-color: var(--foreground);
+  border: 1px solid var(--border-color);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.75rem;
+}
+
+.limitTracker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.limitNumbers {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.limitCurrent {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--primary-color);
+}
+
+.limitTotal {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.limitSub {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.progressBarBg {
+  background-color: var(--background);
+  height: 0.5rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.progressBarFill {
+  background-color: var(--primary-color);
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.upgradeBox {
+  background-color: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  padding: 1.25rem;
+  border-radius: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.upgradeBox p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #5b21b6;
+}
+
+.upgradeButton {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background-color 0.2s;
+}
+
+.upgradeButton:hover {
+  background-color: var(--primary-hover);
+}
+
+.safetyContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.safetyItem {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.safetyIcon {
+  font-size: 1rem;
+  color: var(--success-color);
+  background-color: #d1fae5;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.safetyItem h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.safetyItem p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  background-color: #f1f5f9;
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyState h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+
+.emptyState p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.emptyCta {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 0.5rem;
+}
+
+.emptyCta:hover {
+  background-color: var(--primary-hover);
+}
+
+.footer {
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--foreground);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .welcomeBanner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.75rem;
+  }
+
+  .welcomeText h1 {
+    font-size: 1.5rem;
+  }
+
+  .welcomeText p {
+    font-size: 0.95rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .loadingContainer {
+    background-color: #0f172a;
+    color: #94a3b8;
+  }
+
+  .container {
+    --background: #0f172a;
+    --foreground: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+    --primary-color: #818cf8;
+    --primary-hover: #6366f1;
+  }
+
+  .safetyIcon {
+    background-color: #064e3b;
+    color: #34d399;
+  }
+
+  .upgradeBox {
+    background-color: #1e1b4b;
+    border-color: #312e81;
+  }
+
+  .upgradeBox p {
+    color: #c7d2fe;
+  }
+
+  .emptyIcon {
+    background-color: #0f172a;
+  }
+}
