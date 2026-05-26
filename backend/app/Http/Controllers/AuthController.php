@@ -153,6 +153,7 @@ class AuthController extends Controller
                 'avatar_url' => $user->avatar_url,
                 'plan' => $user->plan,
                 'subscription_status' => $user->subscription_status,
+                'language' => $user->language,
                 'expires_at' => $user->api_token_expires_at,
             ],
         ]);
@@ -192,7 +193,29 @@ class AuthController extends Controller
                 'avatar_url' => $user->avatar_url,
                 'plan' => $user->plan,
                 'subscription_status' => $user->subscription_status,
+                'language' => $user->language,
             ],
+        ]);
+    }
+
+    /**
+     * Update user language preference.
+     */
+    public function updateLanguage(Request $request)
+    {
+        $request->validate([
+            'language' => 'required|string|in:ru,en',
+        ]);
+
+        $user = $request->user();
+        $user->update([
+            'language' => $request->input('language'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'language' => $user->language,
+            'message' => 'Language preference updated successfully.',
         ]);
     }
 }

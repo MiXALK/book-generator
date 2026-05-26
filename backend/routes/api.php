@@ -16,5 +16,6 @@ Route::post('/auth/google/callback', [AuthController::class, 'handleGoogleCallba
 // Protected endpoints
 Route::middleware('auth.api')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
+    Route::put('/user/language', [AuthController::class, 'updateLanguage']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 });

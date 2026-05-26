@@ -3,14 +3,19 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
+import { locales } from "@/app/context/locales";
+import LanguageSelect from "@/app/components/LanguageSelect";
 import styles from "./page.module.css";
 
 export default function Home() {
   const router = useRouter();
-  const { user, loading, getGoogleAuthUrl } = useAuth();
+  const { user, loading, locale, getGoogleAuthUrl } = useAuth();
   const [apiStatus, setApiStatus] = useState<"loading" | "connected" | "failed">("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
+
+  // Load correct translations
+  const t = locales[locale] || locales.ru;
 
   useEffect(() => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
@@ -45,7 +50,7 @@ export default function Home() {
       window.location.href = authUrl;
     } catch (err: unknown) {
       console.error("Failed to initiate Google OAuth redirect:", err);
-      const msg = err instanceof Error ? err.message : "OAuth service currently unavailable. Please verify client configurations.";
+      const msg = err instanceof Error ? err.message : t.oauthConfigAlert;
       alert(msg);
       setAuthLoading(false);
     }
@@ -55,20 +60,21 @@ export default function Home() {
     <div className={styles.page}>
       <header className={styles.header}>
         <div className={styles.logoContainer}>
-          <span className={styles.logoText}>📖 StorySprout</span>
+          <span className={styles.logoText}>📖 {t.brandName}</span>
         </div>
         <div className={styles.navActions}>
+          <LanguageSelect />
           {loading ? (
             <button className={styles.signInButton} disabled>
-              Loading...
+              {t.loading}
             </button>
           ) : user ? (
             <button className={styles.signInButton} onClick={() => router.push("/dashboard")}>
-              Go to Dashboard
+              {t.goToDashboard}
             </button>
           ) : (
             <button className={styles.signInButton} onClick={handleSignIn} disabled={authLoading}>
-              {authLoading ? "Redirecting..." : "Sign In with Google"}
+              {authLoading ? t.redirecting : t.signInWithGoogle}
             </button>
           )}
         </div>
@@ -77,60 +83,59 @@ export default function Home() {
       <main className={styles.main}>
         <div className={styles.hero}>
           <h1 className={styles.title}>
-            Personalized Children&apos;s Stories Tailored For Their Growth
+            {t.heroTitle}
           </h1>
           <p className={styles.subtitle}>
-            Empower your child&apos;s development with custom, beautifully illustrated stories. 
-            Address developmental goals like learning to share, overcoming fears, or bedtime routines.
+            {t.heroSubtitle}
           </p>
           
           <div className={styles.features}>
             <div className={styles.featureCard}>
               <span className={styles.featureIcon}>✨</span>
-              <h3>Custom Templates</h3>
-              <p>Choose from our template library specifically designed for early childhood developmental milestones.</p>
+              <h3>{t.featureTemplatesTitle}</h3>
+              <p>{t.featureTemplatesDesc}</p>
             </div>
             <div className={styles.featureCard}>
               <span className={styles.featureIcon}>🎨</span>
-              <h3>AI Illustrations</h3>
-              <p>Engage your child with rich, personalized visual storytelling featuring custom-styled characters.</p>
+              <h3>{t.featureIllustrationsTitle}</h3>
+              <p>{t.featureIllustrationsDesc}</p>
             </div>
           </div>
 
           <div className={styles.ctaGroup}>
             {loading ? (
               <button className={styles.primaryCta} disabled>
-                Checking Session...
+                {t.checkingSession}
               </button>
             ) : user ? (
               <button className={styles.primaryCta} onClick={() => router.push("/dashboard")}>
-                Go to Dashboard
+                {t.goToDashboard}
               </button>
             ) : (
               <button className={styles.primaryCta} onClick={handleSignIn} disabled={authLoading}>
-                {authLoading ? "Preparing Google Consent..." : "Get Started Free"}
+                {authLoading ? t.preparingGoogle : t.getStartedFree}
               </button>
             )}
           </div>
         </div>
 
         <div className={styles.statusWidget}>
-          <h3 className={styles.widgetTitle}>System Status</h3>
+          <h3 className={styles.widgetTitle}>{t.systemStatus}</h3>
           <div className={styles.statusRow}>
-            <span>Backend API:</span>
+            <span>{t.backendApi}:</span>
             {apiStatus === "loading" && (
               <span className={`${styles.statusBadge} ${styles.statusLoading}`}>
-                Connecting...
+                {t.connecting}
               </span>
             )}
             {apiStatus === "connected" && (
               <span className={`${styles.statusBadge} ${styles.statusConnected}`}>
-                Connected
+                {t.connected}
               </span>
             )}
             {apiStatus === "failed" && (
               <span className={`${styles.statusBadge} ${styles.statusFailed}`}>
-                Offline ({errorMessage})
+                {t.offline} ({errorMessage})
               </span>
             )}
           </div>
@@ -138,7 +143,7 @@ export default function Home() {
       </main>
 
       <footer className={styles.footer}>
-        <p>&copy; {new Date().getFullYear()} StorySprout. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} {t.brandName}. {t.rightsReserved}</p>
       </footer>
     </div>
   );

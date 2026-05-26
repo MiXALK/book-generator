@@ -53,6 +53,14 @@ To maximize children's engagement and ensure readability, we adhere to a paginat
 - **Page Layout Ratio**: Each page layout must strictly allocate **80% of its visual space to the picture/illustration**, and **20% to the text container**.
 - **Character Constraint**: The text content on any single page must be strictly limited to a maximum of **80 characters (symbols)**, including letters, spaces, and punctuation, to ensure early developmental focus.
 
+## Localization & Language Decisions
+
+To support multiple nationalities while maintaining local compliance, the application is built with native multi-language capability:
+
+- **Supported Languages**: **Russian (RU)** is established as the primary/main application language, with **English (EN)** provided as the additional supported language.
+- **Backend Sync**: A `language` string preference is persisted on the `users` table and updated via the protected PUT `/api/user/language` API route.
+- **Frontend Localization**: Translations are managed through lightweight client-side dictionaries (`frontend/src/app/context/locales.ts`) and dynamically synchronized with the user profile database via the unified `AuthContext`.
+
 ## PHP Rules
 
 - Write PHP code according to PSR-12.

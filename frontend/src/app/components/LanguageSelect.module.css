@@ -1,0 +1,55 @@
+.selectWrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: var(--background, #fafafa);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+  position: relative;
+  transition: border-color 0.2s;
+}
+
+.selectWrapper:hover {
+  border-color: var(--primary-color, #4f46e5);
+}
+
+.globeIcon {
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+.selectInput {
+  background-color: transparent;
+  color: var(--text-primary, #1e293b);
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  padding-right: 0.25rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.selectInput option {
+  color: #1e293b;
+  background-color: #ffffff;
+}
+
+/* Fallback default variables just in case */
+@media (prefers-color-scheme: dark) {
+  .selectWrapper {
+    background-color: #1e293b;
+    border-color: #334155;
+  }
+  .selectInput {
+    color: #f1f5f9;
+  }
+  .selectInput option {
+    color: #f1f5f9;
+    background-color: #1e293b;
+  }
+}

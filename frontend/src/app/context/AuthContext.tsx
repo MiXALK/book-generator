@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { Locale } from "./locales";
 
 export interface User {
   id: number;
@@ -10,12 +11,15 @@ export interface User {
   avatar_url: string | null;
   plan: "free" | "paid";
   subscription_status: "active" | "inactive";
+  language: Locale;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
+  locale: Locale;
+  setLocale: (lang: Locale) => Promise<void>;
   login: (token: string, user: User) => void;
   logout: () => Promise<void>;
   getGoogleAuthUrl: () => Promise<string>;
@@ -41,6 +45,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     return null;
   });
+  
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("app_locale") as Locale;
+      if (stored === "ru" || stored === "en") {
+        return stored;
+      }
+    }
+    return "ru"; // Russian is main
+  });
+
   const [loading, setLoading] = useState(() => {
     if (typeof window !== "undefined") {
       return !!localStorage.getItem("auth_token");
@@ -50,6 +65,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
+
+  // Check and keep context synced with user's db language setting if authenticated
+  useEffect(() => {
+    if (user && user.language && user.language !== locale) {
+      Promise.resolve().then(() => {
+        setLocaleState(user.language);
+        localStorage.setItem("app_locale", user.language);
+      });
+    }
+  }, [user, locale]);
 
   useEffect(() => {
     const storedToken = token;
@@ -71,6 +96,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (data.user) {
             setUser(data.user);
             localStorage.setItem("auth_user", JSON.stringify(data.user));
+            if (data.user.language) {
+              setLocaleState(data.user.language);
+              localStorage.setItem("app_locale", data.user.language);
+            }
           }
         })
         .catch((err) => {
@@ -90,6 +119,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (newToken: string, newUser: User) => {
     localStorage.setItem("auth_token", newToken);
     localStorage.setItem("auth_user", JSON.stringify(newUser));
+    if (newUser.language) {
+      localStorage.setItem("app_locale", newUser.language);
+      setLocaleState(newUser.language);
+    }
     setToken(newToken);
     setUser(newUser);
   };
@@ -117,6 +150,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/");
   };
 
+  const setLocale = async (lang: Locale) => {
+    setLocaleState(lang);
+    localStorage.setItem("app_locale", lang);
+
+    // If logged in, persist to backend profile database
+    if (token && user) {
+      try {
+        const res = await fetch(`${apiBaseUrl}/user/language`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ language: lang }),
+        });
+
+        if (res.ok) {
+          const updatedUser = { ...user, language: lang };
+          setUser(updatedUser);
+          localStorage.setItem("auth_user", JSON.stringify(updatedUser));
+        }
+      } catch (err) {
+        console.error("Failed to persist language preference on backend:", err);
+      }
+    }
+  };
+
   const getGoogleAuthUrl = async (): Promise<string> => {
     const res = await fetch(`${apiBaseUrl}/auth/google/url`);
     if (!res.ok) {
@@ -127,7 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout, getGoogleAuthUrl }}>
+    <AuthContext.Provider value={{ user, token, loading, locale, setLocale, login, logout, getGoogleAuthUrl }}>
       {children}
     </AuthContext.Provider>
   );
