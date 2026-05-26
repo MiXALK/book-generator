@@ -41,10 +41,10 @@ The Laravel API is served by FrankenPHP from `backend/public`.
 
 Service URLs:
 
-- Frontend: `http://localhost:3000`
-- Backend API: `http://localhost:8000/api`
-- Backend health check: `http://localhost:8000/api/health`
-- MinIO console: `http://localhost:9001`
+- Frontend: [http://localhost:3000](http://localhost:3000)
+- Backend API: [http://localhost:8000/api](http://localhost:8000/api)
+- Backend health check: [http://localhost:8000/api/health](http://localhost:8000/api/health)
+- MinIO console: [http://localhost:9001](http://localhost:9001)
 
 Validation commands:
 

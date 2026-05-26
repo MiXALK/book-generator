@@ -33,7 +33,7 @@ Before implementing:
 - No abstractions for single-use code.
 - No "flexibility" or "configurability" that wasn't requested.
 - No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
+- If you write 200 lines, and it could be 50, rewrite it.
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes,
 simplify.
@@ -102,4 +102,3 @@ When adding tooling later, document the canonical commands in `@README.md`.
 - Do not create commits unless explicitly requested.
 - Do not rewrite history or run destructive git commands unless explicitly approved.
 - Treat uncommitted changes as user work unless you created them in the current task.
-

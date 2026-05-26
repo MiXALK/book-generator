@@ -97,11 +97,11 @@ endpoint responds, and the frontend can reach the backend API.
 
 Goal: support Google login and a basic account model.
 
-- [ ] Implement Google OAuth.
-- [ ] Create user, plan, and subscription models or provider-backed equivalents.
-- [ ] Configure authenticated API access between Next.js and Laravel.
-- [ ] Add middleware for authenticated routes.
-- [ ] Add a basic account area with profile, subscription status, and generation
+- [x] Implement Google OAuth.
+- [x] Create user, plan, and subscription models or provider-backed equivalents.
+- [x] Configure authenticated API access between Next.js and Laravel.
+- [x] Add middleware for authenticated routes.
+- [x] Add a basic account area with profile, subscription status, and generation
   history placeholder.
 
 Success criteria: a user can sign in with Google, Laravel creates or updates the
@@ -230,7 +230,7 @@ duplicate requests do not create duplicate expensive work.
 
 The first release should include:
 
-- [ ] Google login.
+- [x] Google login.
 - [x] 5 free templates and 3 generated books per month for free users.
 - [ ] Form fields for child name, age, goal, and template.
 - [ ] Template-based story generation without photo personalization.

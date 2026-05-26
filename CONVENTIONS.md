@@ -1,8 +1,7 @@
 # Project Conventions
 
-`@CONVENTIONS.md` serves the same purpose as `@project-specs.md`: it is the
-authoritative source for project conventions, folder structure, technology
-choices, and design decisions.
+This file is the authoritative source for project agreements, folder structure,
+technologies, and design decisions. Keep it concise and up to date.
 
 ## Current State
 
