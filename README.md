@@ -31,6 +31,12 @@ docker compose build backend
 docker compose run --rm --no-deps backend composer install
 ```
 
+Run database migrations through Docker:
+
+```sh
+docker compose exec backend php artisan migrate
+```
+
 Run the local stack:
 
 ```sh
