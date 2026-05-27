@@ -107,36 +107,49 @@ Goal: support Google login and a basic account model.
 Success criteria: a user can sign in with Google, Laravel creates or updates the
 account, and Next.js can render authenticated state.
 
-## Stage 3: Template Catalog And Free Generation
+## Stage 3: Prompt Catalog And Free Generation
 
-Goal: ship the first MVP without photo personalization.
+Goal: ship prompt-driven story generation without photo personalization.
 
-- [ ] Create template entities such as `BookTemplate`, `StoryGoal`, `AgeRange`, and
-  `TemplateScene`.
-- [ ] Mark templates as free or paid.
-- [ ] Seed an initial template set or add a simple management path.
+- [ ] Keep catalog entities such as `BookTemplate`, `StoryGoal`, and `AgeRange` for
+  user-facing selection.
+- [ ] Introduce an AI story prompt catalog stored in the database and managed by
+  admins.
+- [ ] Introduce prompt quality ratings so only high-quality prompts are active for
+  generation.
 - [ ] Add the generation form: child name, age, goal, and template.
 - [ ] Enforce free-tier limits on the backend.
-- [ ] Generate story text from prepared templates by substituting the child's name,
-  age, and goal.
+- [ ] Generate story text through AI prompts using child context (name, age, goal)
+  with safety and age-appropriateness constraints.
+- [ ] Enforce a strict maximum of 80 symbols per compiled page during generation.
 - [ ] Persist `BookGeneration` records with statuses such as `draft`, `queued`,
   `processing`, `completed`, and `failed`.
 
-Success criteria: a free user can pick an available template and receive
-personalized story text without paying.
+Success criteria: a free user can pick an available template and receive an
+interesting AI-generated story adapted to age and goal, with no page exceeding
+80 symbols.
 
 ## Stage 4: Paginated HTML Reader Pipeline
 
 Goal: create an interactive paginated HTML book reader with strict visual-to-text layout and character limit constraints.
 
-- [ ] Implement backend pagination and text division (splitting story content into pages of maximum 80 symbols/characters).
+- [ ] Implement backend pagination and text division (splitting story content into
+  pages of maximum 80 symbols/characters).
+- [ ] Prepare and maintain around 15 HTML layout templates:
+  dedicated cover templates, dedicated ending templates, and content templates.
+- [ ] Support layout variants with different visual composition and text placement:
+  top image, bottom image, left image, right image, and split ratios.
+- [ ] Randomize eligible layout templates per page while preserving reproducibility
+  in stored page metadata.
 - [ ] Render the pages on the Next.js frontend with pagination controls (Next/Prev buttons or swipe gestures).
 - [ ] Ensure strict adherence to layout constraints: 80% picture (illustration) space and 20% text container.
 - [ ] Store generated illustrations and metadata in S3 or MinIO through Laravel Filesystem.
 - [ ] Add transition animations and a beautiful reading mode interface on the frontend.
 - [ ] Add a generation status page that navigates directly to the HTML book reader when complete.
 
-Success criteria: after submitting the form, the user sees progress and can read their beautifully laid out, paginated book directly in the browser.
+Success criteria: after submitting the form, the user sees progress and can read
+their beautifully laid out, paginated book directly in the browser with varied
+cover/content/ending layouts and strict 80/20 + 80-symbol constraints.
 
 ## Stage 5: Subscriptions And Access Limits
 
@@ -205,11 +218,16 @@ Goal: manage templates without code changes.
 
 - [ ] Add an admin role.
 - [ ] Add CRUD for goals, age groups, templates, scenes, and free/paid availability.
+- [ ] Add CRUD for AI story prompts and prompt rating metadata.
 - [ ] Add template preview.
+- [ ] Add layout-template management for cover/content/ending variants.
 - [ ] Version templates so old generations remain reproducible.
 - [ ] Add moderation or manual review before publishing new templates.
+- [ ] Add prompt quality workflows: scoring, activation thresholds, and publication
+  controls.
 
-Success criteria: a content manager can add and preview a new template without a
+Success criteria: a content manager can manage prompts, ratings, and layout
+templates, then publish high-quality story generation configurations without a
 developer changing code.
 
 ## Stage 10: Scaling And Cost Optimization
@@ -233,7 +251,7 @@ The first release should include:
 - [x] Google login.
 - [x] 5 free templates and 3 generated books per month for free users.
 - [ ] Form fields for child name, age, goal, and template.
-- [ ] Template-based story generation without photo personalization.
+- [ ] AI prompt-based story generation without photo personalization.
 - [ ] Asynchronous book layout generation and pagination.
 - [ ] Illustration storage in MinIO or S3.
 - [ ] User account area with book history.

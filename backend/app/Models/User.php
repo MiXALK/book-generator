@@ -29,4 +29,20 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get all book generations requested by this user.
+     */
+    public function bookGenerations()
+    {
+        return $this->hasMany(BookGeneration::class);
+    }
+
+    /**
+     * Get prompt ratings created by this user.
+     */
+    public function storyPromptRatings()
+    {
+        return $this->hasMany(StoryPromptRating::class);
+    }
 }

@@ -15,12 +15,16 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('book_template_id')->constrained('book_templates')->onDelete('restrict');
+            $table->unsignedBigInteger('story_prompt_id')->nullable();
             $table->string('child_name');
             $table->integer('child_age');
             $table->string('child_goal');
+            $table->longText('prompt_snapshot')->nullable();
             $table->string('status')->default('draft'); // draft, queued, processing, completed, failed
             $table->text('error_message')->nullable();
             $table->timestamps();
+
+            $table->index('story_prompt_id');
         });
     }
 

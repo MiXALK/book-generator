@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('book_templates', function (Blueprint $table) {
+        Schema::create('layout_templates', function (Blueprint $table) {
             $table->id();
+            $table->string('key')->unique();
             $table->string('title');
-            $table->text('description')->nullable();
-            $table->boolean('is_free')->default(true);
-            $table->string('template_type')->default('story');
+            $table->string('category'); // cover, content, ending
+            $table->string('ratio_profile')->default('80_20');
+            $table->string('text_position'); // top, left, right, bottom, overlay
+            $table->unsignedInteger('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('book_templates');
+        Schema::dropIfExists('layout_templates');
     }
 };

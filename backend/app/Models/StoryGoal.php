@@ -12,10 +12,10 @@ class StoryGoal extends Model
     use HasFactory;
 
     /**
-     * Get the templates associated with this goal.
+     * Get AI prompts associated with this goal.
      */
-    public function bookTemplates()
+    public function storyPrompts()
     {
-        return $this->hasMany(BookTemplate::class);
+        return $this->hasMany(StoryPrompt::class);
     }
 }

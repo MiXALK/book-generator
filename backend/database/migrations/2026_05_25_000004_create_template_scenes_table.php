@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('book_template_id')->constrained('book_templates')->onDelete('cascade');
             $table->integer('scene_number');
-            $table->text('text_template');
+            $table->text('scene_instruction')->nullable();
             $table->text('image_prompt_template');
             $table->timestamps();
 

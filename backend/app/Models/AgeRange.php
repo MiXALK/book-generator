@@ -12,10 +12,10 @@ class AgeRange extends Model
     use HasFactory;
 
     /**
-     * Get the templates associated with this age range.
+     * Get AI prompts associated with this age range.
      */
-    public function bookTemplates()
+    public function storyPrompts()
     {
-        return $this->hasMany(BookTemplate::class);
+        return $this->hasMany(StoryPrompt::class);
     }
 }
