@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BookGenerationController;
+use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', function () {
@@ -18,4 +20,8 @@ Route::middleware('auth.api')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
     Route::put('/user/language', [AuthController::class, 'updateLanguage']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+    Route::get('/templates/catalog', [TemplateController::class, 'catalog']);
+    Route::get('/books/history', [BookGenerationController::class, 'index']);
+    Route::post('/books/generate', [BookGenerationController::class, 'generate']);
 });

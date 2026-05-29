@@ -37,6 +37,12 @@ Run database migrations through Docker:
 docker compose exec backend php artisan migrate
 ```
 
+Seed the initial catalog data (goals, age ranges, templates, prompts, layouts):
+
+```sh
+docker compose exec backend php artisan db:seed
+```
+
 Run the local stack:
 
 ```sh

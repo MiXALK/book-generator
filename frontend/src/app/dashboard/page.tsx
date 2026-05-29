@@ -71,7 +71,7 @@ export default function DashboardPage() {
             <p>{t.letInspire}</p>
           </div>
           <div className={styles.quickCta}>
-            <button className={styles.primaryCta} onClick={() => alert(t.storyPrepAlert)}>
+            <button className={styles.primaryCta} onClick={() => router.push("/generate")}>
               {t.createNewStorybook}
             </button>
           </div>
@@ -136,7 +136,7 @@ export default function DashboardPage() {
               <span className={styles.emptyIcon}>📚</span>
               <h3>{t.noBooksYet}</h3>
               <p>{t.noBooksDesc}</p>
-              <button className={styles.emptyCta} onClick={() => alert(t.storyPrepAlert)}>
+              <button className={styles.emptyCta} onClick={() => router.push("/generate")}>
                 {t.getFirstBook}
               </button>
             </div>

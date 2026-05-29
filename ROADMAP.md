@@ -111,18 +111,18 @@ account, and Next.js can render authenticated state.
 
 Goal: ship prompt-driven story generation without photo personalization.
 
-- [ ] Keep catalog entities such as `BookTemplate`, `StoryGoal`, and `AgeRange` for
+- [x] Keep catalog entities such as `BookTemplate`, `StoryGoal`, and `AgeRange` for
   user-facing selection.
-- [ ] Introduce an AI story prompt catalog stored in the database and managed by
+- [x] Introduce an AI story prompt catalog stored in the database and managed by
   admins.
-- [ ] Introduce prompt quality ratings so only high-quality prompts are active for
+- [x] Introduce prompt quality ratings so only high-quality prompts are active for
   generation.
-- [ ] Add the generation form: child name, age, goal, and template.
-- [ ] Enforce free-tier limits on the backend.
+- [x] Add the generation form: child name, age, goal, and template.
+- [x] Enforce free-tier limits on the backend.
 - [ ] Generate story text through AI prompts using child context (name, age, goal)
   with safety and age-appropriateness constraints.
-- [ ] Enforce a strict maximum of 80 symbols per compiled page during generation.
-- [ ] Persist `BookGeneration` records with statuses such as `draft`, `queued`,
+- [x] Enforce a strict maximum of 80 symbols per compiled page during generation.
+- [x] Persist `BookGeneration` records with statuses such as `draft`, `queued`,
   `processing`, `completed`, and `failed`.
 
 Success criteria: a free user can pick an available template and receive an
@@ -135,11 +135,11 @@ Goal: create an interactive paginated HTML book reader with strict visual-to-tex
 
 - [ ] Implement backend pagination and text division (splitting story content into
   pages of maximum 80 symbols/characters).
-- [ ] Prepare and maintain around 15 HTML layout templates:
+- [x] Prepare and maintain around 15 HTML layout templates:
   dedicated cover templates, dedicated ending templates, and content templates.
-- [ ] Support layout variants with different visual composition and text placement:
+- [x] Support layout variants with different visual composition and text placement:
   top image, bottom image, left image, right image, and split ratios.
-- [ ] Randomize eligible layout templates per page while preserving reproducibility
+- [x] Randomize eligible layout templates per page while preserving reproducibility
   in stored page metadata.
 - [ ] Render the pages on the Next.js frontend with pagination controls (Next/Prev buttons or swipe gestures).
 - [ ] Ensure strict adherence to layout constraints: 80% picture (illustration) space and 20% text container.
@@ -250,12 +250,12 @@ The first release should include:
 
 - [x] Google login.
 - [x] 5 free templates and 3 generated books per month for free users.
-- [ ] Form fields for child name, age, goal, and template.
+- [x] Form fields for child name, age, goal, and template.
 - [ ] AI prompt-based story generation without photo personalization.
 - [ ] Asynchronous book layout generation and pagination.
 - [ ] Illustration storage in MinIO or S3.
 - [ ] User account area with book history.
-- [ ] Generation statuses and monthly limit enforcement.
+- [x] Generation statuses and monthly limit enforcement.
 
 The first release should not include:
 
