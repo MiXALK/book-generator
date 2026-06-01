@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    public function __construct(private readonly UserRepositoryInterface $users) {}
     /**
      * Get the Google Auth URL.
      */
@@ -112,21 +112,16 @@ class AuthController extends Controller
             ], 400);
         }
 
-        // Create or update the user
-        $user = User::where('google_id', $googleId)
-            ->orWhere('email', $email)
-            ->first();
+        $user = $this->users->findByGoogleIdOrEmail($googleId, $email);
 
         if ($user) {
-            // Update existing user with Google details
-            $user->update([
+            $user = $this->users->updateGoogleProfile($user, [
                 'google_id' => $googleId,
                 'name' => $name,
                 'avatar_url' => $avatarUrl ?? $user->avatar_url,
             ]);
         } else {
-            // Create a new user (with dummy password since password column is nullable or hashed anyway)
-            $user = User::create([
+            $user = $this->users->createFromGoogle([
                 'google_id' => $googleId,
                 'email' => $email,
                 'name' => $name,
@@ -137,12 +132,8 @@ class AuthController extends Controller
             ]);
         }
 
-        // Generate a secure API Token
         $apiToken = Str::random(80);
-        $user->update([
-            'api_token' => $apiToken,
-            'api_token_expires_at' => now()->addDays(30), // Expire after 30 days
-        ]);
+        $user = $this->users->updateApiToken($user, $apiToken, now()->addDays(30));
 
         return response()->json([
             'token' => $apiToken,
@@ -167,10 +158,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user) {
-            $user->update([
-                'api_token' => null,
-                'api_token_expires_at' => null,
-            ]);
+            $this->users->clearApiToken($user);
         }
 
         return response()->json([
@@ -207,10 +195,7 @@ class AuthController extends Controller
             'language' => 'required|string|in:ru,en',
         ]);
 
-        $user = $request->user();
-        $user->update([
-            'language' => $request->input('language'),
-        ]);
+        $user = $this->users->updateLanguage($request->user(), $request->input('language'));
 
         return response()->json([
             'success' => true,

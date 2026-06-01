@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\User;
+use App\Repositories\Contracts\UserRepositoryInterface;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AuthenticateApi
 {
+    public function __construct(private readonly UserRepositoryInterface $users) {}
+
     /**
      * Handle an incoming request.
      *
@@ -26,7 +28,7 @@ class AuthenticateApi
             ], 401);
         }
 
-        $user = User::where('api_token', $token)->first();
+        $user = $this->users->findByApiToken($token);
 
         if (! $user) {
             return response()->json([
@@ -42,7 +44,6 @@ class AuthenticateApi
             ], 401);
         }
 
-        // Authenticate the user for the current request
         Auth::setUser($user);
 
         return $next($request);

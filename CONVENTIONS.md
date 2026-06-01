@@ -65,6 +65,28 @@ To support multiple nationalities while maintaining local compliance, the applic
 
 - Write PHP code according to PSR-12.
 
+## Database Access (Repository Pattern)
+
+All persistence and database queries must go through repository abstractions. Do not
+call Eloquent query builders or model `create`/`update` methods directly from
+controllers, middleware, or services.
+
+- Define contracts in `backend/app/Repositories/Contracts/` (for example,
+  `UserRepositoryInterface`).
+- Provide Eloquent implementations in `backend/app/Repositories/Eloquent/` (for
+  example, `EloquentUserRepository`).
+- Bind each contract to its implementation in `AppServiceProvider`.
+- Inject repository interfaces into controllers, services, and middleware.
+- Keep Eloquent models focused on relationships, casts, and fillable attributes;
+  query logic belongs in repositories.
+
+When adding a new entity or query path, add or extend a repository contract first,
+then use it from the application layer.
+
+For validated API input, use Form Request classes in `backend/app/Http/Requests/`
+with typed accessor methods (for example, `bookTemplateId(): int`) instead of
+casting values in controllers.
+
 ## Documentation Rules
 
 - Update this file when adding or changing conventions, dependencies, folder
@@ -84,6 +106,10 @@ To support multiple nationalities while maintaining local compliance, the applic
 ├── ROADMAP.md
 ├── README.md
 ├── backend/
+│   └── app/
+│       └── Repositories/
+│           ├── Contracts/
+│           └── Eloquent/
 ├── docker-compose.yml
 ├── frontend/
 ├── .github/
