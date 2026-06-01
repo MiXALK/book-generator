@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -33,7 +33,7 @@ class User extends Authenticatable
     /**
      * Get all book generations requested by this user.
      */
-    public function bookGenerations()
+    public function bookGenerations(): HasMany
     {
         return $this->hasMany(BookGeneration::class);
     }
@@ -41,7 +41,7 @@ class User extends Authenticatable
     /**
      * Get prompt ratings created by this user.
      */
-    public function storyPromptRatings()
+    public function storyPromptRatings(): HasMany
     {
         return $this->hasMany(StoryPromptRating::class);
     }

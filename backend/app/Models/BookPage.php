@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['book_generation_id', 'layout_template_id', 'page_number', 'text', 'image_url'])]
 class BookPage extends Model
@@ -14,7 +15,7 @@ class BookPage extends Model
     /**
      * Get the generation that owns this page.
      */
-    public function bookGeneration()
+    public function bookGeneration(): BelongsTo
     {
         return $this->belongsTo(BookGeneration::class);
     }
@@ -22,7 +23,7 @@ class BookPage extends Model
     /**
      * Get the layout template used for this page.
      */
-    public function layoutTemplate()
+    public function layoutTemplate(): BelongsTo
     {
         return $this->belongsTo(LayoutTemplate::class);
     }

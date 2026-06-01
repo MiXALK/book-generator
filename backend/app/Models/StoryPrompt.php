@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'title',
@@ -24,7 +26,7 @@ class StoryPrompt extends Model
     /**
      * Get the age range associated with this prompt.
      */
-    public function ageRange()
+    public function ageRange(): BelongsTo
     {
         return $this->belongsTo(AgeRange::class);
     }
@@ -32,7 +34,7 @@ class StoryPrompt extends Model
     /**
      * Get the story goal associated with this prompt.
      */
-    public function storyGoal()
+    public function storyGoal(): BelongsTo
     {
         return $this->belongsTo(StoryGoal::class);
     }
@@ -40,7 +42,7 @@ class StoryPrompt extends Model
     /**
      * Get all ratings for this prompt.
      */
-    public function ratings()
+    public function ratings(): HasMany
     {
         return $this->hasMany(StoryPromptRating::class);
     }
@@ -48,7 +50,7 @@ class StoryPrompt extends Model
     /**
      * Get all generations that used this prompt.
      */
-    public function bookGenerations()
+    public function bookGenerations(): HasMany
     {
         return $this->hasMany(BookGeneration::class);
     }

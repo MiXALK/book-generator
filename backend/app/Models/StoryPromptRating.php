@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['story_prompt_id', 'user_id', 'rating', 'notes'])]
 class StoryPromptRating extends Model
@@ -14,7 +15,7 @@ class StoryPromptRating extends Model
     /**
      * Get the prompt for this rating.
      */
-    public function storyPrompt()
+    public function storyPrompt(): BelongsTo
     {
         return $this->belongsTo(StoryPrompt::class);
     }
@@ -22,7 +23,7 @@ class StoryPromptRating extends Model
     /**
      * Get the user who left this rating.
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

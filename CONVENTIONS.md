@@ -64,6 +64,10 @@ To support multiple nationalities while maintaining local compliance, the applic
 ## PHP Rules
 
 - Write PHP code according to PSR-12.
+- Run static analysis with PHPStan and Larastan (`composer phpstan` in `backend/`).
+- Larastan infers Eloquent model properties from `database/migrations`; add explicit
+  `BelongsTo` / `HasMany` return types on relationship methods so relation checks pass.
+- Do not call `env()` outside `config/` files; read values via `config()` in application code.
 
 ## Database Access (Repository Pattern)
 

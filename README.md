@@ -62,6 +62,7 @@ Validation commands:
 
 ```sh
 docker compose run --rm --no-deps backend ./vendor/bin/pint --test
+docker compose run --rm --no-deps backend composer phpstan
 docker compose run --rm --no-deps backend php artisan test
 docker compose run --rm --no-deps frontend npm run lint
 docker compose run --rm --no-deps frontend npm run build

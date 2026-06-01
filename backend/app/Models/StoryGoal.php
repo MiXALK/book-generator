@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['name', 'description'])]
 class StoryGoal extends Model
@@ -14,7 +15,7 @@ class StoryGoal extends Model
     /**
      * Get AI prompts associated with this goal.
      */
-    public function storyPrompts()
+    public function storyPrompts(): HasMany
     {
         return $this->hasMany(StoryPrompt::class);
     }

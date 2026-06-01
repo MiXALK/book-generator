@@ -28,6 +28,9 @@ jobs:
       - name: Run Pint (Linter)
         run: ./vendor/bin/pint --test
 
+      - name: Run PHPStan (Larastan)
+        run: ./vendor/bin/phpstan analyse --configuration=phpstan.neon.dist --memory-limit=512M
+
       - name: Run Tests
         run: php artisan test
 

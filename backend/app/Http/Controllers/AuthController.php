@@ -15,8 +15,8 @@ class AuthController extends Controller
      */
     public function getGoogleUrl()
     {
-        $clientId = env('GOOGLE_CLIENT_ID');
-        $redirectUri = env('GOOGLE_REDIRECT_URI');
+        $clientId = config('services.google.client_id');
+        $redirectUri = config('services.google.redirect_uri');
 
         if (! $clientId || ! $redirectUri) {
             return response()->json([
@@ -50,9 +50,9 @@ class AuthController extends Controller
             'code' => 'required|string',
         ]);
 
-        $clientId = env('GOOGLE_CLIENT_ID');
-        $clientSecret = env('GOOGLE_CLIENT_SECRET');
-        $redirectUri = env('GOOGLE_REDIRECT_URI');
+        $clientId = config('services.google.client_id');
+        $clientSecret = config('services.google.client_secret');
+        $redirectUri = config('services.google.redirect_uri');
 
         if (! $clientId || ! $clientSecret || ! $redirectUri) {
             return response()->json([
