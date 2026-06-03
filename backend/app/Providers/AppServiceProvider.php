@@ -18,6 +18,8 @@ use App\Repositories\Eloquent\EloquentLayoutTemplateRepository;
 use App\Repositories\Eloquent\EloquentStoryGoalRepository;
 use App\Repositories\Eloquent\EloquentStoryPromptRepository;
 use App\Repositories\Eloquent\EloquentUserRepository;
+use App\Services\Ai\Contracts\StoryTextGenerationProviderInterface;
+use App\Services\Ai\StoryTextGenerationProviderFactory;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -35,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(BookPageRepositoryInterface::class, EloquentBookPageRepository::class);
         $this->app->bind(StoryPromptRepositoryInterface::class, EloquentStoryPromptRepository::class);
         $this->app->bind(LayoutTemplateRepositoryInterface::class, EloquentLayoutTemplateRepository::class);
+
+        $this->app->singleton(StoryTextGenerationProviderInterface::class, function ($app) {
+            return $app->make(StoryTextGenerationProviderFactory::class)->make();
+        });
     }
 
     /**
