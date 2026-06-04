@@ -44,7 +44,8 @@ readonly class OpenAiCompatibleStoryTextProvider implements StoryTextGenerationP
                         ['role' => 'system', 'content' => $this->promptComposer->systemMessage()],
                         ['role' => 'user', 'content' => $this->promptComposer->userMessage($input)],
                     ],
-                    'temperature' => 0.7,
+                    'max_tokens' => 500,
+                    'temperature' => 0.8,
                 ]);
 
             if (! $response->successful()) {

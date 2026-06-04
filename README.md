@@ -17,12 +17,16 @@ photo so generated illustrations can use a similar-looking character.
 
 See `@CONVENTIONS.md` for the selected stack and repository structure.
 
-Copy environment examples before starting local services:
+Copy environment examples before starting local services, then fill in private
+values in the copied files (never commit `.env` or `.env.local`):
 
 ```sh
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env.local
 ```
+
+Example files list variable names only. For local Docker Compose, service
+defaults in `docker-compose.yml` apply when a variable is unset or empty.
 
 Install backend dependencies through Docker:
 

@@ -1,19 +1,6 @@
 <?php
 
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
-
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],
@@ -41,4 +28,15 @@ return [
         'redirect_uri' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'ai_text' => [
+        'driver' => env('AI_TEXT_DRIVER', 'deepseek'),
+        'api_key' => env('AI_TEXT_API_KEY'),
+        'drivers' => [
+            'deepseek' => [
+                'base_url' => 'https://api.deepseek.com/v1',
+                'model' => 'deepseek-chat',
+                'timeout' => 30,
+            ],
+        ],
+    ],
 ];

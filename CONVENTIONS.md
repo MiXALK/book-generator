@@ -42,6 +42,14 @@ documented in `@README.md`.
 - Follow existing naming, indentation, file organization, linting, and formatting
   conventions once they exist.
 - Preserve existing comments. Add new comments only for non-obvious logic.
+- Do not leave commented-out environment variables, configuration keys, or dead
+  code in the repository. Optional settings belong in `config/` defaults (or
+  driver presets documented there); list only active keys in `.env.example`.
+- `.env.example` files are key catalogs only: no secrets, credentials, API keys,
+  database names, usernames, passwords, or other private or environment-specific
+  values. Leave those empty; developers set real values in local `.env` files
+  (gitignored). Local Docker defaults for unset variables live in
+  `docker-compose.yml`, not in committed examples.
 - Prefer shared helpers or existing patterns over duplicated functionality.
 - Ensure generated code compiles cleanly and passes available validation checks.
 
@@ -68,6 +76,8 @@ To support multiple nationalities while maintaining local compliance, the applic
 - Larastan infers Eloquent model properties from `database/migrations`; add explicit
   `BelongsTo` / `HasMany` return types on relationship methods so relation checks pass.
 - Do not call `env()` outside `config/` files; read values via `config()` in application code.
+- Prefer `readonly class` for DTOs and services that only hold immutable constructor
+  state and do not need subclassing.
 
 ## Database Access (Repository Pattern)
 
@@ -90,6 +100,18 @@ then use it from the application layer.
 For validated API input, use Form Request classes in `backend/app/Http/Requests/`
 with typed accessor methods (for example, `bookTemplateId(): int`) instead of
 casting values in controllers.
+
+## AI Text Generation
+
+Story text generation must use provider abstractions, not a hard-coded vendor:
+
+- Contract: `backend/app/Services/Ai/Contracts/StoryTextGenerationProviderInterface.php`
+- Default driver: `deepseek` (OpenAI-compatible chat completions API)
+- HTTP transport: `backend/app/Services/Ai/Providers/OpenAiCompatibleStoryTextProvider.php`
+- Driver resolution: `backend/app/Services/Ai/StoryTextGenerationProviderFactory.php`
+- Configure via `AI_TEXT_DRIVER` and `AI_TEXT_API_KEY` in `.env`. Each driver's
+  `base_url`, `model`, and `timeout` are defined only in `config/services.php`
+  under `ai_text.drivers`.
 
 ## Documentation Rules
 

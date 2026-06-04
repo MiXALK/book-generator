@@ -11,6 +11,8 @@ use App\Repositories\Contracts\BookPageRepositoryInterface;
 use App\Repositories\Contracts\BookTemplateRepositoryInterface;
 use App\Repositories\Contracts\LayoutTemplateRepositoryInterface;
 use App\Repositories\Contracts\StoryPromptRepositoryInterface;
+use App\Services\Ai\Contracts\StoryTextGenerationProviderInterface;
+use App\Services\Ai\Data\StoryTextGenerationInput;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +29,7 @@ class BookGenerationService
         private readonly BookTemplateRepositoryInterface $bookTemplates,
         private readonly StoryPromptRepositoryInterface $storyPrompts,
         private readonly LayoutTemplateRepositoryInterface $layoutTemplates,
+        private readonly StoryTextGenerationProviderInterface $storyTextProvider,
     ) {}
 
     public function ensureGenerationLimit(User $user): void
@@ -56,7 +59,7 @@ class BookGenerationService
 
         return DB::transaction(function () use ($user, $template, $childName, $age, $goal, $prompt) {
             $generation = $this->createGeneration($user, $template, $childName, $age, $goal, $prompt);
-            $pages = $this->buildPages($childName, $age, $goal, $template);
+            $pages = $this->buildPages($childName, $age, $goal, $template, $prompt);
 
             $this->bookPages->createMany($generation, $pages);
             $this->completeGeneration($generation, $prompt);
@@ -99,7 +102,7 @@ class BookGenerationService
         return $this->storyPrompts->findBestForGeneration($user->language ?? 'ru', $age, $goal);
     }
 
-    private function buildPages(string $name, int $age, string $goal, BookTemplate $template): array
+    private function buildPages(string $name, int $age, string $goal, BookTemplate $template, ?StoryPrompt $prompt): array
     {
         $scenes = $this->bookTemplates->getOrderedScenes($template);
 
@@ -112,17 +115,14 @@ class BookGenerationService
             ]);
         }
 
-        $layouts = $this->pickLayouts($scenes->count());
-        $midpoint = (int) ceil($scenes->count() / 2);
+        $pageCount = $scenes->count();
+        $layouts = $this->pickLayouts($pageCount);
+        $aiTexts = $this->generateStoryTextsWithAi($name, $age, $goal, $prompt, $scenes, $pageCount);
+        $midpoint = (int) ceil($pageCount / 2);
 
-        return $scenes->values()->map(function ($scene, $index) use ($name, $age, $goal, $layouts, $midpoint) {
+        return $scenes->values()->map(function ($scene, $index) use ($name, $age, $goal, $layouts, $midpoint, $aiTexts) {
             $pageNumber = $index + 1;
-            $raw = match (true) {
-                $pageNumber === 1 => "{$name}, {$age}, начинает историю о цели: {$goal}.",
-                $pageNumber === $midpoint => "Неожиданно сюжет меняется, но {$name} не сдается.",
-                $pageNumber === $layouts->count() => "{$name} достигает цели {$goal} и радуется финалу.",
-                default => "{$name} делает шаг к цели {$goal} и становится смелее.",
-            };
+            $raw = $aiTexts[$index] ?? $this->fallbackText($name, $age, $goal, $pageNumber, $layouts->count(), $midpoint);
 
             return [
                 'page_number' => $pageNumber,
@@ -130,6 +130,95 @@ class BookGenerationService
                 'text' => $this->limitSymbols($raw),
             ];
         })->all();
+    }
+
+    private function generateStoryTextsWithAi(
+        string $name,
+        int $age,
+        string $goal,
+        ?StoryPrompt $prompt,
+        Collection $scenes,
+        int $pageCount,
+    ): array {
+        if (! $prompt || ! $this->storyTextProvider->isConfigured()) {
+            return $this->fallbackTexts($name, $age, $goal, $pageCount);
+        }
+
+        $sceneInstructions = $scenes
+            ->pluck('scene_instruction')
+            ->filter(fn ($instruction) => is_string($instruction) && trim($instruction) !== '')
+            ->values()
+            ->all();
+
+        $promptText = strtr($prompt->prompt_text, [
+            '{name}' => $name,
+            '{age}' => (string) $age,
+            '{goal}' => $goal,
+        ]);
+
+        $input = new StoryTextGenerationInput(
+            promptText: $promptText,
+            childName: $name,
+            childAge: $age,
+            childGoal: $goal,
+            sceneInstructions: $sceneInstructions,
+            pageCount: $pageCount,
+        );
+
+        $pages = $this->storyTextProvider->generatePages($input);
+
+        if ($pages === null) {
+            return $this->fallbackTexts($name, $age, $goal, $pageCount);
+        }
+
+        return $this->normalizeAiPages($pages, $name, $age, $goal, $pageCount);
+    }
+
+    private function normalizeAiPages(array $pages, string $name, int $age, string $goal, int $pageCount): array
+    {
+        $normalized = [];
+
+        foreach ($pages as $page) {
+            if (! is_string($page)) {
+                continue;
+            }
+
+            $normalized[] = $this->limitSymbols(trim($page));
+
+            if (count($normalized) === $pageCount) {
+                break;
+            }
+        }
+
+        while (count($normalized) < $pageCount) {
+            $pageNumber = count($normalized) + 1;
+            $midpoint = (int) ceil($pageCount / 2);
+            $normalized[] = $this->limitSymbols($this->fallbackText($name, $age, $goal, $pageNumber, $pageCount, $midpoint));
+        }
+
+        return $normalized;
+    }
+
+    private function fallbackTexts(string $name, int $age, string $goal, int $pageCount): array
+    {
+        $midpoint = (int) ceil($pageCount / 2);
+        $fallback = [];
+
+        for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
+            $fallback[] = $this->fallbackText($name, $age, $goal, $pageNumber, $pageCount, $midpoint);
+        }
+
+        return $fallback;
+    }
+
+    private function fallbackText(string $name, int $age, string $goal, int $pageNumber, int $totalPages, int $midpoint): string
+    {
+        return match (true) {
+            $pageNumber === 1 => "{$name}, {$age}, начинает историю о цели: {$goal}.",
+            $pageNumber === $midpoint => "Неожиданно сюжет меняется, но {$name} не сдается.",
+            $pageNumber === $totalPages => "{$name} достигает цели {$goal} и радуется финалу.",
+            default => "{$name} делает шаг к цели {$goal} и становится смелее.",
+        };
     }
 
     private function pickLayouts(int $pagesCount): Collection
