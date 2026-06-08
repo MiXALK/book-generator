@@ -151,35 +151,6 @@ Success criteria: after submitting the form, the user sees progress and can read
 their beautifully laid out, paginated book directly in the browser with varied
 cover/content/ending layouts and strict 80/20 + 80-symbol constraints.
 
-### Stage 4 Implementation Order
-
-Backend text pagination and layout assignment are already in place (`book_pages`
-with `text`, `layout_template_id`, and 80-symbol trimming). Stage 4 finishes the
-reader experience and asset surface.
-
-1. **Book detail API** — `GET /api/books/{id}` returning generation metadata,
-   ordered pages, and each page's `layoutTemplate` (`category`, `text_position`,
-   `ratio_profile`). Reuse repository loading already used after generate.
-2. **Dashboard library** — replace the empty-state placeholder with data from
-   `GET /api/books/history`; link each item to the reader.
-3. **Reader route** — `frontend` page such as `/books/[id]` that loads the detail
-   API and renders one page at a time.
-4. **Layout renderer** — map `text_position` and `ratio_profile` to CSS (80%
-   illustration zone, 20% text zone) for cover, content, and ending categories.
-   Use placeholder art in the illustration area until Stage 6 image generation.
-5. **Pagination controls** — Previous/Next buttons; optional swipe on touch
-   devices. Disable controls at first/last page.
-6. **Post-generate flow** — after successful `POST /api/books/generate`, navigate
-   to the reader (generation is synchronous today; no separate polling yet).
-7. **Reading polish** — page transition animation, typography tuned for
-   children, and a focused reading layout (minimal chrome).
-8. **Illustration metadata** — reserve `book_pages.image_url` and S3 key
-   conventions with placeholder URLs or static assets; wire Laravel Filesystem
-   only when real images exist (Stage 6). Do not block the reader on image AI.
-
-Defer to later stages: async `queued`/`processing` status polling (Stage 8),
-real illustration generation and private signed URLs (Stages 6–7).
-
 ## Stage 5: Subscriptions And Access Limits
 
 Goal: monetize the expanded product surface.
