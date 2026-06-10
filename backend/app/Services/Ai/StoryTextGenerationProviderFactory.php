@@ -12,13 +12,14 @@ readonly class StoryTextGenerationProviderFactory
 
     public function make(): StoryTextGenerationProviderInterface
     {
-        $driver = (string) config('services.ai_text.driver', 'deepseek');
+        $driver = (string) config('services.ai_text.driver', 'qwen');
         $preset = $this->presetForDriver($driver);
 
         $apiKey = (string) config('services.ai_text.api_key');
         $baseUrl = $this->presetString($preset, 'base_url');
         $model = $this->presetString($preset, 'model');
         $timeout = $this->presetInt($preset, 'timeout');
+        $requestExtras = $this->presetRequestExtras($preset);
 
         return new OpenAiCompatibleStoryTextProvider(
             apiKey: $apiKey,
@@ -26,6 +27,7 @@ readonly class StoryTextGenerationProviderFactory
             model: $model,
             timeoutSeconds: $timeout,
             promptComposer: $this->promptComposer,
+            requestExtras: $requestExtras,
         );
     }
 
@@ -69,6 +71,25 @@ readonly class StoryTextGenerationProviderFactory
         }
 
         return $value;
+    }
+
+    /**
+     * @param  array<string, mixed>  $preset
+     * @return array<string, mixed>
+     */
+    private function presetRequestExtras(array $preset): array
+    {
+        if (! isset($preset['request'])) {
+            return [];
+        }
+
+        $request = $preset['request'];
+
+        if (! is_array($request)) {
+            return [];
+        }
+
+        return $request;
     }
 
     /**

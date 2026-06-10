@@ -11,16 +11,20 @@ use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
- * Works with any OpenAI-compatible chat completions API (DeepSeek, OpenAI, etc.).
+ * Works with any OpenAI-compatible chat completions API (Qwen, DeepSeek, OpenAI, etc.).
  */
 readonly class OpenAiCompatibleStoryTextProvider implements StoryTextGenerationProviderInterface
 {
+    /**
+     * @param  array<string, mixed>  $requestExtras
+     */
     public function __construct(
         private string $apiKey,
         private string $baseUrl,
         private string $model,
         private int $timeoutSeconds,
         private StoryTextPromptComposer $promptComposer,
+        private array $requestExtras = [],
     ) {}
 
     public function isConfigured(): bool
@@ -35,18 +39,24 @@ readonly class OpenAiCompatibleStoryTextProvider implements StoryTextGenerationP
         }
 
         try {
+            $chatCompletionsUrl = rtrim($this->baseUrl, '/').'/chat/completions';
+
+            $messages = [
+                ['role' => 'system', 'content' => $this->promptComposer->systemMessage()],
+                ['role' => 'user', 'content' => $this->promptComposer->userMessage($input)],
+            ];
+
+            $payload = array_merge([
+                'model' => $this->model,
+                'messages' => $messages,
+                'max_tokens' => 500,
+                'temperature' => 0.8,
+            ], $this->requestExtras);
+
             $response = Http::withToken($this->apiKey)
                 ->timeout($this->timeoutSeconds)
                 ->acceptJson()
-                ->post(rtrim($this->baseUrl, '/').'/chat/completions', [
-                    'model' => $this->model,
-                    'messages' => [
-                        ['role' => 'system', 'content' => $this->promptComposer->systemMessage()],
-                        ['role' => 'user', 'content' => $this->promptComposer->userMessage($input)],
-                    ],
-                    'max_tokens' => 500,
-                    'temperature' => 0.8,
-                ]);
+                ->post($chatCompletionsUrl, $payload);
 
             if (! $response->successful()) {
                 Log::warning('Story text provider request failed', [
@@ -58,7 +68,8 @@ readonly class OpenAiCompatibleStoryTextProvider implements StoryTextGenerationP
                 return null;
             }
 
-            $content = (string) Arr::get($response->json(), 'choices.0.message.content', '');
+            $responseData = $response->json();
+            $content = (string) Arr::get($responseData, 'choices.0.message.content', '');
             $decoded = json_decode($content, true);
 
             if (! is_array($decoded) || ! isset($decoded['pages']) || ! is_array($decoded['pages'])) {
@@ -67,12 +78,24 @@ readonly class OpenAiCompatibleStoryTextProvider implements StoryTextGenerationP
 
             $pages = [];
             foreach ($decoded['pages'] as $page) {
-                if (is_string($page) && trim($page) !== '') {
-                    $pages[] = trim($page);
+                if (! is_string($page)) {
+                    continue;
                 }
+
+                $trimmedPage = trim($page);
+
+                if ($trimmedPage === '') {
+                    continue;
+                }
+
+                $pages[] = $trimmedPage;
             }
 
-            return $pages !== [] ? $pages : null;
+            if ($pages === []) {
+                return null;
+            }
+
+            return $pages;
         } catch (Throwable $exception) {
             Log::warning('Story text provider exception', [
                 'message' => $exception->getMessage(),

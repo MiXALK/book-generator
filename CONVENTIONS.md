@@ -78,6 +78,11 @@ To support multiple nationalities while maintaining local compliance, the applic
 - Do not call `env()` outside `config/` files; read values via `config()` in application code.
 - Prefer `readonly class` for DTOs and services that only hold immutable constructor
   state and do not need subclassing.
+- Prefer readable code over dense one-liners. Do not combine multiple function
+  calls, casts, or array operations on a single line when splitting them into
+  named intermediate variables would make the logic easier to follow. One clear
+  step per line is preferred over chaining two or three language constructs
+  together.
 
 ## Database Access (Repository Pattern)
 
@@ -106,12 +111,16 @@ casting values in controllers.
 Story text generation must use provider abstractions, not a hard-coded vendor:
 
 - Contract: `backend/app/Services/Ai/Contracts/StoryTextGenerationProviderInterface.php`
-- Default driver: `deepseek` (OpenAI-compatible chat completions API)
+- Default driver: `qwen` (DashScope OpenAI-compatible chat completions API)
 - HTTP transport: `backend/app/Services/Ai/Providers/OpenAiCompatibleStoryTextProvider.php`
 - Driver resolution: `backend/app/Services/Ai/StoryTextGenerationProviderFactory.php`
-- Configure via `AI_TEXT_DRIVER` and `AI_TEXT_API_KEY` in `.env`. Each driver's
-  `base_url`, `model`, and `timeout` are defined only in `config/services.php`
-  under `ai_text.drivers`.
+- Configure via `AI_TEXT_DRIVER` and `AI_TEXT_API_KEY` in `.env`. `AI_TEXT_API_KEY`
+  is the DashScope API key for the Qwen driver. Each driver's `base_url`, `model`,
+  `timeout`, and optional `request` extras are defined only in
+  `config/services.php` under `ai_text.drivers`.
+- Alternate driver: `deepseek` remains available when that API is reachable.
+- Optional per-driver `request` array is merged into the chat completions POST
+  body (for example, `response_format` for structured JSON output).
 
 ## Documentation Rules
 
