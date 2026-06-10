@@ -121,6 +121,13 @@ export default function GeneratePage() {
         throw new Error(data.message || t.genericGenerateError);
       }
 
+      const generationId = data.generation?.id;
+
+      if (typeof generationId === "number") {
+        router.push(`/books/${generationId}/status`);
+        return;
+      }
+
       setMessage(t.generateSuccess);
     } catch (err) {
       const msg = err instanceof Error ? err.message : t.genericGenerateError;

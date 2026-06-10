@@ -28,15 +28,35 @@ class EloquentBookGenerationRepository implements BookGenerationRepositoryInterf
 
     public function loadForApi(BookGeneration $generation): BookGeneration
     {
-        return $generation->load('bookPages.layoutTemplate', 'bookTemplate', 'storyPrompt');
+        return $generation->load([
+            'bookTemplate',
+            'storyPrompt',
+            'bookPages' => fn ($query) => $query
+                ->orderBy('page_number')
+                ->with('layoutTemplate'),
+        ]);
     }
 
     public function listForUser(int $userId): Collection
     {
         return BookGeneration::query()
             ->where('user_id', $userId)
-            ->with(['bookTemplate:id,title', 'bookPages:id,book_generation_id,page_number,text,image_url'])
+            ->with([
+                'bookTemplate:id,title',
+                'bookPages' => fn ($query) => $query
+                    ->select(['id', 'book_generation_id', 'page_number', 'text', 'image_url', 'layout_template_id'])
+                    ->orderBy('page_number')
+                    ->with('layoutTemplate:id,key,category,ratio_profile,text_position'),
+            ])
             ->latest()
             ->get();
+    }
+
+    public function findForUserById(int $userId, int $generationId): ?BookGeneration
+    {
+        return BookGeneration::query()
+            ->where('user_id', $userId)
+            ->whereKey($generationId)
+            ->first();
     }
 }

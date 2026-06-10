@@ -16,6 +16,7 @@ class EloquentBookPageRepository implements BookPageRepositoryInterface
                 'layout_template_id' => $page['layout_template_id'],
                 'page_number' => $page['page_number'],
                 'text' => $page['text'],
+                'image_url' => $page['image_url'] ?? null,
             ]);
         }
     }

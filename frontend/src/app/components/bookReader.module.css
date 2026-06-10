@@ -1,0 +1,223 @@
+.readerShell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(circle at top left, rgba(124, 58, 237, 0.12), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.12), transparent 32%),
+    #f8fafc;
+  color: #0f172a;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.readerHeader,
+.readerFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+.readerHeader {
+  border-bottom: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+}
+
+.readerTitle {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.readerSubtitle {
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+  color: #64748b;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.closeButton,
+.navButton {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  cursor: pointer;
+}
+
+.closeButton:hover,
+.navButton:hover:not(:disabled) {
+  border-color: #6366f1;
+  color: #4338ca;
+}
+
+.navButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.readerStage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  touch-action: pan-y;
+}
+
+.pageFrame {
+  width: min(100%, 760px);
+  aspect-ratio: 4 / 5;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.16),
+    0 2px 8px rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+}
+
+.pageEnterForward {
+  animation: pageForward 280ms ease;
+}
+
+.pageEnterBackward {
+  animation: pageBackward 280ms ease;
+}
+
+@keyframes pageForward {
+  from {
+    opacity: 0;
+    transform: translateX(28px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes pageBackward {
+  from {
+    opacity: 0;
+    transform: translateX(-28px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.pageCanvas {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  background: #fff7ed;
+}
+
+.layoutTextBottom {
+  flex-direction: column;
+}
+
+.layoutTextTop {
+  flex-direction: column-reverse;
+}
+
+.layoutTextLeft {
+  flex-direction: row;
+}
+
+.layoutTextRight {
+  flex-direction: row-reverse;
+}
+
+.illustrationZone {
+  flex: 4 1 0;
+  min-height: 0;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #dbeafe, #ede9fe);
+}
+
+.illustrationZone[data-category="cover"] {
+  background: linear-gradient(135deg, #ddd6fe, #c4b5fd);
+}
+
+.illustrationZone[data-category="ending"] {
+  background: linear-gradient(135deg, #bbf7d0, #6ee7b7);
+}
+
+.illustrationImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.illustrationFallback {
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.45), transparent 30%),
+    linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(14, 165, 233, 0.35));
+}
+
+.textZone {
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 20px;
+  background: #fffdf8;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.layoutTextLeft .textZone,
+.layoutTextRight .textZone {
+  border-top: none;
+  border-left: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.layoutTextRight .textZone {
+  border-left: none;
+  border-right: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.pageText {
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  font-size: clamp(1rem, 2.4vw, 1.35rem);
+  line-height: 1.45;
+  color: #1e293b;
+}
+
+.readerFooter {
+  border-top: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.pageIndicator {
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 720px) {
+  .readerHeader,
+  .readerFooter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pageFrame {
+    border-radius: 20px;
+  }
+}

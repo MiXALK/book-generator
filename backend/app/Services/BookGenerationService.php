@@ -30,7 +30,16 @@ class BookGenerationService
         private readonly StoryPromptRepositoryInterface $storyPrompts,
         private readonly LayoutTemplateRepositoryInterface $layoutTemplates,
         private readonly StoryTextGenerationProviderInterface $storyTextProvider,
+        private readonly BookIllustrationStorageService $illustrationStorage,
     ) {}
+
+    public function formatForApi(BookGeneration $generation): BookGeneration
+    {
+        $loaded = $this->bookGenerations->loadForApi($generation);
+        $this->illustrationStorage->resolveGenerationImageUrls($loaded);
+
+        return $loaded;
+    }
 
     public function ensureGenerationLimit(User $user): void
     {
@@ -59,12 +68,13 @@ class BookGenerationService
 
         return DB::transaction(function () use ($user, $template, $childName, $age, $goal, $prompt) {
             $generation = $this->createGeneration($user, $template, $childName, $age, $goal, $prompt);
-            $pages = $this->buildPages($childName, $age, $goal, $template, $prompt);
+            $built = $this->buildPages($childName, $age, $goal, $template, $prompt);
+            $pages = $this->attachPlaceholderIllustrations($generation->id, $built['pages'], $built['layouts']);
 
             $this->bookPages->createMany($generation, $pages);
             $this->completeGeneration($generation, $prompt);
 
-            return $this->bookGenerations->loadForApi($generation);
+            return $this->formatForApi($generation);
         });
     }
 
@@ -120,7 +130,7 @@ class BookGenerationService
         $aiTexts = $this->generateStoryTextsWithAi($name, $age, $goal, $prompt, $scenes, $pageCount);
         $midpoint = (int) ceil($pageCount / 2);
 
-        return $scenes->values()->map(function ($scene, $index) use ($name, $age, $goal, $layouts, $midpoint, $aiTexts) {
+        $pages = $scenes->values()->map(function ($scene, $index) use ($name, $age, $goal, $layouts, $midpoint, $aiTexts) {
             $pageNumber = $index + 1;
             $raw = $aiTexts[$index] ?? $this->fallbackText($name, $age, $goal, $pageNumber, $layouts->count(), $midpoint);
 
@@ -130,6 +140,32 @@ class BookGenerationService
                 'text' => $this->limitSymbols($raw),
             ];
         })->all();
+
+        return [
+            'pages' => $pages,
+            'layouts' => $layouts,
+        ];
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $pages
+     */
+    private function attachPlaceholderIllustrations(int $generationId, array $pages, Collection $layouts): array
+    {
+        foreach ($pages as $index => $page) {
+            $layout = $layouts[$index] ?? null;
+            $category = is_object($layout) && isset($layout->category)
+                ? (string) $layout->category
+                : 'content';
+            $pageNumber = (int) $page['page_number'];
+            $pages[$index]['image_url'] = $this->illustrationStorage->storePlaceholder(
+                $generationId,
+                $pageNumber,
+                $category,
+            );
+        }
+
+        return $pages;
     }
 
     private function generateStoryTextsWithAi(

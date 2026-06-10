@@ -23,5 +23,6 @@ Route::middleware('auth.api')->group(function () {
 
     Route::get('/templates/catalog', [TemplateController::class, 'catalog']);
     Route::get('/books/history', [BookGenerationController::class, 'index']);
+    Route::get('/books/{id}', [BookGenerationController::class, 'show'])->whereNumber('id');
     Route::post('/books/generate', [BookGenerationController::class, 'generate']);
 });

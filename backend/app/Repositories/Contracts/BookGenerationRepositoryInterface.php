@@ -16,4 +16,6 @@ interface BookGenerationRepositoryInterface
     public function loadForApi(BookGeneration $generation): BookGeneration;
 
     public function listForUser(int $userId): Collection;
+
+    public function findForUserById(int $userId, int $generationId): ?BookGeneration;
 }

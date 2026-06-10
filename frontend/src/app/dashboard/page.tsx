@@ -1,24 +1,68 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
 import LanguageSelect from "@/app/components/LanguageSelect";
+import { BookGeneration } from "@/app/types/book";
 import styles from "./dashboard.module.css";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, loading, logout, locale } = useAuth();
-
-  // Load correct translations
+  const { token, user, loading, logout, locale } = useAuth();
   const t = locales[locale] || locales.ru;
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
+
+  const [books, setBooks] = useState<BookGeneration[]>([]);
+  const [libraryLoading, setLibraryLoading] = useState(true);
+  const [libraryError, setLibraryError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push("/");
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+
+    const loadLibrary = async () => {
+      setLibraryLoading(true);
+      setLibraryError(null);
+
+      try {
+        const response = await fetch(`${apiBaseUrl}/books/history`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || t.bookLoadError);
+        }
+
+        setBooks(data.items ?? []);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : t.bookLoadError;
+        setLibraryError(message);
+      } finally {
+        setLibraryLoading(false);
+      }
+    };
+
+    loadLibrary();
+  }, [apiBaseUrl, t.bookLoadError, token]);
+
+  const monthlyUsage = useMemo(() => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    return books.filter((book) => new Date(book.created_at) >= monthStart).length;
+  }, [books]);
 
   if (loading) {
     return (
@@ -30,11 +74,12 @@ export default function DashboardPage() {
   }
 
   if (!user) {
-    return null; // Prevents flashing content during redirect
+    return null;
   }
 
   const isPaid = user.plan === "paid";
   const monthlyLimit = isPaid ? 10 : 3;
+  const usagePercent = Math.min(100, Math.round((monthlyUsage / monthlyLimit) * 100));
 
   return (
     <div className={styles.container}>
@@ -78,17 +123,16 @@ export default function DashboardPage() {
         </section>
 
         <div className={styles.grid}>
-          {/* Subscription Limits Status */}
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>{t.monthlyUsageLimit}</h2>
             <div className={styles.limitTracker}>
               <div className={styles.limitNumbers}>
-                <span className={styles.limitCurrent}>0</span>
+                <span className={styles.limitCurrent}>{monthlyUsage}</span>
                 <span className={styles.limitTotal}>/ {monthlyLimit} {t.books}</span>
               </div>
               <p className={styles.limitSub}>{t.quotaResets}</p>
               <div className={styles.progressBarBg}>
-                <div className={styles.progressBarFill} style={{ width: "0%" }}></div>
+                <div className={styles.progressBarFill} style={{ width: `${usagePercent}%` }}></div>
               </div>
             </div>
             {!isPaid && (
@@ -101,7 +145,6 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Guidelines & Safety Card */}
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>{t.privacyConsentTitle}</h2>
             <div className={styles.safetyContent}>
@@ -129,17 +172,53 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Book Library Empty State Placeholder */}
           <div className={`${styles.card} ${styles.fullWidth}`}>
             <h2 className={styles.cardTitle}>{t.myLibraryTitle}</h2>
-            <div className={styles.emptyState}>
-              <span className={styles.emptyIcon}>📚</span>
-              <h3>{t.noBooksYet}</h3>
-              <p>{t.noBooksDesc}</p>
-              <button className={styles.emptyCta} onClick={() => router.push("/generate")}>
-                {t.getFirstBook}
-              </button>
-            </div>
+            {libraryLoading && <p className={styles.libraryState}>{t.loading}</p>}
+            {libraryError && <p className={styles.libraryError}>{libraryError}</p>}
+            {!libraryLoading && !libraryError && books.length === 0 && (
+              <div className={styles.emptyState}>
+                <span className={styles.emptyIcon}>📚</span>
+                <h3>{t.noBooksYet}</h3>
+                <p>{t.noBooksDesc}</p>
+                <button className={styles.emptyCta} onClick={() => router.push("/generate")}>
+                  {t.getFirstBook}
+                </button>
+              </div>
+            )}
+            {!libraryLoading && !libraryError && books.length > 0 && (
+              <div className={styles.libraryGrid}>
+                {books.map((book) => {
+                  const coverImage = book.book_pages[0]?.image_url;
+                  const createdLabel = new Date(book.created_at).toLocaleDateString();
+
+                  return (
+                    <article key={book.id} className={styles.libraryCard}>
+                      <div className={styles.libraryCover}>
+                        {coverImage ? (
+                          <img src={coverImage} alt="" />
+                        ) : (
+                          <div className={styles.libraryCoverFallback} />
+                        )}
+                      </div>
+                      <div className={styles.libraryMeta}>
+                        <h3>{book.book_template?.title ?? book.child_name}</h3>
+                        <p>{book.child_name} · {book.child_goal}</p>
+                        <p>{t.createdAt}: {createdLabel}</p>
+                        <p>{book.book_pages.length} {t.pagesCount}</p>
+                        <button
+                          type="button"
+                          className={styles.libraryReadButton}
+                          onClick={() => router.push(`/books/${book.id}`)}
+                        >
+                          {t.readBook}
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </main>

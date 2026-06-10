@@ -141,11 +141,11 @@ Goal: create an interactive paginated HTML book reader with strict visual-to-tex
   top image, bottom image, left image, right image, and split ratios.
 - [x] Randomize eligible layout templates per page while preserving reproducibility
   in stored page metadata.
-- [ ] Render the pages on the Next.js frontend with pagination controls (Next/Prev buttons or swipe gestures).
-- [ ] Ensure strict adherence to layout constraints: 80% picture (illustration) space and 20% text container.
-- [ ] Store generated illustrations and metadata in S3 or MinIO through Laravel Filesystem.
-- [ ] Add transition animations and a beautiful reading mode interface on the frontend.
-- [ ] Add a generation status page that navigates directly to the HTML book reader when complete.
+- [x] Render the pages on the Next.js frontend with pagination controls (Next/Prev buttons or swipe gestures).
+- [x] Ensure strict adherence to layout constraints: 80% picture (illustration) space and 20% text container.
+- [x] Store generated illustrations and metadata in S3 or MinIO through Laravel Filesystem.
+- [x] Add transition animations and a beautiful reading mode interface on the frontend.
+- [x] Add a generation status page that navigates directly to the HTML book reader when complete.
 
 Success criteria: after submitting the form, the user sees progress and can read
 their beautifully laid out, paginated book directly in the browser with varied
@@ -253,8 +253,8 @@ The first release should include:
 - [x] Form fields for child name, age, goal, and template.
 - [x] AI prompt-based story generation without photo personalization.
 - [ ] Asynchronous book layout generation and pagination.
-- [ ] Illustration storage in MinIO or S3.
-- [ ] User account area with book history.
+- [x] Illustration storage in MinIO or S3.
+- [x] User account area with book history.
 - [x] Generation statuses and monthly limit enforcement.
 
 The first release should not include:

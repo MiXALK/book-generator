@@ -19,8 +19,26 @@ class BookGenerationController extends Controller
 
     public function index(Request $request): JsonResponse
     {
+        $items = $this->bookGenerations->listForUser($request->user()->id)
+            ->map(fn ($generation) => $this->generationService->formatForApi($generation));
+
         return response()->json([
-            'items' => $this->bookGenerations->listForUser($request->user()->id),
+            'items' => $items,
+        ]);
+    }
+
+    public function show(Request $request, int $id): JsonResponse
+    {
+        $generation = $this->bookGenerations->findForUserById($request->user()->id, $id);
+
+        if ($generation === null) {
+            return response()->json([
+                'message' => 'Book not found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'generation' => $this->generationService->formatForApi($generation),
         ]);
     }
 
