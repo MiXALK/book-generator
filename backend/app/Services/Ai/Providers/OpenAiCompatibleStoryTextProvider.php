@@ -55,6 +55,7 @@ readonly class OpenAiCompatibleStoryTextProvider implements StoryTextGenerationP
 
             $response = Http::withToken($this->apiKey)
                 ->timeout($this->timeoutSeconds)
+                ->connectTimeout($this->timeoutSeconds)
                 ->acceptJson()
                 ->post($chatCompletionsUrl, $payload);
 
