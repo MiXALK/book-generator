@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 class AuthController extends Controller
 {
     public function __construct(private readonly UserRepositoryInterface $users) {}
+
     /**
      * Get the Google Auth URL.
      */
