@@ -35,14 +35,15 @@ return [
             'deepseek' => [
                 'base_url' => 'https://api.deepseek.com/v1',
                 'model' => 'deepseek-chat',
-                'timeout' => 30,
+                'timeout' => 90,
             ],
             'qwen' => [
                 'base_url' => 'https://ws-aw3tb2gara5rhvyb.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1',
                 'model' => 'qwen3.6-flash',
-                'timeout' => 30,
+                'timeout' => 90,
                 'request' => [
                     'response_format' => ['type' => 'json_object'],
+                    'enable_thinking' => false,
                 ],
             ],
         ],

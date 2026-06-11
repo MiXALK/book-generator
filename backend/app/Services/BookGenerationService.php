@@ -16,12 +16,16 @@ use App\Services\Ai\Data\StoryTextGenerationInput;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class BookGenerationService
 {
-    private const int FREE_MONTHLY_LIMIT = 3;
+    private const int FREE_MONTHLY_LIMIT = 33;
 
     private const int MAX_PAGE_TEXT_LENGTH = 80;
+
+    private const string DEFAULT_PROMPT_TEXT = 'Напиши детскую историю для возраста {age} про {name} и цель {goal}. '.
+        'Сделай сюжет добрым, с одним мягким поворотом, и выдай текст по страницам до 80 символов.';
 
     public function __construct(
         private readonly BookGenerationRepositoryInterface $bookGenerations,
@@ -176,7 +180,7 @@ class BookGenerationService
         Collection $scenes,
         int $pageCount,
     ): array {
-        if (! $prompt || ! $this->storyTextProvider->isConfigured()) {
+        if (! $this->storyTextProvider->isConfigured()) {
             return $this->fallbackTexts($name, $age, $goal, $pageCount);
         }
 
@@ -186,11 +190,7 @@ class BookGenerationService
             ->values()
             ->all();
 
-        $promptText = strtr($prompt->prompt_text, [
-            '{name}' => $name,
-            '{age}' => (string) $age,
-            '{goal}' => $goal,
-        ]);
+        $promptText = $this->resolvePromptText($prompt, $name, $age, $goal);
 
         $input = new StoryTextGenerationInput(
             promptText: $promptText,
@@ -204,10 +204,31 @@ class BookGenerationService
         $pages = $this->storyTextProvider->generatePages($input);
 
         if ($pages === null) {
+            Log::warning('Story text generation returned no pages; using fallback text', [
+                'child_age' => $age,
+                'child_goal' => $goal,
+                'story_prompt_id' => $prompt?->id,
+            ]);
+
             return $this->fallbackTexts($name, $age, $goal, $pageCount);
         }
 
         return $this->normalizeAiPages($pages, $name, $age, $goal, $pageCount);
+    }
+
+    private function resolvePromptText(?StoryPrompt $prompt, string $name, int $age, string $goal): string
+    {
+        if ($prompt === null) {
+            $template = self::DEFAULT_PROMPT_TEXT;
+        } else {
+            $template = $prompt->prompt_text;
+        }
+
+        return strtr($template, [
+            '{name}' => $name,
+            '{age}' => (string) $age,
+            '{goal}' => $goal,
+        ]);
     }
 
     private function normalizeAiPages(array $pages, string $name, int $age, string $goal, int $pageCount): array
