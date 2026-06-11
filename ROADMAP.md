@@ -111,9 +111,9 @@ account, and Next.js can render authenticated state.
 
 Goal: ship prompt-driven story generation without photo personalization.
 
-- [x] Keep catalog entities such as `BookTemplate`, `StoryGoal`, and `AgeRange`;
-  users select a development goal and age range, and the matching book template is
-  resolved automatically on the backend.
+- [x] Keep catalog entities such as `BookTemplate` and `StoryGoal`; model fixed
+  age bands as the `AgeRange` PHP enum. Users select a development goal and age
+  range, and the matching book template is resolved automatically on the backend.
 - [x] Introduce an AI story prompt catalog stored in the database and managed by
   admins.
 - [x] Introduce prompt quality ratings so only high-quality prompts are active for
@@ -218,7 +218,7 @@ failing.
 Goal: manage templates without code changes.
 
 - [ ] Add an admin role.
-- [ ] Add CRUD for goals, age groups, templates, scenes, and free/paid availability.
+- [ ] Add CRUD for goals, templates, scenes, and free/paid availability.
 - [ ] Add CRUD for AI story prompts and prompt rating metadata.
 - [ ] Add template preview.
 - [ ] Add layout-template management for cover/content/ending variants.

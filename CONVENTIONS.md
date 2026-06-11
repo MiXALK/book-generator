@@ -69,6 +69,15 @@ To support multiple nationalities while maintaining local compliance, the applic
 - **Backend Sync**: A `language` string preference is persisted on the `users` table and updated via the protected PUT `/api/user/language` API route.
 - **Frontend Localization**: Translations are managed through lightweight client-side dictionaries (`frontend/src/app/context/locales.ts`) and dynamically synchronized with the user profile database via the unified `AuthContext`.
 
+## Fixed Domain Constants
+
+Use backed PHP enums in `backend/app/Enums/` for small, fixed product constants
+that will not grow over time. Age bands are modeled this way (`AgeRange`).
+
+Growable catalog entities (for example, `StoryGoal`, `BookTemplate`, and
+`StoryPrompt`) stay in the database and use repositories. UI labels for enum
+values are resolved on the frontend through `frontend/src/app/context/locales.ts`.
+
 ## PHP Rules
 
 - Write PHP code according to PSR-12.
