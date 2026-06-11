@@ -24,6 +24,16 @@ class EloquentBookTemplateRepository implements BookTemplateRepositoryInterface
             ->firstOrFail();
     }
 
+    public function findActiveByStoryGoalName(string $goalName): BookTemplate
+    {
+        return BookTemplate::query()
+            ->where('is_active', true)
+            ->whereHas('storyGoal', function ($query) use ($goalName) {
+                $query->where('name', $goalName);
+            })
+            ->firstOrFail();
+    }
+
     public function getOrderedScenes(BookTemplate $template): Collection
     {
         return $template->templateScenes()->orderBy('scene_number')->get();

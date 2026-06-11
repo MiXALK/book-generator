@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
@@ -16,13 +16,6 @@ interface CatalogAgeRange {
   label: string;
 }
 
-interface CatalogTemplate {
-  id: number;
-  title: string;
-  description: string | null;
-  is_free: boolean;
-}
-
 export default function GeneratePage() {
   const router = useRouter();
   const { token, user, loading, locale } = useAuth();
@@ -31,7 +24,6 @@ export default function GeneratePage() {
 
   const [goals, setGoals] = useState<CatalogGoal[]>([]);
   const [ageRanges, setAgeRanges] = useState<CatalogAgeRange[]>([]);
-  const [templates, setTemplates] = useState<CatalogTemplate[]>([]);
   const [fetching, setFetching] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -40,7 +32,6 @@ export default function GeneratePage() {
   const [childName, setChildName] = useState("");
   const [selectedGoal, setSelectedGoal] = useState("");
   const [selectedAgeRange, setSelectedAgeRange] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState("");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -71,7 +62,6 @@ export default function GeneratePage() {
         const data = await response.json();
         setGoals(data.goals ?? []);
         setAgeRanges(data.age_ranges ?? []);
-        setTemplates(data.templates ?? []);
       } catch (err) {
         const msg = err instanceof Error ? err.message : t.genericGenerateError;
         setError(msg);
@@ -83,13 +73,9 @@ export default function GeneratePage() {
     loadCatalog();
   }, [apiBaseUrl, t.catalogLoadError, t.genericGenerateError, token]);
 
-  const selectedTemplateItem = useMemo(() => {
-    return templates.find((template) => String(template.id) === selectedTemplate);
-  }, [selectedTemplate, templates]);
-
   const submitGeneration = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!token || !selectedGoal || !selectedAgeRange || !selectedTemplate || !childName.trim()) {
+    if (!token || !selectedGoal || !selectedAgeRange || !childName.trim()) {
       return;
     }
 
@@ -111,7 +97,6 @@ export default function GeneratePage() {
           child_name: childName.trim(),
           age: childAge,
           goal: selectedGoal,
-          book_template_id: Number(selectedTemplate),
         }),
       });
 
@@ -187,27 +172,6 @@ export default function GeneratePage() {
             ))}
           </select>
         </label>
-
-        <label className={styles.field}>
-          <span>{t.templateLabel}</span>
-          <select value={selectedTemplate} onChange={(event) => setSelectedTemplate(event.target.value)} required>
-            <option value="">{t.selectOption}</option>
-            {templates.map((template) => (
-              <option key={template.id} value={template.id}>
-                {template.title}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        {selectedTemplateItem && (
-          <div className={styles.templateMeta}>
-            <p>{selectedTemplateItem.description}</p>
-            {!selectedTemplateItem.is_free && user.plan === "free" && (
-              <p className={styles.warning}>{t.paidTemplateWarning}</p>
-            )}
-          </div>
-        )}
 
         <button type="submit" disabled={fetching || submitting} className={styles.submit}>
           {submitting ? t.generating : t.generateButton}

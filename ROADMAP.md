@@ -111,13 +111,14 @@ account, and Next.js can render authenticated state.
 
 Goal: ship prompt-driven story generation without photo personalization.
 
-- [x] Keep catalog entities such as `BookTemplate`, `StoryGoal`, and `AgeRange` for
-  user-facing selection.
+- [x] Keep catalog entities such as `BookTemplate`, `StoryGoal`, and `AgeRange`;
+  users select a development goal and age range, and the matching book template is
+  resolved automatically on the backend.
 - [x] Introduce an AI story prompt catalog stored in the database and managed by
   admins.
 - [x] Introduce prompt quality ratings so only high-quality prompts are active for
   generation.
-- [x] Add the generation form: child name, age, goal, and template.
+- [x] Add the generation form: child name, age, and goal (template auto-selected).
 - [x] Enforce free-tier limits on the backend.
 - [x] Generate story text through AI prompts using child context (name, age, goal)
   with safety and age-appropriateness constraints.
@@ -125,9 +126,9 @@ Goal: ship prompt-driven story generation without photo personalization.
 - [x] Persist `BookGeneration` records with statuses such as `draft`, `queued`,
   `processing`, `completed`, and `failed`.
 
-Success criteria: a free user can pick an available template and receive an
-interesting AI-generated story adapted to age and goal, with no page exceeding
-80 symbols.
+Success criteria: a free user can pick a development goal and receive an
+interesting AI-generated story with a matching template, adapted to age and goal,
+with no page exceeding 80 symbols.
 
 ## Stage 4: Paginated HTML Reader Pipeline
 

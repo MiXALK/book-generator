@@ -45,7 +45,7 @@ class BookGenerationController extends Controller
     public function generate(GenerateBookRequest $request): JsonResponse
     {
         $user = $request->user();
-        $template = $this->bookTemplates->findActiveById($request->bookTemplateId());
+        $template = $this->bookTemplates->findActiveByStoryGoalName($request->goal());
 
         if ($user->plan === 'free' && ! $template->is_free) {
             return response()->json([

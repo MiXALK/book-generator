@@ -24,8 +24,7 @@ class GenerateBookRequest extends FormRequest
         return [
             'child_name' => ['required', 'string', 'max:120'],
             'age' => ['required', 'integer', 'min:2', 'max:12'],
-            'goal' => ['required', 'string', 'max:255'],
-            'book_template_id' => ['required', 'integer', 'exists:book_templates,id'],
+            'goal' => ['required', 'string', 'max:255', 'exists:story_goals,name'],
         ];
     }
 
@@ -42,10 +41,5 @@ class GenerateBookRequest extends FormRequest
     public function goal(): string
     {
         return (string) $this->validated('goal');
-    }
-
-    public function bookTemplateId(): int
-    {
-        return (int) $this->validated('book_template_id');
     }
 }
