@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AgeRange;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'title',
     'prompt_text',
     'language',
-    'age_range_id',
+    'age_range',
     'story_goal_id',
     'quality_score',
     'rating_count',
@@ -24,11 +25,13 @@ class StoryPrompt extends Model
     use HasFactory;
 
     /**
-     * Get the age range associated with this prompt.
+     * @return array<string, string>
      */
-    public function ageRange(): BelongsTo
+    protected function casts(): array
     {
-        return $this->belongsTo(AgeRange::class);
+        return [
+            'age_range' => AgeRange::class,
+        ];
     }
 
     /**

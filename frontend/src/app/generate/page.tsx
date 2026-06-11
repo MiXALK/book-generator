@@ -12,8 +12,9 @@ interface CatalogGoal {
 }
 
 interface CatalogAgeRange {
-  id: number;
-  label: string;
+  value: string;
+  min_age: number;
+  max_age: number;
 }
 
 export default function GeneratePage() {
@@ -79,8 +80,8 @@ export default function GeneratePage() {
       return;
     }
 
-    const ageDigits = selectedAgeRange.match(/\d+/);
-    const childAge = ageDigits ? Number(ageDigits[0]) : 5;
+    const selectedRange = ageRanges.find((ageRange) => ageRange.value === selectedAgeRange);
+    const childAge = selectedRange?.min_age ?? 5;
 
     setSubmitting(true);
     setMessage(null);
@@ -166,8 +167,8 @@ export default function GeneratePage() {
           <select value={selectedAgeRange} onChange={(event) => setSelectedAgeRange(event.target.value)} required>
             <option value="">{t.selectOption}</option>
             {ageRanges.map((ageRange) => (
-              <option key={ageRange.id} value={ageRange.label}>
-                {ageRange.label}
+              <option key={ageRange.value} value={ageRange.value}>
+                {t.ageRangeLabels[ageRange.value as keyof typeof t.ageRangeLabels] ?? ageRange.value}
               </option>
             ))}
           </select>

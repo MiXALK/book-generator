@@ -65,6 +65,10 @@ export const locales = {
     childNamePlaceholder: "Например: Маша",
     goalLabel: "Цель развития",
     ageRangeLabel: "Возраст",
+    ageRangeLabels: {
+      toddler: "2-4 года",
+      early_reader: "5-7 лет",
+    },
     selectOption: "Выберите...",
     generateButton: "Сгенерировать книгу",
     generating: "Генерация...",
@@ -151,6 +155,10 @@ export const locales = {
     childNamePlaceholder: "For example: Emma",
     goalLabel: "Development goal",
     ageRangeLabel: "Age range",
+    ageRangeLabels: {
+      toddler: "2-4 years",
+      early_reader: "5-7 years",
+    },
     selectOption: "Select...",
     generateButton: "Generate book",
     generating: "Generating...",

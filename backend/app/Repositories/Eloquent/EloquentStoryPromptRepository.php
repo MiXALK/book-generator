@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\AgeRange;
 use App\Models\StoryPrompt;
 use App\Repositories\Contracts\StoryPromptRepositoryInterface;
 
@@ -41,11 +42,17 @@ class EloquentStoryPromptRepository implements StoryPromptRepositoryInterface
                 });
             })
             ->when($age !== null, function ($query) use ($age) {
-                $query->where(function ($inner) use ($age) {
-                    $inner->whereNull('age_range_id')
-                        ->orWhereHas('ageRange', function ($rangeQuery) use ($age) {
-                            $rangeQuery->where('min_age', '<=', $age)->where('max_age', '>=', $age);
-                        });
+                $matchingRanges = array_map(
+                    fn (AgeRange $range) => $range->value,
+                    array_filter(AgeRange::cases(), fn (AgeRange $range) => $range->contains($age)),
+                );
+
+                $query->where(function ($inner) use ($matchingRanges) {
+                    $inner->whereNull('age_range');
+
+                    if ($matchingRanges !== []) {
+                        $inner->orWhereIn('age_range', $matchingRanges);
+                    }
                 });
             })
             ->orderByDesc('quality_score')
