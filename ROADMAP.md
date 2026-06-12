@@ -122,7 +122,8 @@ Goal: ship prompt-driven story generation without photo personalization.
 - [x] Enforce free-tier limits on the backend.
 - [x] Generate story text through AI prompts using child context (name, age, goal)
   with safety and age-appropriateness constraints.
-- [x] Enforce a strict maximum of 80 symbols per compiled page during generation.
+- [x] Generate a continuous story from `StoryPrompt`; backend pagination applies a
+  soft 80-symbol page target after text generation.
 - [x] Persist `BookGeneration` records with statuses such as `draft`, `queued`,
   `processing`, `completed`, and `failed`.
 
@@ -134,8 +135,8 @@ with no page exceeding 80 symbols.
 
 Goal: create an interactive paginated HTML book reader with strict visual-to-text layout and character limit constraints.
 
-- [x] Implement backend pagination and text division (splitting story content into
-  pages of maximum 80 symbols/characters).
+- [x] Implement backend pagination and text division (`StoryPaginator` splits a full
+  story into pages with a soft 80-symbol target and hard cap).
 - [x] Prepare and maintain around 15 HTML layout templates:
   dedicated cover templates, dedicated ending templates, and content templates.
 - [x] Support layout variants with different visual composition and text placement:
@@ -173,7 +174,8 @@ Goal: add the key paid feature.
 - [ ] Allow photo upload only for paid users.
 - [ ] Validate image size, MIME type, dimensions, and parental consent.
 - [ ] Store original uploads under private S3 prefixes.
-- [ ] Run illustration generation through the `generation-image` queue.
+- [ ] Run illustration generation through the `generation-image` queue (image prompts
+  derived from paginated story fragments plus a shared style/character bible).
 - [ ] Model relationships between `ChildProfile`, `UploadedPhoto`,
   `GeneratedCharacter`, and `BookGeneration`.
 - [ ] Decide whether a generated character is reused per child profile or generated

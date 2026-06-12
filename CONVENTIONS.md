@@ -59,7 +59,7 @@ To maximize children's engagement and ensure readability, we adhere to a paginat
 
 - **No PDF Generation**: Books are delivered entirely as interactive, paginated HTML/CSS experiences rendered on the Next.js frontend.
 - **Page Layout Ratio**: Each page layout must strictly allocate **80% of its visual space to the picture/illustration**, and **20% to the text container**.
-- **Character Constraint**: The text content on any single page must be strictly limited to a maximum of **80 characters (symbols)**, including letters, spaces, and punctuation, to ensure early developmental focus.
+- **Character Constraint**: The LLM generates one continuous story; the backend paginates it into pages with a **soft target of 80 characters (symbols)** per page, including letters, spaces, and punctuation. Sentences are packed greedily up to that limit; a hard cap still applies so no page exceeds 80 symbols.
 
 ## Localization & Language Decisions
 

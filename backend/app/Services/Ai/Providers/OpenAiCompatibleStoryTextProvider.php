@@ -32,7 +32,7 @@ readonly class OpenAiCompatibleStoryTextProvider implements StoryTextGenerationP
         return $this->apiKey !== '' && $this->baseUrl !== '' && $this->model !== '';
     }
 
-    public function generatePages(StoryTextGenerationInput $input): ?array
+    public function generateStory(StoryTextGenerationInput $input): ?string
     {
         if (! $this->isConfigured()) {
             return null;
@@ -49,7 +49,7 @@ readonly class OpenAiCompatibleStoryTextProvider implements StoryTextGenerationP
             $payload = array_merge([
                 'model' => $this->model,
                 'messages' => $messages,
-                'max_tokens' => 500,
+                'max_tokens' => 1500,
                 'temperature' => 0.8,
             ], $this->requestExtras);
 
@@ -73,30 +73,17 @@ readonly class OpenAiCompatibleStoryTextProvider implements StoryTextGenerationP
             $content = (string) Arr::get($responseData, 'choices.0.message.content', '');
             $decoded = json_decode($content, true);
 
-            if (! is_array($decoded) || ! isset($decoded['pages']) || ! is_array($decoded['pages'])) {
+            if (! is_array($decoded) || ! isset($decoded['story']) || ! is_string($decoded['story'])) {
                 return null;
             }
 
-            $pages = [];
-            foreach ($decoded['pages'] as $page) {
-                if (! is_string($page)) {
-                    continue;
-                }
+            $story = trim($decoded['story']);
 
-                $trimmedPage = trim($page);
-
-                if ($trimmedPage === '') {
-                    continue;
-                }
-
-                $pages[] = $trimmedPage;
-            }
-
-            if ($pages === []) {
+            if ($story === '') {
                 return null;
             }
 
-            return $pages;
+            return $story;
         } catch (Throwable $exception) {
             Log::warning('Story text provider exception', [
                 'message' => $exception->getMessage(),

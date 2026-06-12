@@ -18,17 +18,17 @@ class OpenAiCompatibleStoryTextProviderTest extends TestCase
         $this->assertFalse($provider->isConfigured());
     }
 
-    public function test_generate_pages_returns_null_when_not_configured(): void
+    public function test_generate_story_returns_null_when_not_configured(): void
     {
         $provider = $this->makeProvider(apiKey: '');
 
-        $result = $provider->generatePages($this->sampleInput());
+        $result = $provider->generateStory($this->sampleInput());
 
         $this->assertNull($result);
         Http::assertNothingSent();
     }
 
-    public function test_generate_pages_merges_request_extras_and_parses_json_response(): void
+    public function test_generate_story_merges_request_extras_and_parses_json_response(): void
     {
         Http::fake([
             'dashscope-intl.aliyuncs.com/*' => Http::response([
@@ -36,7 +36,7 @@ class OpenAiCompatibleStoryTextProviderTest extends TestCase
                     [
                         'message' => [
                             'content' => json_encode([
-                                'pages' => ['Anna found a star.', 'She shared it with friends.'],
+                                'story' => 'Anna found a star. She shared it with friends.',
                             ]),
                         ],
                     ],
@@ -48,9 +48,9 @@ class OpenAiCompatibleStoryTextProviderTest extends TestCase
             'response_format' => ['type' => 'json_object'],
         ]);
 
-        $result = $provider->generatePages($this->sampleInput());
+        $result = $provider->generateStory($this->sampleInput());
 
-        $this->assertSame(['Anna found a star.', 'She shared it with friends.'], $result);
+        $this->assertSame('Anna found a star. She shared it with friends.', $result);
 
         Http::assertSent(function ($request): bool {
             $body = $request->data();
@@ -105,8 +105,6 @@ class OpenAiCompatibleStoryTextProviderTest extends TestCase
             childName: 'Anna',
             childAge: 5,
             childGoal: 'learn to share',
-            sceneInstructions: ['Anna finds a star.'],
-            pageCount: 2,
         );
     }
 }

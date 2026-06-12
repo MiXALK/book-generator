@@ -13,21 +13,10 @@ readonly class StoryTextPromptComposer
 
     public function userMessage(StoryTextGenerationInput $input): string
     {
-        $sceneBlock = '';
-        if ($input->sceneInstructions !== []) {
-            $sceneLines = array_map(
-                fn (int $index, string $instruction) => ($index + 1).'. '.$instruction,
-                array_keys($input->sceneInstructions),
-                $input->sceneInstructions
-            );
-            $sceneBlock = "Scene guidance:\n".implode("\n", $sceneLines)."\n\n";
-        }
-
         return "{$input->promptText}\n\n".
             "Child name: {$input->childName}\nChild age: {$input->childAge}\nGoal: {$input->childGoal}\n\n".
-            $sceneBlock.
-            "Return strict JSON object: {\"pages\": [\"...\", \"...\"]} with exactly {$input->pageCount} page strings.\n".
-            'Each page must be a complete sentence, max 80 symbols including spaces and punctuation.'.
-            ' Include one gentle plot twist. Avoid unsafe or scary content.';
+            'Return strict JSON object: {"story": "..."} with one continuous story from beginning to end. '.
+            'Do not split into pages. Write 4-12 sentences. Include one gentle plot twist. '.
+            'Avoid unsafe or scary content.';
     }
 }

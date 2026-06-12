@@ -8,7 +8,6 @@ use App\Models\StoryPrompt;
 use App\Models\User;
 use App\Repositories\Contracts\BookGenerationRepositoryInterface;
 use App\Repositories\Contracts\BookPageRepositoryInterface;
-use App\Repositories\Contracts\BookTemplateRepositoryInterface;
 use App\Repositories\Contracts\LayoutTemplateRepositoryInterface;
 use App\Repositories\Contracts\StoryPromptRepositoryInterface;
 use App\Services\Ai\Contracts\StoryTextGenerationProviderInterface;
@@ -22,19 +21,17 @@ class BookGenerationService
 {
     private const int FREE_MONTHLY_LIMIT = 33;
 
-    private const int MAX_PAGE_TEXT_LENGTH = 80;
-
-    private const string DEFAULT_PROMPT_TEXT = 'Напиши детскую историю для возраста {age} про {name} и цель {goal}. '.
-        'Сделай сюжет добрым, с одним мягким поворотом, и выдай текст по страницам до 80 символов.';
+    private const string DEFAULT_PROMPT_TEXT = 'Напиши цельную добрую детскую сказку про {name} (возраст {age}) с целью {goal}. '.
+        'Один мягкий сюжетный поворот, безопасный финал.';
 
     public function __construct(
         private readonly BookGenerationRepositoryInterface $bookGenerations,
         private readonly BookPageRepositoryInterface $bookPages,
-        private readonly BookTemplateRepositoryInterface $bookTemplates,
         private readonly StoryPromptRepositoryInterface $storyPrompts,
         private readonly LayoutTemplateRepositoryInterface $layoutTemplates,
         private readonly StoryTextGenerationProviderInterface $storyTextProvider,
         private readonly BookIllustrationStorageService $illustrationStorage,
+        private readonly StoryPaginator $storyPaginator,
     ) {}
 
     public function formatForApi(BookGeneration $generation): BookGeneration
@@ -72,7 +69,7 @@ class BookGenerationService
 
         return DB::transaction(function () use ($user, $template, $childName, $age, $goal, $prompt) {
             $generation = $this->createGeneration($user, $template, $childName, $age, $goal, $prompt);
-            $built = $this->buildPages($childName, $age, $goal, $template, $prompt);
+            $built = $this->buildPages($childName, $age, $goal, $prompt);
             $pages = $this->attachPlaceholderIllustrations($generation->id, $built['pages'], $built['layouts']);
 
             $this->bookPages->createMany($generation, $pages);
@@ -116,34 +113,22 @@ class BookGenerationService
         return $this->storyPrompts->findBestForGeneration($user->language ?? 'ru', $age, $goal);
     }
 
-    private function buildPages(string $name, int $age, string $goal, BookTemplate $template, ?StoryPrompt $prompt): array
+    private function buildPages(string $name, int $age, string $goal, ?StoryPrompt $prompt): array
     {
-        $scenes = $this->bookTemplates->getOrderedScenes($template);
+        $storyText = $this->resolveStoryText($name, $age, $goal, $prompt);
+        $pageTexts = $this->storyPaginator->paginate($storyText);
 
-        if ($scenes->isEmpty()) {
-            $scenes = collect([
-                (object) ['scene_number' => 1],
-                (object) ['scene_number' => 2],
-                (object) ['scene_number' => 3],
-                (object) ['scene_number' => 4],
-            ]);
-        }
-
-        $pageCount = $scenes->count();
+        $pageCount = count($pageTexts);
         $layouts = $this->pickLayouts($pageCount);
-        $aiTexts = $this->generateStoryTextsWithAi($name, $age, $goal, $prompt, $scenes, $pageCount);
-        $midpoint = (int) ceil($pageCount / 2);
 
-        $pages = $scenes->values()->map(function ($scene, $index) use ($name, $age, $goal, $layouts, $midpoint, $aiTexts) {
-            $pageNumber = $index + 1;
-            $raw = $aiTexts[$index] ?? $this->fallbackText($name, $age, $goal, $pageNumber, $layouts->count(), $midpoint);
-
-            return [
-                'page_number' => $pageNumber,
+        $pages = [];
+        foreach ($pageTexts as $index => $text) {
+            $pages[] = [
+                'page_number' => $index + 1,
                 'layout_template_id' => $layouts[$index]?->id,
-                'text' => $this->limitSymbols($raw),
+                'text' => $text,
             ];
-        })->all();
+        }
 
         return [
             'pages' => $pages,
@@ -172,23 +157,26 @@ class BookGenerationService
         return $pages;
     }
 
-    private function generateStoryTextsWithAi(
+    private function resolveStoryText(string $name, int $age, string $goal, ?StoryPrompt $prompt): string
+    {
+        $story = $this->generateStoryWithAi($name, $age, $goal, $prompt);
+
+        if ($story !== null && trim($story) !== '') {
+            return $story;
+        }
+
+        return $this->buildFallbackStory($name, $age, $goal);
+    }
+
+    private function generateStoryWithAi(
         string $name,
         int $age,
         string $goal,
         ?StoryPrompt $prompt,
-        Collection $scenes,
-        int $pageCount,
-    ): array {
+    ): ?string {
         if (! $this->storyTextProvider->isConfigured()) {
-            return $this->fallbackTexts($name, $age, $goal, $pageCount);
+            return null;
         }
-
-        $sceneInstructions = $scenes
-            ->pluck('scene_instruction')
-            ->filter(fn ($instruction) => is_string($instruction) && trim($instruction) !== '')
-            ->values()
-            ->all();
 
         $promptText = $this->resolvePromptText($prompt, $name, $age, $goal);
 
@@ -197,23 +185,19 @@ class BookGenerationService
             childName: $name,
             childAge: $age,
             childGoal: $goal,
-            sceneInstructions: $sceneInstructions,
-            pageCount: $pageCount,
         );
 
-        $pages = $this->storyTextProvider->generatePages($input);
+        $story = $this->storyTextProvider->generateStory($input);
 
-        if ($pages === null) {
-            Log::warning('Story text generation returned no pages; using fallback text', [
+        if ($story === null) {
+            Log::warning('Story text generation returned no story; using fallback text', [
                 'child_age' => $age,
                 'child_goal' => $goal,
                 'story_prompt_id' => $prompt?->id,
             ]);
-
-            return $this->fallbackTexts($name, $age, $goal, $pageCount);
         }
 
-        return $this->normalizeAiPages($pages, $name, $age, $goal, $pageCount);
+        return $story;
     }
 
     private function resolvePromptText(?StoryPrompt $prompt, string $name, int $age, string $goal): string
@@ -231,41 +215,17 @@ class BookGenerationService
         ]);
     }
 
-    private function normalizeAiPages(array $pages, string $name, int $age, string $goal, int $pageCount): array
+    private function buildFallbackStory(string $name, int $age, string $goal): string
     {
-        $normalized = [];
+        $sentences = [];
+        $sentenceCount = 8;
+        $midpoint = (int) ceil($sentenceCount / 2);
 
-        foreach ($pages as $page) {
-            if (! is_string($page)) {
-                continue;
-            }
-
-            $normalized[] = $this->limitSymbols(trim($page));
-
-            if (count($normalized) === $pageCount) {
-                break;
-            }
+        for ($pageNumber = 1; $pageNumber <= $sentenceCount; $pageNumber++) {
+            $sentences[] = $this->fallbackText($name, $age, $goal, $pageNumber, $sentenceCount, $midpoint);
         }
 
-        while (count($normalized) < $pageCount) {
-            $pageNumber = count($normalized) + 1;
-            $midpoint = (int) ceil($pageCount / 2);
-            $normalized[] = $this->limitSymbols($this->fallbackText($name, $age, $goal, $pageNumber, $pageCount, $midpoint));
-        }
-
-        return $normalized;
-    }
-
-    private function fallbackTexts(string $name, int $age, string $goal, int $pageCount): array
-    {
-        $midpoint = (int) ceil($pageCount / 2);
-        $fallback = [];
-
-        for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
-            $fallback[] = $this->fallbackText($name, $age, $goal, $pageNumber, $pageCount, $midpoint);
-        }
-
-        return $fallback;
+        return implode(' ', $sentences);
     }
 
     private function fallbackText(string $name, int $age, string $goal, int $pageNumber, int $totalPages, int $midpoint): string
@@ -305,45 +265,5 @@ class BookGenerationService
         }
 
         return $layouts->take($pagesCount)->values();
-    }
-
-    private function limitSymbols(string $value): string
-    {
-        $max = self::MAX_PAGE_TEXT_LENGTH;
-
-        if (mb_strlen($value) <= $max) {
-            return $value;
-        }
-
-        $chunk = mb_substr($value, 0, $max);
-        $sentenceEnd = $this->findLastSentenceEndPosition($chunk);
-
-        if ($sentenceEnd !== null) {
-            return rtrim(mb_substr($value, 0, $sentenceEnd + 1));
-        }
-
-        $lastSpace = mb_strrpos($chunk, ' ');
-        if ($lastSpace !== false && $lastSpace > 0) {
-            return rtrim(mb_substr($value, 0, $lastSpace));
-        }
-
-        return rtrim($chunk);
-    }
-
-    private function findLastSentenceEndPosition(string $text): ?int
-    {
-        $lastPosition = null;
-        $length = mb_strlen($text);
-
-        for ($index = $length - 1; $index >= 0; $index--) {
-            $character = mb_substr($text, $index, 1);
-
-            if (in_array($character, ['.', '!', '?', '…'], true)) {
-                $lastPosition = $index;
-                break;
-            }
-        }
-
-        return $lastPosition;
     }
 }

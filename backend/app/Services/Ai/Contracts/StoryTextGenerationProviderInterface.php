@@ -8,8 +8,5 @@ interface StoryTextGenerationProviderInterface
 {
     public function isConfigured(): bool;
 
-    /**
-     * @return list<string>|null Page texts in order, or null when generation fails.
-     */
-    public function generatePages(StoryTextGenerationInput $input): ?array;
+    public function generateStory(StoryTextGenerationInput $input): ?string;
 }
