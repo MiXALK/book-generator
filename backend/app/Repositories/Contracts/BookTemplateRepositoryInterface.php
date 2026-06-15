@@ -12,6 +12,4 @@ interface BookTemplateRepositoryInterface
     public function findActiveById(int $id): BookTemplate;
 
     public function findActiveByStoryGoalName(string $goalName): BookTemplate;
-
-    public function getOrderedScenes(BookTemplate $template): Collection;
 }

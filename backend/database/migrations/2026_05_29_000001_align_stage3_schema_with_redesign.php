@@ -30,16 +30,6 @@ return new class extends Migration
                 $table->boolean('is_active')->default(true)->after('template_type');
             }
         });
-
-        Schema::table('template_scenes', function (Blueprint $table) {
-            if (! Schema::hasColumn('template_scenes', 'scene_instruction')) {
-                $table->text('scene_instruction')->nullable()->after('scene_number');
-            }
-
-            if (Schema::hasColumn('template_scenes', 'text_template')) {
-                $table->dropColumn('text_template');
-            }
-        });
     }
 
     /**
@@ -47,16 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('template_scenes', function (Blueprint $table) {
-            if (! Schema::hasColumn('template_scenes', 'text_template')) {
-                $table->text('text_template')->nullable()->after('scene_number');
-            }
-
-            if (Schema::hasColumn('template_scenes', 'scene_instruction')) {
-                $table->dropColumn('scene_instruction');
-            }
-        });
-
         Schema::table('book_templates', function (Blueprint $table) {
             if (Schema::hasColumn('book_templates', 'template_type')) {
                 $table->dropColumn('template_type');

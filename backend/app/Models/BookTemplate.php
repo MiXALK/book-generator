@@ -22,14 +22,6 @@ class BookTemplate extends Model
     }
 
     /**
-     * Get all scenes for this template.
-     */
-    public function templateScenes(): HasMany
-    {
-        return $this->hasMany(TemplateScene::class);
-    }
-
-    /**
      * Get all generated books from this template.
      */
     public function bookGenerations(): HasMany

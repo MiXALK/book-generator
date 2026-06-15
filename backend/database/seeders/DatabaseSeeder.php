@@ -17,7 +17,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             StoryGoalSeeder::class,
             BookTemplateSeeder::class,
-            TemplateSceneSeeder::class,
             StoryPromptSeeder::class,
             LayoutTemplateSeeder::class,
         ]);

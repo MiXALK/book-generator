@@ -220,7 +220,7 @@ failing.
 Goal: manage templates without code changes.
 
 - [ ] Add an admin role.
-- [ ] Add CRUD for goals, templates, scenes, and free/paid availability.
+- [ ] Add CRUD for goals, templates, and free/paid availability.
 - [ ] Add CRUD for AI story prompts and prompt rating metadata.
 - [ ] Add template preview.
 - [ ] Add layout-template management for cover/content/ending variants.

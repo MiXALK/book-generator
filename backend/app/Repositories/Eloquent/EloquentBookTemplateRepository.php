@@ -33,9 +33,4 @@ class EloquentBookTemplateRepository implements BookTemplateRepositoryInterface
             })
             ->firstOrFail();
     }
-
-    public function getOrderedScenes(BookTemplate $template): Collection
-    {
-        return $template->templateScenes()->orderBy('scene_number')->get();
-    }
 }
