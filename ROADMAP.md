@@ -157,12 +157,12 @@ cover/content/ending layouts and strict 80/20 + 80-symbol constraints.
 
 Goal: monetize the expanded product surface.
 
-- [ ] Integrate Stripe Checkout or the selected payment provider.
-- [ ] Handle subscription webhooks.
-- [ ] Restrict paid templates to active subscribers.
-- [ ] Enforce generation quotas for free and paid plans.
-- [ ] Add subscription management UI.
-- [ ] Prevent duplicate or excessive generation requests above plan limits.
+- [x] Integrate Stripe Checkout or the selected payment provider.
+- [x] Handle subscription webhooks.
+- [x] Restrict paid templates to active subscribers.
+- [x] Enforce generation quotas for free and paid plans.
+- [x] Add subscription management UI.
+- [x] Prevent duplicate or excessive generation requests above plan limits.
 
 Success criteria: free users see paid templates as locked, and paid users can use
 the expanded catalog.

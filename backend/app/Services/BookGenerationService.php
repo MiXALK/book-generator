@@ -19,8 +19,6 @@ use Illuminate\Support\Facades\Log;
 
 class BookGenerationService
 {
-    private const int FREE_MONTHLY_LIMIT = 33;
-
     private const string DEFAULT_PROMPT_TEXT = 'Напиши цельную добрую детскую сказку про {name} (возраст {age}) с целью {goal}. '.
         'Один мягкий сюжетный поворот, безопасный финал.';
 
@@ -32,6 +30,7 @@ class BookGenerationService
         private readonly StoryTextGenerationProviderInterface $storyTextProvider,
         private readonly BookIllustrationStorageService $illustrationStorage,
         private readonly StoryPaginator $storyPaginator,
+        private readonly SubscriptionAccessService $subscriptionAccess,
     ) {}
 
     public function formatForApi(BookGeneration $generation): BookGeneration
@@ -44,16 +43,13 @@ class BookGenerationService
 
     public function ensureGenerationLimit(User $user): void
     {
-        if ($user->plan !== 'free') {
-            return;
-        }
-
+        $limit = $this->subscriptionAccess->monthlyLimit($user);
         $count = $this->bookGenerations->countForUserInCurrentMonth($user->id);
 
-        if ($count >= self::FREE_MONTHLY_LIMIT) {
+        if ($count >= $limit) {
             throw new HttpResponseException(response()->json([
-                'message' => 'Monthly free generation limit reached.',
-                'limit' => self::FREE_MONTHLY_LIMIT,
+                'message' => 'Monthly generation limit reached.',
+                'limit' => $limit,
             ], 422));
         }
     }

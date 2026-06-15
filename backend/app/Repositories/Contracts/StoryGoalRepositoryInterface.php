@@ -6,5 +6,5 @@ use Illuminate\Support\Collection;
 
 interface StoryGoalRepositoryInterface
 {
-    public function listForCatalog(): Collection;
+    public function listForCatalog(bool $hasPaidAccess): Collection;
 }

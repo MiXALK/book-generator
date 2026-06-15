@@ -131,6 +131,15 @@ Story text generation must use provider abstractions, not a hard-coded vendor:
 - Optional per-driver `request` array is merged into the chat completions POST
   body (for example, `response_format` for structured JSON output).
 
+## Billing And Subscriptions
+
+Stripe monthly subscriptions gate paid templates and higher generation quotas:
+
+- Service: `backend/app/Services/StripeBillingService.php` (Checkout, Customer Portal, webhooks).
+- Access rules: `backend/app/Services/SubscriptionAccessService.php` (`free`: 3 books/month, `paid` + `active`: 10 books/month and paid templates).
+- Configure via `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID`, and redirect URLs in `.env`. Driver defaults live in `config/services.php` under `stripe`.
+- Webhook endpoint: `POST /api/webhooks/stripe` (Stripe-Signature verification required).
+
 ## Documentation Rules
 
 - Update this file when adding or changing conventions, dependencies, folder

@@ -38,6 +38,38 @@ class BookTemplateSeeder extends Seeder
                 'template_type' => 'story',
                 'is_active' => true,
             ],
+            [
+                'title' => 'Волшебное спасибо',
+                'goal_name' => 'Говорить «спасибо»',
+                'description' => 'RU: История о благодарности. | EN: A thank-you adventure.',
+                'is_free' => true,
+                'template_type' => 'story',
+                'is_active' => true,
+            ],
+            [
+                'title' => 'Мой маленький шаг',
+                'goal_name' => 'Развивать самостоятельность',
+                'description' => 'RU: История самостоятельности. | EN: Growing independence.',
+                'is_free' => true,
+                'template_type' => 'story',
+                'is_active' => true,
+            ],
+            [
+                'title' => 'Спокойные чувства',
+                'goal_name' => 'Управлять эмоциями',
+                'description' => 'RU: История об эмоциях. | EN: Emotional regulation story.',
+                'is_free' => false,
+                'template_type' => 'story',
+                'is_active' => true,
+            ],
+            [
+                'title' => 'Дружная компания',
+                'goal_name' => 'Дружить и общаться',
+                'description' => 'RU: История о дружбе. | EN: Friendship and communication.',
+                'is_free' => false,
+                'template_type' => 'story',
+                'is_active' => true,
+            ],
         ];
 
         foreach ($templateDefinitions as $template) {

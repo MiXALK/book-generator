@@ -7,6 +7,11 @@ use App\Repositories\Contracts\UserRepositoryInterface;
 
 class EloquentUserRepository implements UserRepositoryInterface
 {
+    public function findById(int $id): ?User
+    {
+        return User::query()->find($id);
+    }
+
     public function findByApiToken(string $token): ?User
     {
         return User::query()->where('api_token', $token)->first();
@@ -17,6 +22,20 @@ class EloquentUserRepository implements UserRepositoryInterface
         return User::query()
             ->where('google_id', $googleId)
             ->orWhere('email', $email)
+            ->first();
+    }
+
+    public function findByStripeCustomerId(string $stripeCustomerId): ?User
+    {
+        return User::query()
+            ->where('stripe_customer_id', $stripeCustomerId)
+            ->first();
+    }
+
+    public function findByStripeSubscriptionId(string $stripeSubscriptionId): ?User
+    {
+        return User::query()
+            ->where('stripe_subscription_id', $stripeSubscriptionId)
             ->first();
     }
 
@@ -53,6 +72,30 @@ class EloquentUserRepository implements UserRepositoryInterface
     public function updateLanguage(User $user, string $language): User
     {
         $user->update(['language' => $language]);
+
+        return $user;
+    }
+
+    public function updateStripeCustomerId(User $user, string $stripeCustomerId): User
+    {
+        $user->update([
+            'stripe_customer_id' => $stripeCustomerId,
+        ]);
+
+        return $user;
+    }
+
+    public function updateSubscription(
+        User $user,
+        string $plan,
+        string $subscriptionStatus,
+        ?string $stripeSubscriptionId,
+    ): User {
+        $user->update([
+            'plan' => $plan,
+            'subscription_status' => $subscriptionStatus,
+            'stripe_subscription_id' => $stripeSubscriptionId,
+        ]);
 
         return $user;
     }

@@ -9,6 +9,7 @@ import styles from "./generate.module.css";
 interface CatalogGoal {
   id: number;
   name: string;
+  is_locked?: boolean;
 }
 
 interface CatalogAgeRange {
@@ -33,6 +34,9 @@ export default function GeneratePage() {
   const [childName, setChildName] = useState("");
   const [selectedGoal, setSelectedGoal] = useState("");
   const [selectedAgeRange, setSelectedAgeRange] = useState("");
+
+  const selectedGoalMeta = goals.find((goal) => goal.name === selectedGoal);
+  const selectedGoalLocked = selectedGoalMeta?.is_locked === true;
 
   useEffect(() => {
     if (!loading && !user) {
@@ -76,7 +80,7 @@ export default function GeneratePage() {
 
   const submitGeneration = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!token || !selectedGoal || !selectedAgeRange || !childName.trim()) {
+    if (!token || !selectedGoal || !selectedAgeRange || !childName.trim() || selectedGoalLocked) {
       return;
     }
 
@@ -155,11 +159,12 @@ export default function GeneratePage() {
           <select value={selectedGoal} onChange={(event) => setSelectedGoal(event.target.value)} required>
             <option value="">{t.selectOption}</option>
             {goals.map((goal) => (
-              <option key={goal.id} value={goal.name}>
-                {goal.name}
+              <option key={goal.id} value={goal.name} disabled={goal.is_locked}>
+                {goal.is_locked ? `${goal.name} (${t.goalLockedLabel})` : goal.name}
               </option>
             ))}
           </select>
+          {selectedGoalLocked && <p className={styles.warning}>{t.goalLockedHint}</p>}
         </label>
 
         <label className={styles.field}>
@@ -174,7 +179,7 @@ export default function GeneratePage() {
           </select>
         </label>
 
-        <button type="submit" disabled={fetching || submitting} className={styles.submit}>
+        <button type="submit" disabled={fetching || submitting || selectedGoalLocked} className={styles.submit}>
           {submitting ? t.generating : t.generateButton}
         </button>
       </form>

@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const [books, setBooks] = useState<BookGeneration[]>([]);
   const [libraryLoading, setLibraryLoading] = useState(true);
   const [libraryError, setLibraryError] = useState<string | null>(null);
+  const [billingLoading, setBillingLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -77,9 +78,65 @@ export default function DashboardPage() {
     return null;
   }
 
-  const isPaid = user.plan === "paid";
+  const isPaid = user.plan === "paid" && user.subscription_status === "active";
   const monthlyLimit = isPaid ? 10 : 3;
   const usagePercent = Math.min(100, Math.round((monthlyUsage / monthlyLimit) * 100));
+
+  const startCheckout = async () => {
+    if (!token) {
+      return;
+    }
+
+    setBillingLoading(true);
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/billing/checkout`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+
+      if (!response.ok || typeof data.url !== "string") {
+        throw new Error(data.message || t.billingNotConfigured);
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t.billingNotConfigured;
+      alert(message);
+      setBillingLoading(false);
+    }
+  };
+
+  const openBillingPortal = async () => {
+    if (!token) {
+      return;
+    }
+
+    setBillingLoading(true);
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/billing/portal`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+
+      if (!response.ok || typeof data.url !== "string") {
+        throw new Error(data.message || t.billingNotConfigured);
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t.billingNotConfigured;
+      alert(message);
+      setBillingLoading(false);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -138,8 +195,23 @@ export default function DashboardPage() {
             {!isPaid && (
               <div className={styles.upgradeBox}>
                 <p>{t.unlockPremium}</p>
-                <button className={styles.upgradeButton} onClick={() => alert(t.stripePrepAlert)}>
-                  {t.upgradeToPremium}
+                <button
+                  className={styles.upgradeButton}
+                  onClick={startCheckout}
+                  disabled={billingLoading}
+                >
+                  {billingLoading ? t.billingRedirecting : t.upgradeToPremium}
+                </button>
+              </div>
+            )}
+            {isPaid && (
+              <div className={styles.upgradeBox}>
+                <button
+                  className={styles.upgradeButton}
+                  onClick={openBillingPortal}
+                  disabled={billingLoading}
+                >
+                  {billingLoading ? t.billingRedirecting : t.manageBilling}
                 </button>
               </div>
             )}

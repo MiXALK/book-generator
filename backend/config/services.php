@@ -48,4 +48,13 @@ return [
             ],
         ],
     ],
+
+    'stripe' => [
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'price_id' => env('STRIPE_PRICE_ID'),
+        'success_url' => env('STRIPE_SUCCESS_URL', 'http://localhost:3000/billing/success'),
+        'cancel_url' => env('STRIPE_CANCEL_URL', 'http://localhost:3000/dashboard'),
+        'portal_return_url' => env('STRIPE_PORTAL_RETURN_URL', 'http://localhost:3000/dashboard'),
+    ],
 ];

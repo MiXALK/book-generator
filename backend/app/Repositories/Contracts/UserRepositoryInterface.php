@@ -6,9 +6,15 @@ use App\Models\User;
 
 interface UserRepositoryInterface
 {
+    public function findById(int $id): ?User;
+
     public function findByApiToken(string $token): ?User;
 
     public function findByGoogleIdOrEmail(string $googleId, string $email): ?User;
+
+    public function findByStripeCustomerId(string $stripeCustomerId): ?User;
+
+    public function findByStripeSubscriptionId(string $stripeSubscriptionId): ?User;
 
     public function createFromGoogle(array $attributes): User;
 
@@ -19,4 +25,13 @@ interface UserRepositoryInterface
     public function clearApiToken(User $user): void;
 
     public function updateLanguage(User $user, string $language): User;
+
+    public function updateStripeCustomerId(User $user, string $stripeCustomerId): User;
+
+    public function updateSubscription(
+        User $user,
+        string $plan,
+        string $subscriptionStatus,
+        ?string $stripeSubscriptionId,
+    ): User;
 }

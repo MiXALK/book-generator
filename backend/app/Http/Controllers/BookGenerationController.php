@@ -6,8 +6,10 @@ use App\Http\Requests\GenerateBookRequest;
 use App\Repositories\Contracts\BookGenerationRepositoryInterface;
 use App\Repositories\Contracts\BookTemplateRepositoryInterface;
 use App\Services\BookGenerationService;
+use App\Services\SubscriptionAccessService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class BookGenerationController extends Controller
 {
@@ -15,6 +17,7 @@ class BookGenerationController extends Controller
         private readonly BookGenerationService $generationService,
         private readonly BookGenerationRepositoryInterface $bookGenerations,
         private readonly BookTemplateRepositoryInterface $bookTemplates,
+        private readonly SubscriptionAccessService $subscriptionAccess,
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -47,20 +50,32 @@ class BookGenerationController extends Controller
         $user = $request->user();
         $template = $this->bookTemplates->findActiveByStoryGoalName($request->goal());
 
-        if ($user->plan === 'free' && ! $template->is_free) {
+        if (! $this->subscriptionAccess->canAccessTemplate($user, $template)) {
             return response()->json([
-                'message' => 'This template is available only for paid users.',
+                'message' => 'This template is available only for active Premium subscribers.',
             ], 403);
         }
 
-        $this->generationService->ensureGenerationLimit($user);
-        $generation = $this->generationService->generate(
-            $user,
-            $template,
-            $request->childName(),
-            $request->age(),
-            $request->goal(),
-        );
+        $lock = Cache::lock('book-generation:'.$user->id, 120);
+
+        if (! $lock->get()) {
+            return response()->json([
+                'message' => 'A book generation is already in progress. Please wait.',
+            ], 429);
+        }
+
+        try {
+            $this->generationService->ensureGenerationLimit($user);
+            $generation = $this->generationService->generate(
+                $user,
+                $template,
+                $request->childName(),
+                $request->age(),
+                $request->goal(),
+            );
+        } finally {
+            $lock->release();
+        }
 
         return response()->json([
             'message' => 'Book generation completed.',

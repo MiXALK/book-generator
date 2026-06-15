@@ -25,6 +25,22 @@ class StoryGoalSeeder extends Seeder
                 'name' => 'Преодолевать страхи',
                 'description' => 'RU: Делаем шаг навстречу смелости. | EN: Facing fears gently.',
             ],
+            [
+                'name' => 'Говорить «спасибо»',
+                'description' => 'RU: Учимся благодарить. | EN: Learning to say thank you.',
+            ],
+            [
+                'name' => 'Развивать самостоятельность',
+                'description' => 'RU: Делаем маленькие дела сами. | EN: Building independence.',
+            ],
+            [
+                'name' => 'Управлять эмоциями',
+                'description' => 'RU: Спокойно переживаем чувства. | EN: Managing emotions gently.',
+            ],
+            [
+                'name' => 'Дружить и общаться',
+                'description' => 'RU: Находим друзей и общаемся. | EN: Making friends and socializing.',
+            ],
         ];
 
         foreach ($goals as $goal) {

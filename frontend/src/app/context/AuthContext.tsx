@@ -22,6 +22,7 @@ interface AuthContextType {
   setLocale: (lang: Locale) => Promise<void>;
   login: (token: string, user: User) => void;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   getGoogleAuthUrl: () => Promise<string>;
 }
 
@@ -186,8 +187,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data.url;
   };
 
+  const refreshUser = async () => {
+    const currentToken = token || localStorage.getItem("auth_token");
+
+    if (!currentToken) {
+      return;
+    }
+
+    const res = await fetch(`${apiBaseUrl}/user`, {
+      headers: {
+        Authorization: `Bearer ${currentToken}`,
+      },
+    });
+
+    if (!res.ok) {
+      return;
+    }
+
+    const data = await res.json();
+
+    if (data.user) {
+      setUser(data.user);
+      localStorage.setItem("auth_user", JSON.stringify(data.user));
+      if (data.user.language) {
+        setLocaleState(data.user.language);
+        localStorage.setItem("app_locale", data.user.language);
+      }
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, locale, setLocale, login, logout, getGoogleAuthUrl }}>
+    <AuthContext.Provider value={{ user, token, loading, locale, setLocale, login, logout, refreshUser, getGoogleAuthUrl }}>
       {children}
     </AuthContext.Provider>
   );
