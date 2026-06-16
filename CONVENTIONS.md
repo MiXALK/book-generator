@@ -145,12 +145,14 @@ Stripe monthly subscriptions gate paid templates and higher generation quotas:
 Illustration generation for paid photo personalization uses provider abstractions:
 
 - Contract: `backend/app/Services/Ai/Contracts/IllustrationGenerationProviderInterface.php`
-- Default driver: `openai` (OpenAI-compatible `/images/generations` API)
-- HTTP transport: `backend/app/Services/Ai/Providers/OpenAiCompatibleIllustrationProvider.php`
+- Default driver: `yandexart` (Yandex Cloud Foundation Models YandexART async REST API)
+- HTTP transport: `backend/app/Services/Ai/Providers/YandexArtIllustrationProvider.php`
+- Alternate driver: `openai` via `OpenAiCompatibleIllustrationProvider` (OpenAI-compatible `/images/generations` API)
 - Driver resolution: `backend/app/Services/Ai/IllustrationGenerationProviderFactory.php`
 - Prompt composition: `IllustrationPromptComposer` (page fragment + shared style bible) and `CharacterBibleComposer`
 - Queue: `GenerateBookIllustrationsJob` on the `generation-image` queue
-- Configure via `AI_IMAGE_DRIVER` and `AI_IMAGE_API_KEY` in `.env`. Driver `base_url`, `model`, `timeout`, and `size` live in `config/services.php` under `ai_image.drivers`.
+- Configure via `AI_IMAGE_DRIVER`, `AI_IMAGE_API_KEY`, and `AI_IMAGE_FOLDER_ID` in `.env`. Driver `base_url`, `model`, `timeout`, `operations_url`, `poll_interval_seconds`, and `aspect_ratio` (YandexART) or `size` (OpenAI) live in `config/services.php` under `ai_image.drivers`.
+- YandexART auth uses `Authorization: Api-Key <key>`; the service account API key needs `yc.ai.imageGeneration.execute`.
 - When the image provider is not configured, book generation keeps SVG placeholder illustrations and still deletes uploaded photos after successful generation.
 
 Photo upload validation limits are defined in `config/services.php` under `book_photo`.

@@ -59,9 +59,21 @@ return [
     ],
 
     'ai_image' => [
-        'driver' => env('AI_IMAGE_DRIVER', 'openai'),
+        'driver' => env('AI_IMAGE_DRIVER', 'yandexart'),
         'api_key' => env('AI_IMAGE_API_KEY'),
+        'folder_id' => env('AI_IMAGE_FOLDER_ID'),
         'drivers' => [
+            'yandexart' => [
+                'base_url' => 'https://ai.api.cloud.yandex.net/v1',
+                'operations_url' => 'https://operation.api.cloud.yandex.net/operations',
+                'model' => 'aliceai-image-art-3.0/latest',
+                'timeout' => 120,
+                'poll_interval_seconds' => 2,
+                'aspect_ratio' => [
+                    'widthRatio' => '4',
+                    'heightRatio' => '5',
+                ],
+            ],
             'openai' => [
                 'base_url' => 'https://api.openai.com/v1',
                 'model' => 'dall-e-3',

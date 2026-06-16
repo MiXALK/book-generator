@@ -117,6 +117,7 @@ class PhotoPersonalizationFeatureTest extends TestCase
         config([
             'services.ai_text.api_key' => '',
             'services.ai_image.api_key' => 'test-image-key',
+            'services.ai_image.folder_id' => 'b1gtestfolder',
         ]);
 
         $goal = StoryGoal::query()->create([

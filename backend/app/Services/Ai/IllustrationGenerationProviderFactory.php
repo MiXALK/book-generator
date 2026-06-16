@@ -4,28 +4,45 @@ namespace App\Services\Ai;
 
 use App\Services\Ai\Contracts\IllustrationGenerationProviderInterface;
 use App\Services\Ai\Providers\OpenAiCompatibleIllustrationProvider;
+use App\Services\Ai\Providers\YandexArtIllustrationProvider;
 use InvalidArgumentException;
 
 readonly class IllustrationGenerationProviderFactory
 {
     public function make(): IllustrationGenerationProviderInterface
     {
-        $driver = (string) config('services.ai_image.driver', 'openai');
+        $driver = (string) config('services.ai_image.driver', 'yandexart');
         $preset = $this->presetForDriver($driver);
 
         $apiKey = (string) config('services.ai_image.api_key');
-        $baseUrl = $this->presetString($preset, 'base_url');
-        $model = $this->presetString($preset, 'model');
         $timeout = $this->presetInt($preset, 'timeout');
-        $size = $this->presetString($preset, 'size');
 
-        return new OpenAiCompatibleIllustrationProvider(
-            apiKey: $apiKey,
-            baseUrl: $baseUrl,
-            model: $model,
-            timeoutSeconds: $timeout,
-            size: $size !== '' ? $size : '1024x1024',
-        );
+        if ($driver === 'yandexart') {
+            return new YandexArtIllustrationProvider(
+                apiKey: $apiKey,
+                folderId: (string) config('services.ai_image.folder_id'),
+                baseUrl: $this->presetString($preset, 'base_url'),
+                operationsUrl: $this->presetString($preset, 'operations_url'),
+                model: $this->presetString($preset, 'model'),
+                timeoutSeconds: $timeout,
+                pollIntervalSeconds: $this->presetPollInterval($preset),
+                aspectRatio: $this->presetAspectRatio($preset),
+            );
+        }
+
+        if ($driver === 'openai') {
+            $size = $this->presetString($preset, 'size');
+
+            return new OpenAiCompatibleIllustrationProvider(
+                apiKey: $apiKey,
+                baseUrl: $this->presetString($preset, 'base_url'),
+                model: $this->presetString($preset, 'model'),
+                timeoutSeconds: $timeout,
+                size: $size !== '' ? $size : '1024x1024',
+            );
+        }
+
+        throw new InvalidArgumentException("Unsupported AI image driver [{$driver}].");
     }
 
     /**
@@ -64,5 +81,38 @@ readonly class IllustrationGenerationProviderFactory
         }
 
         return $preset[$key];
+    }
+
+    /**
+     * @param  array<string, mixed>  $preset
+     */
+    private function presetPollInterval(array $preset): int
+    {
+        if (! isset($preset['poll_interval_seconds']) || ! is_int($preset['poll_interval_seconds'])) {
+            return 2;
+        }
+
+        return $preset['poll_interval_seconds'];
+    }
+
+    /**
+     * @param  array<string, mixed>  $preset
+     * @return array{widthRatio: string, heightRatio: string}
+     */
+    private function presetAspectRatio(array $preset): array
+    {
+        $aspectRatio = $preset['aspect_ratio'] ?? null;
+
+        if (! is_array($aspectRatio)) {
+            return ['widthRatio' => '1', 'heightRatio' => '1'];
+        }
+
+        $widthRatio = $aspectRatio['widthRatio'] ?? '1';
+        $heightRatio = $aspectRatio['heightRatio'] ?? '1';
+
+        return [
+            'widthRatio' => is_string($widthRatio) ? $widthRatio : '1',
+            'heightRatio' => is_string($heightRatio) ? $heightRatio : '1',
+        ];
     }
 }
