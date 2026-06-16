@@ -26,6 +26,36 @@ class EloquentBookGenerationRepository implements BookGenerationRepositoryInterf
         $generation->update(['status' => $status]);
     }
 
+    public function updateIllustrationStatus(BookGeneration $generation, ?string $status, ?string $errorMessage = null): void
+    {
+        $generation->update([
+            'illustration_status' => $status,
+            'error_message' => $errorMessage,
+        ]);
+    }
+
+    public function updatePersonalization(BookGeneration $generation, array $attributes): void
+    {
+        $generation->update($attributes);
+    }
+
+    public function findForUserIllustrationRetry(int $userId, int $generationId): ?BookGeneration
+    {
+        return BookGeneration::query()
+            ->where('user_id', $userId)
+            ->whereKey($generationId)
+            ->where('illustration_status', 'failed')
+            ->with(['bookPages' => fn ($query) => $query->orderBy('page_number')->with('layoutTemplate')])
+            ->first();
+    }
+
+    public function findWithPagesForIllustration(int $generationId): ?BookGeneration
+    {
+        return BookGeneration::query()
+            ->with(['bookPages' => fn ($query) => $query->orderBy('page_number')->with('layoutTemplate')])
+            ->find($generationId);
+    }
+
     public function loadForApi(BookGeneration $generation): BookGeneration
     {
         return $generation->load([

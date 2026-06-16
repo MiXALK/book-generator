@@ -4,12 +4,17 @@ namespace App\Services;
 
 use App\Models\BookGeneration;
 use App\Models\BookTemplate;
+use App\Models\ChildProfile;
+use App\Models\GeneratedCharacter;
 use App\Models\StoryPrompt;
+use App\Models\UploadedPhoto;
 use App\Models\User;
 use App\Repositories\Contracts\BookGenerationRepositoryInterface;
 use App\Repositories\Contracts\BookPageRepositoryInterface;
+use App\Repositories\Contracts\ChildProfileRepositoryInterface;
 use App\Repositories\Contracts\LayoutTemplateRepositoryInterface;
 use App\Repositories\Contracts\StoryPromptRepositoryInterface;
+use App\Repositories\Contracts\UploadedPhotoRepositoryInterface;
 use App\Services\Ai\Contracts\StoryTextGenerationProviderInterface;
 use App\Services\Ai\Data\StoryTextGenerationInput;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -31,6 +36,9 @@ class BookGenerationService
         private readonly BookIllustrationStorageService $illustrationStorage,
         private readonly StoryPaginator $storyPaginator,
         private readonly SubscriptionAccessService $subscriptionAccess,
+        private readonly ChildProfileRepositoryInterface $childProfiles,
+        private readonly UploadedPhotoRepositoryInterface $uploadedPhotos,
+        private readonly IllustrationGenerationService $illustrationGeneration,
     ) {}
 
     public function formatForApi(BookGeneration $generation): BookGeneration
@@ -60,19 +68,80 @@ class BookGenerationService
         string $childName,
         int $age,
         string $goal,
+        ?int $uploadedPhotoId = null,
     ): BookGeneration {
+        $photo = $this->resolveUploadedPhoto($user, $uploadedPhotoId);
         $prompt = $this->selectPrompt($user, $age, $goal);
 
-        return DB::transaction(function () use ($user, $template, $childName, $age, $goal, $prompt) {
-            $generation = $this->createGeneration($user, $template, $childName, $age, $goal, $prompt);
+        return DB::transaction(function () use ($user, $template, $childName, $age, $goal, $prompt, $photo) {
+            $profile = $this->resolveChildProfile($user, $childName, $age, $photo);
+            $character = $photo !== null
+                ? $this->illustrationGeneration->resolveOrCreateCharacter($profile, $childName, $age, $photo)
+                : null;
+
+            $generation = $this->createGeneration($user, $template, $childName, $age, $goal, $prompt, $profile, $photo, $character);
             $built = $this->buildPages($childName, $age, $goal, $prompt);
             $pages = $this->attachPlaceholderIllustrations($generation->id, $built['pages'], $built['layouts']);
 
             $this->bookPages->createMany($generation, $pages);
-            $this->completeGeneration($generation, $prompt);
+
+            if ($photo !== null && $this->illustrationGeneration->shouldGenerateIllustrations($photo)) {
+                $this->bookGenerations->updateStatus($generation, 'processing');
+                $this->illustrationGeneration->queueGeneration($generation);
+            } elseif ($photo !== null) {
+                $this->illustrationGeneration->finalizeWithoutProvider($generation, $photo);
+            } else {
+                $this->bookGenerations->updateStatus($generation, 'completed');
+            }
+
+            $this->recordPromptUsage($prompt);
 
             return $this->formatForApi($generation);
         });
+    }
+
+    private function resolveUploadedPhoto(User $user, ?int $uploadedPhotoId): ?UploadedPhoto
+    {
+        if ($uploadedPhotoId === null) {
+            return null;
+        }
+
+        if (! $this->subscriptionAccess->canUploadPhoto($user)) {
+            throw new HttpResponseException(response()->json([
+                'message' => 'Photo personalization is available only for active Premium subscribers.',
+            ], 403));
+        }
+
+        $photo = $this->uploadedPhotos->findPendingForUser($user->id, $uploadedPhotoId);
+
+        if ($photo === null) {
+            throw new HttpResponseException(response()->json([
+                'message' => 'Uploaded photo not found or already used.',
+            ], 422));
+        }
+
+        return $photo;
+    }
+
+    private function resolveChildProfile(User $user, string $childName, int $age, ?UploadedPhoto $photo): ChildProfile
+    {
+        $profile = $this->childProfiles->findForUserByName($user->id, $childName);
+
+        if ($profile === null) {
+            $profile = $this->childProfiles->create([
+                'user_id' => $user->id,
+                'child_name' => $childName,
+                'child_age' => $age,
+            ]);
+        } else {
+            $this->childProfiles->updateAge($profile, $age);
+        }
+
+        if ($photo !== null && $photo->child_profile_id === null) {
+            $this->uploadedPhotos->attachChildProfile($photo, $profile->id);
+        }
+
+        return $profile;
     }
 
     private function createGeneration(
@@ -82,23 +151,28 @@ class BookGenerationService
         int $age,
         string $goal,
         ?StoryPrompt $prompt,
+        ChildProfile $profile,
+        ?UploadedPhoto $photo,
+        ?GeneratedCharacter $character,
     ): BookGeneration {
         return $this->bookGenerations->create([
             'user_id' => $user->id,
             'book_template_id' => $template->id,
             'story_prompt_id' => $prompt?->id,
+            'child_profile_id' => $profile->id,
+            'uploaded_photo_id' => $photo?->id,
+            'generated_character_id' => $character?->id,
             'child_name' => $childName,
             'child_age' => $age,
             'child_goal' => $goal,
             'prompt_snapshot' => $prompt?->prompt_text,
             'status' => 'processing',
+            'illustration_status' => $photo !== null ? 'queued' : null,
         ]);
     }
 
-    private function completeGeneration(BookGeneration $generation, ?StoryPrompt $prompt): void
+    private function recordPromptUsage(?StoryPrompt $prompt): void
     {
-        $this->bookGenerations->updateStatus($generation, 'completed');
-
         if ($prompt) {
             $this->storyPrompts->incrementUsageCount($prompt);
         }

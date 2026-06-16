@@ -38,6 +38,16 @@ class User extends Authenticatable
         return $this->hasMany(BookGeneration::class);
     }
 
+    public function childProfiles(): HasMany
+    {
+        return $this->hasMany(ChildProfile::class);
+    }
+
+    public function uploadedPhotos(): HasMany
+    {
+        return $this->hasMany(UploadedPhoto::class);
+    }
+
     /**
      * Get prompt ratings created by this user.
      */

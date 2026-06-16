@@ -5,10 +5,57 @@ namespace App\Services;
 use App\Models\BookGeneration;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Throwable;
 
 readonly class BookIllustrationStorageService
 {
+    public function storeUploadedPhoto(int $userId, string $binary, string $extension): string
+    {
+        $filename = Str::uuid()->toString().'.'.$extension;
+        $path = "private/users/{$userId}/photos/{$filename}";
+
+        Storage::disk('s3')->put($path, $binary, [
+            'ContentType' => $this->mimeForExtension($extension),
+            'visibility' => 'private',
+        ]);
+
+        return $path;
+    }
+
+    public function deleteUploadedPhoto(string $path): void
+    {
+        try {
+            Storage::disk('s3')->delete($path);
+        } catch (Throwable $exception) {
+            Log::warning('Failed to delete uploaded child photo', [
+                'message' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    public function storeGeneratedImage(int $generationId, int $pageNumber, string $binary): ?string
+    {
+        $path = "books/{$generationId}/page-{$pageNumber}.png";
+
+        try {
+            Storage::disk('s3')->put($path, $binary, [
+                'ContentType' => 'image/png',
+                'visibility' => 'private',
+            ]);
+
+            return $path;
+        } catch (Throwable $exception) {
+            Log::warning('Failed to store generated illustration', [
+                'generation_id' => $generationId,
+                'page_number' => $pageNumber,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
     public function storePlaceholder(int $generationId, int $pageNumber, string $category): ?string
     {
         $path = "books/{$generationId}/page-{$pageNumber}.svg";
@@ -94,5 +141,14 @@ readonly class BookIllustrationStorageService
   <text x="400" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" fill="rgba(255,255,255,0.92)">Page {$pageNumber}</text>
 </svg>
 SVG;
+    }
+
+    private function mimeForExtension(string $extension): string
+    {
+        return match ($extension) {
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            default => 'image/jpeg',
+        };
     }
 }

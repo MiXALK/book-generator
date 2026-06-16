@@ -57,4 +57,26 @@ return [
         'cancel_url' => env('STRIPE_CANCEL_URL', 'http://localhost:3000/dashboard'),
         'portal_return_url' => env('STRIPE_PORTAL_RETURN_URL', 'http://localhost:3000/dashboard'),
     ],
+
+    'ai_image' => [
+        'driver' => env('AI_IMAGE_DRIVER', 'openai'),
+        'api_key' => env('AI_IMAGE_API_KEY'),
+        'drivers' => [
+            'openai' => [
+                'base_url' => 'https://api.openai.com/v1',
+                'model' => 'dall-e-3',
+                'timeout' => 120,
+                'size' => '1024x1024',
+            ],
+        ],
+    ],
+
+    'book_photo' => [
+        'max_kb' => 5120,
+        'min_width' => 256,
+        'min_height' => 256,
+        'max_width' => 4096,
+        'max_height' => 4096,
+        'allowed_mimes' => ['image/jpeg', 'image/png', 'image/webp'],
+    ],
 ];

@@ -13,6 +13,14 @@ interface BookGenerationRepositoryInterface
 
     public function updateStatus(BookGeneration $generation, string $status): void;
 
+    public function updateIllustrationStatus(BookGeneration $generation, ?string $status, ?string $errorMessage = null): void;
+
+    public function updatePersonalization(BookGeneration $generation, array $attributes): void;
+
+    public function findForUserIllustrationRetry(int $userId, int $generationId): ?BookGeneration;
+
+    public function findWithPagesForIllustration(int $generationId): ?BookGeneration;
+
     public function loadForApi(BookGeneration $generation): BookGeneration;
 
     public function listForUser(int $userId): Collection;

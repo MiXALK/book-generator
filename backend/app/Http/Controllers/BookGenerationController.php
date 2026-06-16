@@ -6,6 +6,7 @@ use App\Http\Requests\GenerateBookRequest;
 use App\Repositories\Contracts\BookGenerationRepositoryInterface;
 use App\Repositories\Contracts\BookTemplateRepositoryInterface;
 use App\Services\BookGenerationService;
+use App\Services\IllustrationGenerationService;
 use App\Services\SubscriptionAccessService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ class BookGenerationController extends Controller
 {
     public function __construct(
         private readonly BookGenerationService $generationService,
+        private readonly IllustrationGenerationService $illustrationGeneration,
         private readonly BookGenerationRepositoryInterface $bookGenerations,
         private readonly BookTemplateRepositoryInterface $bookTemplates,
         private readonly SubscriptionAccessService $subscriptionAccess,
@@ -72,6 +74,7 @@ class BookGenerationController extends Controller
                 $request->childName(),
                 $request->age(),
                 $request->goal(),
+                $request->uploadedPhotoId(),
             );
         } finally {
             $lock->release();
@@ -81,5 +84,31 @@ class BookGenerationController extends Controller
             'message' => 'Book generation completed.',
             'generation' => $generation,
         ], 201);
+    }
+
+    public function retryIllustrations(Request $request, int $id): JsonResponse
+    {
+        $generation = $this->bookGenerations->findForUserIllustrationRetry($request->user()->id, $id);
+
+        if ($generation === null) {
+            return response()->json([
+                'message' => 'Illustration retry is not available for this book.',
+            ], 422);
+        }
+
+        $this->illustrationGeneration->retryGeneration($generation);
+
+        $fresh = $this->bookGenerations->findForUserById($request->user()->id, $id);
+
+        if ($fresh === null) {
+            return response()->json([
+                'message' => 'Book not found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Illustration generation restarted.',
+            'generation' => $this->generationService->formatForApi($fresh),
+        ]);
     }
 }

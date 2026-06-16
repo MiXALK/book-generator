@@ -17,12 +17,45 @@ export default function BookStatusPage() {
 
   const [message, setMessage] = useState(t.preparingBook);
   const [error, setError] = useState<string | null>(null);
+  const [canRetryIllustrations, setCanRetryIllustrations] = useState(false);
+  const [retrying, setRetrying] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push("/");
     }
   }, [loading, router, user]);
+
+  const retryIllustrations = async () => {
+    if (!token || Number.isNaN(bookId)) {
+      return;
+    }
+
+    setRetrying(true);
+    setError(null);
+    setCanRetryIllustrations(false);
+    setMessage(t.assemblingBook);
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/books/${bookId}/retry-illustrations`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || t.bookStatusError);
+      }
+    } catch (err) {
+      const statusMessage = err instanceof Error ? err.message : t.bookStatusError;
+      setError(statusMessage);
+    } finally {
+      setRetrying(false);
+    }
+  };
 
   useEffect(() => {
     if (!token || Number.isNaN(bookId)) {
@@ -56,11 +89,20 @@ export default function BookStatusPage() {
         }
 
         if (generation.status === "failed") {
-          setError(t.bookGenerationFailed);
+          if (generation.illustration_status === "failed") {
+            setError(generation.error_message || t.illustrationFailed);
+            setCanRetryIllustrations(true);
+          } else {
+            setError(t.bookGenerationFailed);
+          }
           return;
         }
 
-        setMessage(t.assemblingBook);
+        setMessage(
+          generation.illustration_status === "processing" || generation.illustration_status === "queued"
+            ? t.assemblingBook
+            : t.preparingBook,
+        );
         window.setTimeout(pollStatus, 800);
       } catch (err) {
         if (!cancelled) {
@@ -75,7 +117,18 @@ export default function BookStatusPage() {
     return () => {
       cancelled = true;
     };
-  }, [apiBaseUrl, bookId, router, t.assemblingBook, t.bookGenerationFailed, t.bookStatusError, t.preparingBook, token]);
+  }, [
+    apiBaseUrl,
+    bookId,
+    retrying,
+    router,
+    t.assemblingBook,
+    t.bookGenerationFailed,
+    t.bookStatusError,
+    t.illustrationFailed,
+    t.preparingBook,
+    token,
+  ]);
 
   if (loading) {
     return (
@@ -89,6 +142,11 @@ export default function BookStatusPage() {
     return (
       <div className={styles.state}>
         <p className={styles.error}>{error}</p>
+        {canRetryIllustrations && (
+          <button type="button" onClick={retryIllustrations} disabled={retrying}>
+            {retrying ? t.generating : t.retryIllustrations}
+          </button>
+        )}
         <button type="button" onClick={() => router.push("/dashboard")}>
           {t.backToDashboard}
         </button>

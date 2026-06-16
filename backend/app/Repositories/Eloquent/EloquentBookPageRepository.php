@@ -20,4 +20,11 @@ class EloquentBookPageRepository implements BookPageRepositoryInterface
             ]);
         }
     }
+
+    public function updateImageUrl(int $pageId, ?string $imagePath): void
+    {
+        BookPage::query()
+            ->whereKey($pageId)
+            ->update(['image_url' => $imagePath]);
+    }
 }

@@ -140,6 +140,23 @@ Stripe monthly subscriptions gate paid templates and higher generation quotas:
 - Configure via `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID`, and redirect URLs in `.env`. Driver defaults live in `config/services.php` under `stripe`.
 - Webhook endpoint: `POST /api/webhooks/stripe` (Stripe-Signature verification required).
 
+## AI Image Generation
+
+Illustration generation for paid photo personalization uses provider abstractions:
+
+- Contract: `backend/app/Services/Ai/Contracts/IllustrationGenerationProviderInterface.php`
+- Default driver: `openai` (OpenAI-compatible `/images/generations` API)
+- HTTP transport: `backend/app/Services/Ai/Providers/OpenAiCompatibleIllustrationProvider.php`
+- Driver resolution: `backend/app/Services/Ai/IllustrationGenerationProviderFactory.php`
+- Prompt composition: `IllustrationPromptComposer` (page fragment + shared style bible) and `CharacterBibleComposer`
+- Queue: `GenerateBookIllustrationsJob` on the `generation-image` queue
+- Configure via `AI_IMAGE_DRIVER` and `AI_IMAGE_API_KEY` in `.env`. Driver `base_url`, `model`, `timeout`, and `size` live in `config/services.php` under `ai_image.drivers`.
+- When the image provider is not configured, book generation keeps SVG placeholder illustrations and still deletes uploaded photos after successful generation.
+
+Photo upload validation limits are defined in `config/services.php` under `book_photo`.
+
+Character reuse: one `GeneratedCharacter` per `ChildProfile` (unique per `user_id` + `child_name`). New uploads refresh the linked photo reference but keep the existing style bible for visual consistency across books.
+
 ## Documentation Rules
 
 - Update this file when adding or changing conventions, dependencies, folder

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BookGenerationController;
+use App\Http\Controllers\ChildPhotoController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,9 @@ Route::middleware('auth.api')->group(function () {
     Route::get('/templates/catalog', [TemplateController::class, 'catalog']);
     Route::get('/books/history', [BookGenerationController::class, 'index']);
     Route::get('/books/{id}', [BookGenerationController::class, 'show'])->whereNumber('id');
+    Route::post('/books/{id}/retry-illustrations', [BookGenerationController::class, 'retryIllustrations'])->whereNumber('id');
     Route::post('/books/generate', [BookGenerationController::class, 'generate'])
         ->middleware('throttle:books-generate');
+    Route::post('/photos/upload', [ChildPhotoController::class, 'upload'])
+        ->middleware('throttle:photos-upload');
 });

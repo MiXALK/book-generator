@@ -43,7 +43,7 @@ independently:
 
 - [x] `default` for light background work.
 - [ ] `generation-text` for story text generation.
-- [ ] `generation-image` for illustration generation.
+- [x] `generation-image` for illustration generation.
 - [ ] `generation-layout` for paginating book pages.
 - [ ] `mail` for email notifications.
 
@@ -171,16 +171,16 @@ the expanded catalog.
 
 Goal: add the key paid feature.
 
-- [ ] Allow photo upload only for paid users.
-- [ ] Validate image size, MIME type, dimensions, and parental consent.
-- [ ] Store original uploads under private S3 prefixes.
-- [ ] Run illustration generation through the `generation-image` queue (image prompts
+- [x] Allow photo upload only for paid users.
+- [x] Validate image size, MIME type, dimensions, and parental consent.
+- [x] Store original uploads under private S3 prefixes.
+- [x] Run illustration generation through the `generation-image` queue (image prompts
   derived from paginated story fragments plus a shared style/character bible).
-- [ ] Model relationships between `ChildProfile`, `UploadedPhoto`,
+- [x] Model relationships between `ChildProfile`, `UploadedPhoto`,
   `GeneratedCharacter`, and `BookGeneration`.
-- [ ] Decide whether a generated character is reused per child profile or generated
+- [x] Decide whether a generated character is reused per child profile or generated
   per book.
-- [ ] Provide retry and clear failure states for image generation.
+- [x] Provide retry and clear failure states for image generation.
 
 Success criteria: a paid user uploads a photo and receives a book with
 illustrations where the character resembles the child.

@@ -33,4 +33,9 @@ readonly class SubscriptionAccessService
 
         return $this->hasActivePaidAccess($user);
     }
+
+    public function canUploadPhoto(User $user): bool
+    {
+        return $this->hasActivePaidAccess($user);
+    }
 }

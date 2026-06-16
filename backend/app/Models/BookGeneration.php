@@ -8,7 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'book_template_id', 'story_prompt_id', 'child_name', 'child_age', 'child_goal', 'prompt_snapshot', 'status', 'error_message'])]
+#[Fillable([
+    'user_id',
+    'book_template_id',
+    'story_prompt_id',
+    'child_profile_id',
+    'uploaded_photo_id',
+    'generated_character_id',
+    'child_name',
+    'child_age',
+    'child_goal',
+    'prompt_snapshot',
+    'status',
+    'illustration_status',
+    'error_message',
+])]
 class BookGeneration extends Model
 {
     use HasFactory;
@@ -35,6 +49,21 @@ class BookGeneration extends Model
     public function storyPrompt(): BelongsTo
     {
         return $this->belongsTo(StoryPrompt::class);
+    }
+
+    public function childProfile(): BelongsTo
+    {
+        return $this->belongsTo(ChildProfile::class);
+    }
+
+    public function uploadedPhoto(): BelongsTo
+    {
+        return $this->belongsTo(UploadedPhoto::class);
+    }
+
+    public function generatedCharacter(): BelongsTo
+    {
+        return $this->belongsTo(GeneratedCharacter::class);
     }
 
     /**

@@ -25,6 +25,7 @@ class GenerateBookRequest extends FormRequest
             'child_name' => ['required', 'string', 'max:120'],
             'age' => ['required', 'integer', 'min:2', 'max:12'],
             'goal' => ['required', 'string', 'max:255', 'exists:story_goals,name'],
+            'uploaded_photo_id' => ['nullable', 'integer', 'min:1'],
         ];
     }
 
@@ -41,5 +42,16 @@ class GenerateBookRequest extends FormRequest
     public function goal(): string
     {
         return (string) $this->validated('goal');
+    }
+
+    public function uploadedPhotoId(): ?int
+    {
+        $value = $this->validated('uploaded_photo_id');
+
+        if ($value === null) {
+            return null;
+        }
+
+        return (int) $value;
     }
 }

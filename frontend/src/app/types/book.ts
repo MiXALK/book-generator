@@ -25,6 +25,8 @@ export interface BookGeneration {
   child_age: number;
   child_goal: string;
   status: string;
+  illustration_status?: string | null;
+  error_message?: string | null;
   created_at: string;
   book_template?: BookTemplateSummary | null;
   book_pages: BookPage[];
