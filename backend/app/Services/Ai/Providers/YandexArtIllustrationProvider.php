@@ -4,6 +4,7 @@ namespace App\Services\Ai\Providers;
 
 use App\Services\Ai\Contracts\IllustrationGenerationProviderInterface;
 use App\Services\Ai\Data\IllustrationGenerationInput;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -160,7 +161,7 @@ readonly class YandexArtIllustrationProvider implements IllustrationGenerationPr
         return 'art://'.$this->folderId.'/'.$this->model;
     }
 
-    private function httpClient(): \Illuminate\Http\Client\PendingRequest
+    private function httpClient(): PendingRequest
     {
         return Http::withHeaders([
             'Authorization' => 'Api-Key '.$this->apiKey,

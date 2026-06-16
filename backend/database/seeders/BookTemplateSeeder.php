@@ -73,12 +73,14 @@ class BookTemplateSeeder extends Seeder
         ];
 
         foreach ($templateDefinitions as $template) {
-            $storyGoal = StoryGoal::query()->where('name', $template['goal_name'])->first();
+            $storyGoal = StoryGoal::query()
+                ->where('name', $template['goal_name'])
+                ->firstOrFail();
 
             BookTemplate::query()->updateOrCreate(
                 ['title' => $template['title']],
                 [
-                    'story_goal_id' => $storyGoal?->id,
+                    'story_goal_id' => $storyGoal->id,
                     'description' => $template['description'],
                     'is_free' => $template['is_free'],
                     'template_type' => $template['template_type'],

@@ -33,5 +33,8 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="AI_IMAGE_DRIVER" value="yandexart"/>
+        <env name="AI_IMAGE_API_KEY" value=""/>
+        <env name="AI_IMAGE_FOLDER_ID" value=""/>
     </php>
 </phpunit>

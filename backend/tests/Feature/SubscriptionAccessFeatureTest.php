@@ -5,12 +5,62 @@ namespace Tests\Feature;
 use App\Models\BookTemplate;
 use App\Models\StoryGoal;
 use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class SubscriptionAccessFeatureTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_catalog_returns_seeded_goals_with_active_templates(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        User::query()->create([
+            'name' => 'Catalog User',
+            'email' => 'catalog@example.com',
+            'password' => bcrypt('password'),
+            'plan' => 'free',
+            'subscription_status' => 'inactive',
+            'api_token' => 'catalog-user-token',
+            'api_token_expires_at' => now()->addDay(),
+        ]);
+
+        $response = $this->withToken('catalog-user-token')->getJson('/api/templates/catalog');
+
+        $response->assertOk();
+        $response->assertJsonCount(7, 'goals');
+        $response->assertJsonFragment([
+            'name' => 'Делиться игрушками',
+            'is_locked' => false,
+        ]);
+        $response->assertJsonFragment([
+            'name' => 'Управлять эмоциями',
+            'is_locked' => true,
+        ]);
+    }
+
+    public function test_catalog_is_empty_when_templates_are_unlinked_from_goals(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        BookTemplate::query()->update(['story_goal_id' => null]);
+
+        User::query()->create([
+            'name' => 'Unlinked Catalog User',
+            'email' => 'unlinked-catalog@example.com',
+            'password' => bcrypt('password'),
+            'plan' => 'free',
+            'subscription_status' => 'inactive',
+            'api_token' => 'unlinked-catalog-token',
+            'api_token_expires_at' => now()->addDay(),
+        ]);
+
+        $response = $this->withToken('unlinked-catalog-token')->getJson('/api/templates/catalog');
+
+        $response->assertOk();
+        $response->assertJsonCount(0, 'goals');
+    }
 
     public function test_catalog_marks_paid_goals_as_locked_for_free_users(): void
     {
