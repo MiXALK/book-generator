@@ -16,7 +16,7 @@ The service has two main tiers:
 
 Initial MVP decisions:
 
-- [x] Free tier: 5 free templates and 3 generated books per month.
+- [x] Free tier: 2 free templates and 3 generated books per month.
 - [x] Paid tier: all templates, photo personalization, generated illustrations, book
   history, and 10 generated books per month.
 - [x] Paid billing: monthly subscription through Stripe; do not use credits in the
@@ -63,7 +63,7 @@ Goal: define product boundaries before implementation.
 
 Decisions:
 
-- [x] Free users can access 5 free templates and generate 3 books per month.
+- [x] Free users can access 2 free templates and generate 3 books per month.
 - [x] Paid subscribers can access all templates, generate 10 books per month, use
   photo personalization, and view book history.
 - [x] Billing uses Stripe monthly subscriptions. The MVP does not use credits.
@@ -252,7 +252,7 @@ duplicate requests do not create duplicate expensive work.
 The first release should include:
 
 - [x] Google login.
-- [x] 5 free templates and 3 generated books per month for free users.
+- [x] 2 free templates and 3 generated books per month for free users.
 - [x] Form fields for child name, age, goal, and template.
 - [x] AI prompt-based story generation without photo personalization.
 - [ ] Asynchronous book layout generation and pagination.
