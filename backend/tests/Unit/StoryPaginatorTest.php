@@ -56,8 +56,18 @@ class StoryPaginatorTest extends TestCase
 
         $pages = $this->paginator->paginate($story);
 
-        $this->assertNotEmpty($pages);
-        $this->assertLessThanOrEqual(80, mb_strlen($pages[0]));
+        $this->assertSame([$story], $pages);
+    }
+
+    public function test_paginate_does_not_split_long_sentence_between_pages(): void
+    {
+        $longSentence = 'Это очень длинное предложение, которое заметно превышает лимит в восемьдесят символов, но теперь должно оставаться на одной странице целиком.';
+        $story = "Короткое начало. {$longSentence} Финал короткий.";
+
+        $pages = $this->paginator->paginate($story);
+
+        $this->assertGreaterThanOrEqual(2, count($pages));
+        $this->assertContains($longSentence, $pages);
     }
 
     public function test_paginate_normalizes_whitespace(): void

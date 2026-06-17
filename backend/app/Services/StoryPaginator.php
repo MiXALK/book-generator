@@ -20,10 +20,7 @@ readonly class StoryPaginator
         $sentences = $this->splitIntoSentences($normalized);
         $pages = $this->packSentencesIntoPages($sentences);
 
-        return array_map(
-            fn (string $page) => $this->limitSymbols($page),
-            $pages,
-        );
+        return $pages;
     }
 
     private function normalizeText(string $text): string
@@ -77,7 +74,7 @@ readonly class StoryPaginator
                     $currentPage = '';
                 }
 
-                $pages = array_merge($pages, $this->splitOversizedSentence($sentence));
+                $pages[] = $sentence;
 
                 continue;
             }
