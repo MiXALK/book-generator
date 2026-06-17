@@ -41,8 +41,8 @@ class YandexArtIllustrationProviderTest extends TestCase
         $encodedImage = base64_encode($imageBinary);
 
         Http::fake([
-            'llm.api.cloud.yandex.net/*' => Http::response(['id' => 'op-123']),
-            'operation.api.cloud.yandex.net/*' => Http::response([
+            'llm.api.cloud.yandex.net/foundationModels/v1/imageGenerationAsync' => Http::response(['id' => 'op-123']),
+            'llm.api.cloud.yandex.net/operations/*' => Http::response([
                 'id' => 'op-123',
                 'done' => true,
                 'response' => [
@@ -77,7 +77,7 @@ class YandexArtIllustrationProviderTest extends TestCase
 
         Http::assertSent(function ($request): bool {
             return $request->method() === 'GET'
-                && $request->url() === 'https://operation.api.cloud.yandex.net/operations/op-123';
+                && $request->url() === 'https://llm.api.cloud.yandex.net/operations/op-123';
         });
     }
 
@@ -93,6 +93,44 @@ class YandexArtIllustrationProviderTest extends TestCase
         $this->assertTrue($provider->isConfigured());
     }
 
+    public function test_factory_yandexart_driver_uses_documented_endpoint_and_model(): void
+    {
+        Http::fake([
+            'llm.api.cloud.yandex.net/foundationModels/v1/imageGenerationAsync' => Http::response(['id' => 'op-123']),
+            'llm.api.cloud.yandex.net/operations/*' => Http::response([
+                'id' => 'op-123',
+                'done' => true,
+                'response' => [
+                    'image' => base64_encode('fake-jpeg-bytes'),
+                ],
+            ]),
+        ]);
+
+        config()->set('services.ai_image.driver', 'yandexart');
+        config()->set('services.ai_image.api_key', 'test-key');
+        config()->set('services.ai_image.folder_id', 'b1gtestfolder');
+
+        $provider = $this->app->make(IllustrationGenerationProviderFactory::class)->make();
+
+        $provider->generateIllustration($this->sampleInput());
+
+        Http::assertSent(function ($request): bool {
+            if ($request->method() !== 'POST') {
+                return false;
+            }
+
+            $body = $request->data();
+
+            return $request->url() === 'https://llm.api.cloud.yandex.net/foundationModels/v1/imageGenerationAsync'
+                && ($body['modelUri'] ?? null) === 'art://b1gtestfolder/yandex-art/latest';
+        });
+
+        Http::assertSent(function ($request): bool {
+            return $request->method() === 'GET'
+                && $request->url() === 'https://llm.api.cloud.yandex.net/operations/op-123';
+        });
+    }
+
     public function test_factory_resolves_openai_driver(): void
     {
         config()->set('services.ai_image.driver', 'openai');
@@ -106,7 +144,7 @@ class YandexArtIllustrationProviderTest extends TestCase
 
     public function test_factory_resolves_driver_when_model_name_is_configured_by_mistake(): void
     {
-        config()->set('services.ai_image.driver', 'aliceai-image-art-3.0/latest');
+        config()->set('services.ai_image.driver', 'yandex-art/latest');
         config()->set('services.ai_image.api_key', 'test-key');
         config()->set('services.ai_image.folder_id', 'b1gtestfolder');
 
@@ -122,7 +160,7 @@ class YandexArtIllustrationProviderTest extends TestCase
             apiKey: $apiKey,
             folderId: $folderId,
             baseUrl: 'https://llm.api.cloud.yandex.net/foundationModels/v1',
-            operationsUrl: 'https://operation.api.cloud.yandex.net/operations',
+            operationsUrl: 'https://llm.api.cloud.yandex.net/operations',
             model: 'yandex-art/latest',
             timeoutSeconds: 30,
             pollIntervalSeconds: 0,

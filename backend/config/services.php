@@ -64,9 +64,9 @@ return [
         'folder_id' => env('AI_IMAGE_FOLDER_ID'),
         'drivers' => [
             'yandexart' => [
-                'base_url' => 'https://ai.api.cloud.yandex.net/v1',
-                'operations_url' => 'https://operation.api.cloud.yandex.net/operations',
-                'model' => 'aliceai-image-art-3.0/latest',
+                'base_url' => 'https://llm.api.cloud.yandex.net/foundationModels/v1',
+                'operations_url' => 'https://llm.api.cloud.yandex.net/operations',
+                'model' => 'yandex-art/latest',
                 'timeout' => 120,
                 'poll_interval_seconds' => 2,
                 'aspect_ratio' => [

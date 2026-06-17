@@ -12,6 +12,8 @@ class GenerateBookIllustrationsJob implements ShouldQueue
 
     public int $tries = 3;
 
+    public int $timeout = 10800;
+
     public int $backoff = 30;
 
     public function __construct(public int $generationId)
