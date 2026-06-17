@@ -104,6 +104,18 @@ class YandexArtIllustrationProviderTest extends TestCase
         $this->assertTrue($provider->isConfigured());
     }
 
+    public function test_factory_resolves_driver_when_model_name_is_configured_by_mistake(): void
+    {
+        config()->set('services.ai_image.driver', 'aliceai-image-art-3.0/latest');
+        config()->set('services.ai_image.api_key', 'test-key');
+        config()->set('services.ai_image.folder_id', 'b1gtestfolder');
+
+        $provider = $this->app->make(IllustrationGenerationProviderFactory::class)->make();
+
+        $this->assertInstanceOf(YandexArtIllustrationProvider::class, $provider);
+        $this->assertTrue($provider->isConfigured());
+    }
+
     private function makeProvider(string $apiKey = 'test-image-key', string $folderId = 'b1gtestfolder'): YandexArtIllustrationProvider
     {
         return new YandexArtIllustrationProvider(

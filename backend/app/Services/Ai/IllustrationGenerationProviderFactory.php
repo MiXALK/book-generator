@@ -11,7 +11,7 @@ readonly class IllustrationGenerationProviderFactory
 {
     public function make(): IllustrationGenerationProviderInterface
     {
-        $driver = (string) config('services.ai_image.driver', 'yandexart');
+        $driver = $this->resolveDriver((string) config('services.ai_image.driver', 'yandexart'));
         $preset = $this->presetForDriver($driver);
 
         $apiKey = (string) config('services.ai_image.api_key');
@@ -43,6 +43,31 @@ readonly class IllustrationGenerationProviderFactory
         }
 
         throw new InvalidArgumentException("Unsupported AI image driver [{$driver}].");
+    }
+
+    private function resolveDriver(string $driver): string
+    {
+        $drivers = config('services.ai_image.drivers', []);
+
+        if (is_array($drivers) && isset($drivers[$driver])) {
+            return $driver;
+        }
+
+        if (is_array($drivers)) {
+            foreach ($drivers as $key => $preset) {
+                if (! is_array($preset)) {
+                    continue;
+                }
+
+                $model = $preset['model'] ?? null;
+
+                if (is_string($model) && $model === $driver) {
+                    return (string) $key;
+                }
+            }
+        }
+
+        return $driver;
     }
 
     /**
