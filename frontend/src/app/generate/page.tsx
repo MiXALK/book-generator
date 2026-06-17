@@ -23,6 +23,7 @@ export default function GeneratePage() {
   const { token, user, loading, locale } = useAuth();
   const t = locales[locale] || locales.ru;
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
+  const [hydrated, setHydrated] = useState(false);
 
   const [goals, setGoals] = useState<CatalogGoal[]>([]);
   const [ageRanges, setAgeRanges] = useState<CatalogAgeRange[]>([]);
@@ -43,6 +44,10 @@ export default function GeneratePage() {
   const selectedGoalMeta = goals.find((goal) => goal.name === selectedGoal);
   const selectedGoalLocked = selectedGoalMeta?.is_locked === true;
   const isPaid = user?.plan === "paid" && user?.subscription_status === "active";
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -214,7 +219,7 @@ export default function GeneratePage() {
     }
   };
 
-  if (loading || !user) {
+  if (!hydrated || loading || !user) {
     return (
       <div className={styles.state}>
         <p>{t.loading}</p>
