@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
 import LanguageSelect from "@/app/components/LanguageSelect";
+import btn from "@/app/components/storyButton.module.css";
 import { BookGeneration } from "@/app/types/book";
 import styles from "./dashboard.module.css";
 
@@ -160,91 +161,97 @@ export default function DashboardPage() {
               </span>
             </div>
           </div>
-          <button className={styles.logoutButton} onClick={logout}>
+          <button className={btn.btnGhost} onClick={logout}>
             {t.signOut}
           </button>
         </nav>
       </header>
 
       <main className={styles.main}>
-        <section className={styles.welcomeBanner}>
-          <div className={styles.welcomeText}>
-            <h1>{t.welcomeBack}, {user.name.split(" ")[0]}!</h1>
-            <p>{t.letInspire}</p>
-          </div>
-          <div className={styles.quickCta}>
-            <button className={styles.primaryCta} onClick={() => router.push("/generate")}>
-              {t.createNewStorybook}
-            </button>
-          </div>
-        </section>
+        <div className={styles.dashboardGrid}>
+          <section className={styles.welcomeBanner}>
+            <div className={styles.welcomeText}>
+              <h1>{t.welcomeBack}, {user.name.split(" ")[0]}!</h1>
+              <p>{t.letInspire}</p>
+            </div>
+            <div className={styles.quickCta}>
+              <button
+                type="button"
+                className={`${btn.btnPrimary} ${btn.btnLarge}`}
+                onClick={() => router.push("/generate")}
+              >
+                {t.createNewStorybook}
+              </button>
+            </div>
+          </section>
 
-        <div className={styles.grid}>
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>{t.monthlyUsageLimit}</h2>
-            <div className={styles.limitTracker}>
-              <div className={styles.limitNumbers}>
-                <span className={styles.limitCurrent}>{monthlyUsage}</span>
-                <span className={styles.limitTotal}>/ {monthlyLimit} {t.books}</span>
+          <div className={styles.sideStack}>
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>{t.monthlyUsageLimit}</h2>
+              <div className={styles.limitTracker}>
+                <div className={styles.limitNumbers}>
+                  <span className={styles.limitCurrent}>{monthlyUsage}</span>
+                  <span className={styles.limitTotal}>/ {monthlyLimit} {t.books}</span>
+                </div>
+                <p className={styles.limitSub}>{t.quotaResets}</p>
+                <div className={styles.progressBarBg}>
+                  <div className={styles.progressBarFill} style={{ width: `${usagePercent}%` }}></div>
+                </div>
               </div>
-              <p className={styles.limitSub}>{t.quotaResets}</p>
-              <div className={styles.progressBarBg}>
-                <div className={styles.progressBarFill} style={{ width: `${usagePercent}%` }}></div>
+              {!isPaid && (
+                <div className={styles.upgradeBox}>
+                  <p>{t.unlockPremium}</p>
+                  <button
+                    className={`${btn.btnPrimary} ${styles.upgradeButton}`}
+                    onClick={startCheckout}
+                    disabled={billingLoading}
+                  >
+                    {billingLoading ? t.billingRedirecting : t.upgradeToPremium}
+                  </button>
+                </div>
+              )}
+              {isPaid && (
+                <div className={styles.upgradeBox}>
+                  <button
+                    className={`${btn.btnPrimary} ${styles.upgradeButton}`}
+                    onClick={openBillingPortal}
+                    disabled={billingLoading}
+                  >
+                    {billingLoading ? t.billingRedirecting : t.manageBilling}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>{t.privacyConsentTitle}</h2>
+              <div className={styles.safetyContent}>
+                <div className={styles.safetyItem}>
+                  <span className={styles.safetyIcon}>✓</span>
+                  <div>
+                    <h4>{t.strictPhotoDeletionTitle}</h4>
+                    <p>{t.strictPhotoDeletionDesc}</p>
+                  </div>
+                </div>
+                <div className={styles.safetyItem}>
+                  <span className={styles.safetyIcon}>✓</span>
+                  <div>
+                    <h4>{t.parentalConsentTitle}</h4>
+                    <p>{t.parentalConsentDesc}</p>
+                  </div>
+                </div>
+                <div className={styles.safetyItem}>
+                  <span className={styles.safetyIcon}>✓</span>
+                  <div>
+                    <h4>{t.privateS3Title}</h4>
+                    <p>{t.privateS3Desc}</p>
+                  </div>
+                </div>
               </div>
             </div>
-            {!isPaid && (
-              <div className={styles.upgradeBox}>
-                <p>{t.unlockPremium}</p>
-                <button
-                  className={styles.upgradeButton}
-                  onClick={startCheckout}
-                  disabled={billingLoading}
-                >
-                  {billingLoading ? t.billingRedirecting : t.upgradeToPremium}
-                </button>
-              </div>
-            )}
-            {isPaid && (
-              <div className={styles.upgradeBox}>
-                <button
-                  className={styles.upgradeButton}
-                  onClick={openBillingPortal}
-                  disabled={billingLoading}
-                >
-                  {billingLoading ? t.billingRedirecting : t.manageBilling}
-                </button>
-              </div>
-            )}
           </div>
 
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>{t.privacyConsentTitle}</h2>
-            <div className={styles.safetyContent}>
-              <div className={styles.safetyItem}>
-                <span className={styles.safetyIcon}>✓</span>
-                <div>
-                  <h4>{t.strictPhotoDeletionTitle}</h4>
-                  <p>{t.strictPhotoDeletionDesc}</p>
-                </div>
-              </div>
-              <div className={styles.safetyItem}>
-                <span className={styles.safetyIcon}>✓</span>
-                <div>
-                  <h4>{t.parentalConsentTitle}</h4>
-                  <p>{t.parentalConsentDesc}</p>
-                </div>
-              </div>
-              <div className={styles.safetyItem}>
-                <span className={styles.safetyIcon}>✓</span>
-                <div>
-                  <h4>{t.privateS3Title}</h4>
-                  <p>{t.privateS3Desc}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className={`${styles.card} ${styles.fullWidth}`}>
+          <div className={`${styles.card} ${styles.librarySection}`}>
             <h2 className={styles.cardTitle}>{t.myLibraryTitle}</h2>
             {libraryLoading && <p className={styles.libraryState}>{t.loading}</p>}
             {libraryError && <p className={styles.libraryError}>{libraryError}</p>}
@@ -253,7 +260,7 @@ export default function DashboardPage() {
                 <span className={styles.emptyIcon}>📚</span>
                 <h3>{t.noBooksYet}</h3>
                 <p>{t.noBooksDesc}</p>
-                <button className={styles.emptyCta} onClick={() => router.push("/generate")}>
+                <button className={`${btn.btnPrimary} ${styles.emptyCta}`} onClick={() => router.push("/generate")}>
                   {t.getFirstBook}
                 </button>
               </div>
@@ -280,7 +287,7 @@ export default function DashboardPage() {
                         <p>{book.book_pages.length} {t.pagesCount}</p>
                         <button
                           type="button"
-                          className={styles.libraryReadButton}
+                          className={`${btn.btnPrimary} ${styles.libraryReadButton}`}
                           onClick={() => router.push(`/books/${book.id}`)}
                         >
                           {t.readBook}

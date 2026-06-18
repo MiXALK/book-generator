@@ -32,6 +32,7 @@ export default function BookPageView({ page }: BookPageViewProps) {
         )}
       </div>
       <div className={styles.textZone}>
+        <div className={styles.textZoneBackdrop} aria-hidden="true" />
         <p className={styles.pageText}>{page.text}</p>
       </div>
     </article>

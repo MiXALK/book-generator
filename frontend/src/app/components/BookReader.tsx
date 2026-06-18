@@ -1,15 +1,32 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type TouchEvent } from "react";
-import BookPageView from "@/app/components/BookPageView";
+import { useMemo, useState, useSyncExternalStore } from "react";
+import BookFlipStage from "@/app/components/BookFlipStage";
 import { BookGeneration } from "@/app/types/book";
 import styles from "./bookReader.module.css";
 
+const HINT_STORAGE_KEY = "storysprout-reader-hint-dismissed";
+
+const hintListeners = new Set<() => void>();
+
+function subscribeHint(callback: () => void) {
+  hintListeners.add(callback);
+  return () => hintListeners.delete(callback);
+}
+
+function getHintDismissed() {
+  return localStorage.getItem(HINT_STORAGE_KEY) === "1";
+}
+
+function notifyHintListeners() {
+  hintListeners.forEach((listener) => listener());
+}
+
 interface BookReaderLabels {
-  previousPage: string;
-  nextPage: string;
-  pageIndicator: string;
   closeReader: string;
+  turnPageHint: string;
+  dismissHint: string;
+  pageAnnouncement: string;
 }
 
 interface BookReaderProps {
@@ -24,115 +41,60 @@ export default function BookReader({ generation, labels, onClose }: BookReaderPr
     [generation.book_pages],
   );
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [transitionDirection, setTransitionDirection] = useState<"forward" | "backward" | "none">("none");
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const hintDismissed = useSyncExternalStore(subscribeHint, getHintDismissed, () => true);
+  const showHint = !hintDismissed;
 
-  const currentPage = pages[currentIndex];
   const totalPages = pages.length;
+  const progress = totalPages > 0 ? ((currentIndex + 1) / totalPages) * 100 : 0;
 
-  const goToPage = useCallback((nextIndex: number, direction: "forward" | "backward") => {
-    if (nextIndex < 0 || nextIndex >= totalPages) {
-      return;
-    }
+  const pageAnnouncement = labels.pageAnnouncement
+    .replace("{current}", String(currentIndex + 1))
+    .replace("{total}", String(totalPages));
 
-    setTransitionDirection(direction);
-    setCurrentIndex(nextIndex);
-  }, [totalPages]);
-
-  const goPrevious = () => goToPage(currentIndex - 1, "backward");
-  const goNext = () => goToPage(currentIndex + 1, "forward");
-
-  useEffect(() => {
-    if (transitionDirection === "none") {
-      return;
-    }
-
-    const timer = window.setTimeout(() => setTransitionDirection("none"), 280);
-
-    return () => window.clearTimeout(timer);
-  }, [transitionDirection, currentIndex]);
-
-  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
-    setTouchStartX(event.changedTouches[0]?.clientX ?? null);
+  const dismissHint = () => {
+    localStorage.setItem(HINT_STORAGE_KEY, "1");
+    notifyHintListeners();
   };
 
-  const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
-    if (touchStartX === null) {
-      return;
-    }
-
-    const touchEndX = event.changedTouches[0]?.clientX ?? touchStartX;
-    const delta = touchEndX - touchStartX;
-
-    if (Math.abs(delta) > 48) {
-      if (delta < 0) {
-        goNext();
-      } else {
-        goPrevious();
-      }
-    }
-
-    setTouchStartX(null);
-  };
-
-  if (!currentPage) {
+  if (totalPages === 0) {
     return null;
   }
 
-  const transitionClass =
-    transitionDirection === "forward"
-      ? styles.pageEnterForward
-      : transitionDirection === "backward"
-        ? styles.pageEnterBackward
-        : "";
-
   return (
     <div className={styles.readerShell}>
-      <header className={styles.readerHeader}>
-        <div>
-          <h1 className={styles.readerTitle}>{generation.book_template?.title ?? generation.child_name}</h1>
-          <p className={styles.readerSubtitle}>
-            {generation.child_name} · {generation.child_goal}
-          </p>
-        </div>
-        <button type="button" className={styles.closeButton} onClick={onClose}>
-          {labels.closeReader}
-        </button>
-      </header>
-
       <div
-        className={styles.readerStage}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+        className={styles.progressBarTrack}
+        role="progressbar"
+        aria-valuenow={currentIndex + 1}
+        aria-valuemin={1}
+        aria-valuemax={totalPages}
+        aria-label={pageAnnouncement}
       >
-        <div key={currentPage.id} className={`${styles.pageFrame} ${transitionClass}`}>
-          <BookPageView page={currentPage} />
-        </div>
+        <span className={styles.progressBarLabel}>
+          {currentIndex + 1}/{totalPages}
+        </span>
+        <div className={styles.progressBarFill} style={{ width: `${progress}%` }} />
       </div>
 
-      <footer className={styles.readerFooter}>
-        <button
-          type="button"
-          className={styles.navButton}
-          onClick={goPrevious}
-          disabled={currentIndex === 0}
-        >
-          {labels.previousPage}
-        </button>
-        <span className={styles.pageIndicator}>
-          {labels.pageIndicator
-            .replace("{current}", String(currentIndex + 1))
-            .replace("{total}", String(totalPages))}
-        </span>
-        <button
-          type="button"
-          className={styles.navButton}
-          onClick={goNext}
-          disabled={currentIndex >= totalPages - 1}
-        >
-          {labels.nextPage}
-        </button>
-      </footer>
+      <div className={styles.readerMain}>
+        <BookFlipStage
+          pages={pages}
+          currentIndex={currentIndex}
+          onPageChange={setCurrentIndex}
+          pageAnnouncement={pageAnnouncement}
+          onClose={onClose}
+          closeLabel={labels.closeReader}
+        />
+
+        {showHint && (
+          <p className={styles.turnHint}>
+            {labels.turnPageHint}{" "}
+            <button type="button" className={styles.turnHintDismiss} onClick={dismissHint}>
+              {labels.dismissHint}
+            </button>
+          </p>
+        )}
+      </div>
     </div>
   );
 }

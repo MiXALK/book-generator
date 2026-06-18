@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import BookReader from "@/app/components/BookReader";
+import btn from "@/app/components/storyButton.module.css";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
 import { BookGeneration } from "@/app/types/book";
@@ -72,7 +73,7 @@ export default function BookReaderPage() {
     return (
       <div className={styles.state}>
         <p>{error || t.bookLoadError}</p>
-        <button type="button" onClick={() => router.push("/dashboard")}>
+        <button type="button" className={btn.btnPrimary} onClick={() => router.push("/dashboard")}>
           {t.backToDashboard}
         </button>
       </div>
@@ -83,10 +84,10 @@ export default function BookReaderPage() {
     <BookReader
       generation={generation}
       labels={{
-        previousPage: t.previousPage,
-        nextPage: t.nextPage,
-        pageIndicator: t.pageIndicator,
         closeReader: t.closeReader,
+        turnPageHint: t.turnPageHint,
+        dismissHint: t.dismissHint,
+        pageAnnouncement: t.pageAnnouncement,
       }}
       onClose={() => router.push("/dashboard")}
     />

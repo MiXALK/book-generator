@@ -1,55 +1,95 @@
-.selectWrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background-color: var(--background, #fafafa);
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 9999px;
-  padding: 0.35rem 0.75rem;
+.root {
   position: relative;
-  transition: border-color 0.2s;
+  z-index: 10;
 }
 
-.selectWrapper:hover {
-  border-color: var(--primary-color, #4f46e5);
+.trigger {
+  gap: 0.4rem;
 }
 
-.globeIcon {
-  font-size: 0.9rem;
+.trigger[aria-expanded="true"] {
+  border-color: var(--color-mustard);
+  box-shadow: 0 3px 10px rgba(61, 46, 32, 0.1);
+}
+
+.triggerFlag,
+.optionFlag {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.triggerLabel {
+  white-space: nowrap;
+}
+
+.chevron {
+  margin-left: 0.1rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  transition: transform 0.2s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 200;
+  min-width: 100%;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background-color: var(--color-surface-raised);
+  border: 1.5px solid var(--color-olive);
+  border-radius: var(--radius-btn);
+  box-shadow: var(--shadow-lift);
+}
+
+.option {
   display: flex;
   align-items: center;
-}
-
-.selectInput {
-  background-color: transparent;
-  color: var(--text-primary, #1e293b);
-  border: none;
-  font-size: 0.85rem;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  font-family: inherit;
+  font-size: 0.875rem;
   font-weight: 600;
+  color: var(--color-olive-deep);
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--radius-btn) - 2px);
   cursor: pointer;
-  outline: none;
-  padding-right: 0.25rem;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
+  text-align: left;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.selectInput option {
-  color: #1e293b;
-  background-color: #ffffff;
+.option:hover {
+  background-color: var(--color-olive-soft);
+  color: var(--color-olive-deep);
 }
 
-/* Fallback default variables just in case */
+.optionSelected {
+  background-color: var(--color-olive-soft);
+  color: var(--color-olive-deep);
+  box-shadow: inset 3px 0 0 var(--color-mustard);
+}
+
 @media (prefers-color-scheme: dark) {
-  .selectWrapper {
-    background-color: #1e293b;
-    border-color: #334155;
+  .menu {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
   }
-  .selectInput {
-    color: #f1f5f9;
+
+  .option {
+    color: var(--color-cream-text);
   }
-  .selectInput option {
-    color: #f1f5f9;
-    background-color: #1e293b;
+
+  .option:hover,
+  .optionSelected {
+    background-color: var(--color-olive-soft);
+    color: var(--color-cream-text);
   }
 }

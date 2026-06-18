@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
+import btn from "@/app/components/storyButton.module.css";
 import { BookGeneration } from "@/app/types/book";
 import styles from "./status.module.css";
 
@@ -143,11 +144,11 @@ export default function BookStatusPage() {
       <div className={styles.state}>
         <p className={styles.error}>{error}</p>
         {canRetryIllustrations && (
-          <button type="button" onClick={retryIllustrations} disabled={retrying}>
+          <button type="button" className={btn.btnPrimary} onClick={retryIllustrations} disabled={retrying}>
             {retrying ? t.generating : t.retryIllustrations}
           </button>
         )}
-        <button type="button" onClick={() => router.push("/dashboard")}>
+        <button type="button" className={btn.btnPrimary} onClick={() => router.push("/dashboard")}>
           {t.backToDashboard}
         </button>
       </div>

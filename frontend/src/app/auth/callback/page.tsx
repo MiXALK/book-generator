@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
+import btn from "@/app/components/storyButton.module.css";
 import styles from "./callback.module.css";
 
 function CallbackHandler() {
@@ -95,7 +96,7 @@ function CallbackHandler() {
             <div className={styles.errorIcon}>✕</div>
             <h2>Sign-In Failed</h2>
             <p className={styles.errorText}>{errorMessage}</p>
-            <button className={styles.retryButton} onClick={() => router.push("/")}>
+            <button className={`${btn.btnPrimary} ${styles.retryButton}`} onClick={() => router.push("/")}>
               Return to Landing Page
             </button>
           </div>

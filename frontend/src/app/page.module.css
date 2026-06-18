@@ -1,57 +1,47 @@
 .page {
-  --background: #fafafa;
-  --foreground: #ffffff;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --border-color: #e2e8f0;
-  
-  --primary-color: #4f46e5;
-  --primary-hover: #4338ca;
-  --success-color: #10b981;
-  --error-color: #ef4444;
-  --warning-color: #f59e0b;
-
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: var(--background);
-  color: var(--text-primary);
+  background:
+    radial-gradient(ellipse 80% 50% at 12% 8%, rgba(237, 227, 207, 0.65), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 88% 92%, rgba(212, 196, 168, 0.55), transparent 50%),
+    radial-gradient(circle at 50% 40%, rgba(213, 232, 226, 0.22), transparent 42%),
+    linear-gradient(
+      168deg,
+      var(--color-parchment-light) 0%,
+      var(--color-parchment-mid) 42%,
+      var(--color-parchment-dark) 100%
+    );
+  color: var(--color-text);
 }
 
 .header {
+  position: relative;
+  z-index: 100;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  background-color: var(--foreground);
-  border-bottom: 1px solid var(--border-color);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background-color: var(--color-surface-raised);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-chrome-border);
+  box-shadow: var(--shadow-soft);
+  color: var(--color-ink);
 }
 
 .logoText {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--color-ink);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.signInButton {
-  background-color: transparent;
-  color: var(--primary-color);
-  border: 1px solid var(--primary-color);
-  padding: 0.5rem 1.25rem;
-  border-radius: 9999px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.signInButton:hover {
-  background-color: var(--primary-color);
-  color: var(--foreground);
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .main {
@@ -77,94 +67,90 @@
 
 .title {
   font-size: 2.75rem;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.2;
-  letter-spacing: -0.025em;
-  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  color: var(--color-text);
 }
 
 .subtitle {
   font-size: 1.25rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
+  line-height: 1.65;
+  color: var(--color-text-muted);
   max-width: 650px;
 }
 
 .features {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
+  gap: 1.75rem;
   width: 100%;
   margin-top: 2rem;
   text-align: left;
 }
 
 .featureCard {
-  background-color: var(--foreground);
-  border: 1px solid var(--border-color);
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
   padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+  border-color: #b8a480;
+}
+
+.featureCard:nth-child(1) .featureIcon {
+  background-color: var(--color-accent-warm);
+}
+
+.featureCard:nth-child(2) .featureIcon {
+  background-color: var(--color-accent-soft);
 }
 
 .featureIcon {
   font-size: 2rem;
-  background-color: #e0e7ff;
+  background-color: var(--color-accent-soft);
   width: 3.5rem;
   height: 3.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 0.75rem;
+  border: 1px solid rgba(196, 179, 146, 0.45);
 }
 
 .featureCard h3 {
   font-size: 1.25rem;
   font-weight: 600;
+  color: var(--color-text);
 }
 
 .featureCard p {
-  color: var(--text-secondary);
+  color: var(--color-text-muted);
   font-size: 1rem;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .ctaGroup {
   margin-top: 1.5rem;
 }
 
-.primaryCta {
-  background-color: var(--primary-color);
-  color: var(--foreground);
-  border: none;
-  padding: 0.875rem 2.5rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-  border-radius: 9999px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
-}
-
-.primaryCta:hover {
-  background-color: var(--primary-hover);
-}
-
-.primaryCta:active {
-  transform: scale(0.98);
-}
-
 .statusWidget {
-  background-color: var(--foreground);
-  border: 1px solid var(--border-color);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   padding: 1.5rem 2rem;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-lg);
   width: 100%;
   max-width: 500px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  box-shadow: var(--shadow-soft);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -173,7 +159,7 @@
 .widgetTitle {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--color-text-muted);
 }
 
 .statusRow {
@@ -181,66 +167,106 @@
   justify-content: space-between;
   align-items: center;
   font-weight: 500;
+  color: var(--color-text);
 }
 
 .statusBadge {
   padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   font-size: 0.875rem;
   font-weight: 600;
 }
 
 .statusLoading {
-  background-color: #fef3c7;
-  color: #d97706;
+  background-color: #f5e8cc;
+  color: #8a6830;
+  border: 1px solid #e8d4a8;
 }
 
 .statusConnected {
-  background-color: #d1fae5;
-  color: var(--success-color);
+  background-color: #dcebe3;
+  color: #3d6b5c;
+  border: 1px solid #b8d4c8;
 }
 
 .statusFailed {
-  background-color: #fee2e2;
-  color: var(--error-color);
+  background-color: #f2ddd8;
+  color: #8f3d30;
+  border: 1px solid #e4b8b0;
 }
 
 .footer {
   text-align: center;
   padding: 2rem;
-  border-top: 1px solid var(--border-color);
-  background-color: var(--foreground);
-  color: var(--text-secondary);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-parchment-dark);
+  color: #5c4e42;
   font-size: 0.875rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    background:
+      radial-gradient(ellipse 80% 50% at 12% 8%, rgba(74, 63, 52, 0.7), transparent 55%),
+      radial-gradient(ellipse 70% 45% at 88% 92%, rgba(61, 50, 40, 0.65), transparent 50%),
+      linear-gradient(
+        168deg,
+        var(--color-parchment-light) 0%,
+        var(--color-parchment-mid) 42%,
+        #2e2520 100%
+      );
+  }
+
+  .header {
+    background-color: var(--color-surface);
+  }
+
+  .logoText {
+    color: var(--color-ink);
+  }
+
+  .featureCard:hover {
+    border-color: var(--color-border);
+  }
+
+  .featureIcon {
+    border-color: rgba(107, 92, 78, 0.55);
+  }
+
+  .statusLoading {
+    background-color: #4a4030;
+    color: #d4a868;
+    border-color: #6b5c40;
+  }
+
+  .statusConnected {
+    background-color: #2d4a44;
+    color: #8fbaa8;
+    border-color: #3d6b5c;
+  }
+
+  .statusFailed {
+    background-color: #4a3530;
+    color: #d4846a;
+    border-color: #6b4540;
+  }
+
+  .footer {
+    background-color: #2e2520;
+    color: #c4b5a4;
+  }
 }
 
 @media (max-width: 768px) {
   .title {
     font-size: 2rem;
   }
-  
+
   .subtitle {
     font-size: 1rem;
   }
-  
+
   .main {
     padding: 2rem 1rem;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .page {
-    --background: #0f172a;
-    --foreground: #1e293b;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --border-color: #334155;
-    
-    --primary-color: #818cf8;
-    --primary-hover: #6366f1;
-  }
-  
-  .featureIcon {
-    background-color: #312e81;
   }
 }

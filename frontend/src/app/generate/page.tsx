@@ -4,6 +4,7 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
+import btn from "@/app/components/storyButton.module.css";
 import styles from "./generate.module.css";
 
 interface CatalogGoal {
@@ -294,7 +295,7 @@ export default function GeneratePage() {
         <button
           type="submit"
           disabled={fetching || submitting || uploadingPhoto || selectedGoalLocked}
-          className={styles.submit}
+          className={`${btn.btnPrimary} ${styles.submit}`}
         >
           {submitting ? t.generating : t.generateButton}
         </button>

@@ -1,12 +1,90 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Parchment — shared with book reader text substrate */
+  --color-parchment-light: #ede3cf;
+  --color-parchment-mid: #e2d6bc;
+  --color-parchment-dark: #d4c4a8;
+  --color-ink: #3d2e1f;
+
+  --color-bg: var(--color-parchment-mid);
+  --color-surface: #f7f0e4;
+  --color-surface-raised: #faf6ef;
+  --color-text: var(--color-ink);
+  --color-text-muted: #756458;
+  --color-border: #c4b392;
+  --color-primary: #b85c42;
+  --color-primary-hover: #a04f38;
+  --color-accent: #4a8778;
+  --color-accent-soft: #d5e8e2;
+  --color-accent-warm: #f0ddd4;
+  --color-olive: #6b7d5e;
+  --color-olive-deep: #5a6b50;
+  --color-olive-soft: #e8ede4;
+  --color-mustard: #d4a017;
+  --color-mustard-soft: #f5e8c4;
+  --color-success: #5a8572;
+  --color-error: #b54a3a;
+  --color-warning: #c4923f;
+  --shadow-soft: 0 4px 20px rgba(61, 46, 32, 0.1), 0 1px 3px rgba(61, 46, 32, 0.06);
+  --shadow-lift: 0 8px 28px rgba(61, 46, 32, 0.12), 0 2px 6px rgba(61, 46, 32, 0.06);
+  --radius-lg: 16px;
+  --radius-btn: 8px;
+  --radius-pill: 999px;
+  --color-cream-text: #f7f0e4;
+
+  --color-chrome-bg: rgba(247, 240, 228, 0.94);
+  --color-chrome-text: var(--color-ink);
+  --color-chrome-text-muted: #756458;
+  --color-chrome-border: #c9b896;
+
+  /* Lora — loaded in layout.tsx via next/font/google */
+  --font-body: var(--font-lora), serif;
+
+  /* Legacy aliases for gradual module migration */
+  --background: var(--color-bg);
+  --foreground: var(--color-surface);
+  --text-primary: var(--color-text);
+  --text-secondary: var(--color-text-muted);
+  --border-color: var(--color-border);
+  --primary-color: var(--color-primary);
+  --primary-hover: var(--color-primary-hover);
+  --success-color: var(--color-success);
+  --error-color: var(--color-error);
+  --warning-color: var(--color-warning);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-parchment-light: #4a3f34;
+    --color-parchment-mid: #3d3228;
+    --color-parchment-dark: #524840;
+    --color-ink: #f0e6d4;
+
+    --color-bg: var(--color-parchment-mid);
+    --color-surface: #4a3f34;
+    --color-surface-raised: #524840;
+    --color-text: var(--color-ink);
+    --color-text-muted: #c4b5a4;
+    --color-border: #6b5c4e;
+    --color-primary: #d4846a;
+    --color-primary-hover: #e09880;
+    --color-accent: #6aab9a;
+    --color-accent-soft: #2d4a44;
+    --color-accent-warm: #5c4a42;
+    --color-olive: #8a9b7c;
+    --color-olive-deep: #6b7d5e;
+    --color-olive-soft: #3d4a38;
+    --color-mustard: #d4a017;
+    --color-mustard-soft: #4a4030;
+    --color-success: #8fbaa8;
+    --color-error: #d46a58;
+    --color-warning: #d4a868;
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.28), 0 1px 3px rgba(0, 0, 0, 0.18);
+    --shadow-lift: 0 8px 28px rgba(0, 0, 0, 0.32), 0 2px 6px rgba(0, 0, 0, 0.2);
+
+    --color-chrome-bg: rgba(74, 63, 52, 0.94);
+    --color-chrome-text: var(--color-ink);
+    --color-chrome-text-muted: #c4b5a4;
+    --color-chrome-border: #6b5c4e;
   }
 }
 
@@ -24,9 +102,9 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

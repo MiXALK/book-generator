@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
+import btn from "@/app/components/storyButton.module.css";
 import styles from "./success.module.css";
 
 export default function BillingSuccessPage() {
@@ -37,7 +38,7 @@ export default function BillingSuccessPage() {
     <main className={styles.page}>
       <h1>{t.billingSuccessTitle}</h1>
       <p>{t.billingSuccessMessage}</p>
-      <button type="button" className={styles.button} onClick={() => router.push("/dashboard")}>
+      <button type="button" className={btn.btnPrimary} onClick={() => router.push("/dashboard")}>
         {t.billingSuccessContinue}
       </button>
     </main>

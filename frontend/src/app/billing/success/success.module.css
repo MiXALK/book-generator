@@ -3,6 +3,7 @@
   margin: 0 auto;
   padding: 48px 20px;
   text-align: center;
+  color: var(--color-text);
 }
 
 .page h1 {
@@ -11,15 +12,5 @@
 
 .page p {
   margin: 0 0 24px;
-  color: #5f6b85;
-}
-
-.button {
-  border: none;
-  border-radius: 10px;
-  background: #3059f5;
-  color: #ffffff;
-  font-weight: 600;
-  padding: 12px 20px;
-  cursor: pointer;
+  color: var(--color-text-muted);
 }

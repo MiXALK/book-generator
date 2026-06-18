@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
 import LanguageSelect from "@/app/components/LanguageSelect";
+import btn from "@/app/components/storyButton.module.css";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -65,15 +66,15 @@ export default function Home() {
         <div className={styles.navActions}>
           <LanguageSelect />
           {loading ? (
-            <button className={styles.signInButton} disabled>
+            <button className={btn.btnGhost} disabled>
               {t.loading}
             </button>
           ) : user ? (
-            <button className={styles.signInButton} onClick={() => router.push("/dashboard")}>
+            <button className={btn.btnGhost} onClick={() => router.push("/dashboard")}>
               {t.goToDashboard}
             </button>
           ) : (
-            <button className={styles.signInButton} onClick={handleSignIn} disabled={authLoading}>
+            <button className={btn.btnGhost} onClick={handleSignIn} disabled={authLoading}>
               {authLoading ? t.redirecting : t.signInWithGoogle}
             </button>
           )}
@@ -104,15 +105,15 @@ export default function Home() {
 
           <div className={styles.ctaGroup}>
             {loading ? (
-              <button className={styles.primaryCta} disabled>
+              <button className={`${btn.btnPrimary} ${btn.btnLarge}`} disabled>
                 {t.checkingSession}
               </button>
             ) : user ? (
-              <button className={styles.primaryCta} onClick={() => router.push("/dashboard")}>
+              <button className={`${btn.btnPrimary} ${btn.btnLarge}`} onClick={() => router.push("/dashboard")}>
                 {t.goToDashboard}
               </button>
             ) : (
-              <button className={styles.primaryCta} onClick={handleSignIn} disabled={authLoading}>
+              <button className={`${btn.btnPrimary} ${btn.btnLarge}`} onClick={handleSignIn} disabled={authLoading}>
                 {authLoading ? t.preparingGoogle : t.getStartedFree}
               </button>
             )}
