@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\BookGeneration;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -36,11 +37,12 @@ readonly class BookIllustrationStorageService
 
     public function storeGeneratedImage(int $generationId, int $pageNumber, string $binary): ?string
     {
-        $path = "books/{$generationId}/page-{$pageNumber}.png";
+        $extension = $this->extensionForBinary($binary);
+        $path = "books/{$generationId}/page-{$pageNumber}.{$extension}";
 
         try {
             Storage::disk('s3')->put($path, $binary, [
-                'ContentType' => 'image/png',
+                'ContentType' => $this->resolveContentType($binary, $path),
                 'visibility' => 'private',
             ]);
 
@@ -85,19 +87,41 @@ readonly class BookIllustrationStorageService
             return null;
         }
 
-        try {
-            return Storage::disk('s3')->temporaryUrl($path, now()->addDay());
-        } catch (Throwable $exception) {
-            try {
-                return Storage::disk('s3')->url($path);
-            } catch (Throwable $fallbackException) {
-                Log::warning('Failed to resolve illustration URL', [
-                    'path' => $path,
-                    'message' => $fallbackException->getMessage(),
-                ]);
+        if (preg_match('#^books/(\d+)/page-(\d+)\.[a-z0-9]+$#', $path, $matches) === 1) {
+            return URL::temporarySignedRoute('books.page-image', now()->addDay(), [
+                'id' => (int) $matches[1],
+                'page' => (int) $matches[2],
+            ]);
+        }
 
+        return null;
+    }
+
+    /**
+     * @return array{binary: string, content_type: string}|null
+     */
+    public function readForResponse(string $path): ?array
+    {
+        try {
+            $disk = Storage::disk('s3');
+
+            if (! $disk->exists($path)) {
                 return null;
             }
+
+            $binary = $disk->get($path);
+
+            return [
+                'binary' => $binary,
+                'content_type' => $this->resolveContentType($binary, $path),
+            ];
+        } catch (Throwable $exception) {
+            Log::warning('Failed to read illustration from storage', [
+                'path' => $path,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return null;
         }
     }
 
@@ -150,5 +174,35 @@ SVG;
             'webp' => 'image/webp',
             default => 'image/jpeg',
         };
+    }
+
+    private function extensionForBinary(string $binary): string
+    {
+        if (str_starts_with($binary, "\xFF\xD8\xFF")) {
+            return 'jpg';
+        }
+
+        if (str_starts_with($binary, "\x89PNG\r\n\x1a\n")) {
+            return 'png';
+        }
+
+        return 'jpg';
+    }
+
+    private function resolveContentType(string $binary, string $path): string
+    {
+        if (str_starts_with($binary, "\xFF\xD8\xFF")) {
+            return 'image/jpeg';
+        }
+
+        if (str_starts_with($binary, "\x89PNG\r\n\x1a\n")) {
+            return 'image/png';
+        }
+
+        if (str_ends_with($path, '.svg')) {
+            return 'image/svg+xml';
+        }
+
+        return 'application/octet-stream';
     }
 }

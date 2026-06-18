@@ -3,19 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GenerateBookRequest;
+use App\Models\BookPage;
 use App\Repositories\Contracts\BookGenerationRepositoryInterface;
 use App\Repositories\Contracts\BookTemplateRepositoryInterface;
 use App\Services\BookGenerationService;
+use App\Services\BookIllustrationStorageService;
 use App\Services\IllustrationGenerationService;
 use App\Services\SubscriptionAccessService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Symfony\Component\HttpFoundation\Response;
 
 class BookGenerationController extends Controller
 {
     public function __construct(
         private readonly BookGenerationService $generationService,
+        private readonly BookIllustrationStorageService $illustrationStorage,
         private readonly IllustrationGenerationService $illustrationGeneration,
         private readonly BookGenerationRepositoryInterface $bookGenerations,
         private readonly BookTemplateRepositoryInterface $bookTemplates,
@@ -109,6 +113,35 @@ class BookGenerationController extends Controller
         return response()->json([
             'message' => 'Illustration generation restarted.',
             'generation' => $this->generationService->formatForApi($fresh),
+        ]);
+    }
+
+    public function pageImage(int $id, int $page): Response
+    {
+        $bookPage = BookPage::query()
+            ->where('book_generation_id', $id)
+            ->where('page_number', $page)
+            ->first();
+
+        if ($bookPage === null) {
+            abort(404);
+        }
+
+        $path = $bookPage->getAttributes()['image_url'] ?? null;
+
+        if (! is_string($path) || $path === '') {
+            abort(404);
+        }
+
+        $payload = $this->illustrationStorage->readForResponse($path);
+
+        if ($payload === null) {
+            abort(404);
+        }
+
+        return response($payload['binary'], 200, [
+            'Content-Type' => $payload['content_type'],
+            'Cache-Control' => 'private, max-age=3600',
         ]);
     }
 }

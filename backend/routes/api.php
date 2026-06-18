@@ -19,6 +19,12 @@ Route::get('/auth/google/url', [AuthController::class, 'getGoogleUrl']);
 Route::post('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 Route::post('/webhooks/stripe', [StripeWebhookController::class, 'handle']);
 
+Route::get('/books/{id}/pages/{page}/image', [BookGenerationController::class, 'pageImage'])
+    ->whereNumber('id')
+    ->whereNumber('page')
+    ->middleware('signed')
+    ->name('books.page-image');
+
 // Protected endpoints
 Route::middleware('auth.api')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
