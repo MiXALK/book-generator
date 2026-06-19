@@ -159,6 +159,18 @@ Photo upload validation limits are defined in `config/services.php` under `book_
 
 Character reuse: one `GeneratedCharacter` per `ChildProfile` (unique per `user_id` + `child_name`). New uploads refresh the linked photo reference but keep the existing style bible for visual consistency across books.
 
+## Privacy And Data Deletion
+
+Child-related data is minimized to generation inputs (name, age, goal) and optional paid-tier photos:
+
+- Service: `backend/app/Services/UserDataDeletionService.php` (book/account deletion, S3 purge).
+- Account deletion: `DELETE /api/user` with `{ "confirm": true }`; cancels active Stripe subscriptions when configured.
+- Book deletion: `DELETE /api/books/{id}` removes DB records and S3 assets for the generation.
+- Signed illustration URLs expire after `config('services.privacy.signed_url_ttl_minutes')` (default 60 minutes).
+- Retention cleanup: `php artisan privacy:purge-expired` (scheduled daily) deletes pending photos older than 24 hours and failed generations older than 7 days.
+- Parental consent is required at upload and re-checked before illustration processing.
+- Logs avoid child PII and private storage paths.
+
 ## Documentation Rules
 
 - Update this file when adding or changing conventions, dependencies, folder

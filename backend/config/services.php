@@ -91,4 +91,10 @@ return [
         'max_height' => 4096,
         'allowed_mimes' => ['image/jpeg', 'image/png', 'image/webp'],
     ],
+
+    'privacy' => [
+        'signed_url_ttl_minutes' => 60,
+        'pending_photo_retention_hours' => 24,
+        'failed_generation_retention_days' => 7,
+    ],
 ];

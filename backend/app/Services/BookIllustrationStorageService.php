@@ -26,10 +26,39 @@ readonly class BookIllustrationStorageService
 
     public function deleteUploadedPhoto(string $path): void
     {
+        $this->deleteObject($path);
+    }
+
+    public function deleteObject(string $path): void
+    {
         try {
             Storage::disk('s3')->delete($path);
         } catch (Throwable $exception) {
-            Log::warning('Failed to delete uploaded child photo', [
+            Log::warning('Failed to delete storage object', [
+                'message' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    public function deleteGenerationPrefix(int $generationId): void
+    {
+        try {
+            Storage::disk('s3')->deleteDirectory("books/{$generationId}");
+        } catch (Throwable $exception) {
+            Log::warning('Failed to delete generation storage prefix', [
+                'generation_id' => $generationId,
+                'message' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    public function deleteUserPrivatePrefix(int $userId): void
+    {
+        try {
+            Storage::disk('s3')->deleteDirectory("private/users/{$userId}");
+        } catch (Throwable $exception) {
+            Log::warning('Failed to delete user private storage prefix', [
+                'user_id' => $userId,
                 'message' => $exception->getMessage(),
             ]);
         }
@@ -66,7 +95,10 @@ readonly class BookIllustrationStorageService
             Storage::disk('s3')->put(
                 $path,
                 $this->svgForCategory($category, $pageNumber),
-                ['ContentType' => 'image/svg+xml'],
+                [
+                    'ContentType' => 'image/svg+xml',
+                    'visibility' => 'private',
+                ],
             );
 
             return $path;
@@ -88,7 +120,9 @@ readonly class BookIllustrationStorageService
         }
 
         if (preg_match('#^books/(\d+)/page-(\d+)\.[a-z0-9]+$#', $path, $matches) === 1) {
-            return URL::temporarySignedRoute('books.page-image', now()->addDay(), [
+            $ttlMinutes = (int) config('services.privacy.signed_url_ttl_minutes', 60);
+
+            return URL::temporarySignedRoute('books.page-image', now()->addMinutes($ttlMinutes), [
                 'id' => (int) $matches[1],
                 'page' => (int) $matches[2],
             ]);
@@ -117,12 +151,16 @@ readonly class BookIllustrationStorageService
             ];
         } catch (Throwable $exception) {
             Log::warning('Failed to read illustration from storage', [
-                'path' => $path,
                 'message' => $exception->getMessage(),
             ]);
 
             return null;
         }
+    }
+
+    public function signedUrlTtlSeconds(): int
+    {
+        return (int) config('services.privacy.signed_url_ttl_minutes', 60) * 60;
     }
 
     public function resolveGenerationImageUrls(BookGeneration $generation): void

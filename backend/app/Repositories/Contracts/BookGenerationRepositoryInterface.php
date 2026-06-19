@@ -26,4 +26,16 @@ interface BookGenerationRepositoryInterface
     public function listForUser(int $userId): Collection;
 
     public function findForUserById(int $userId, int $generationId): ?BookGeneration;
+
+    public function delete(BookGeneration $generation): void;
+
+    /**
+     * @return list<string>
+     */
+    public function listImagePathsForGeneration(int $generationId): array;
+
+    /**
+     * @return Collection<int, BookGeneration>
+     */
+    public function listFailedOlderThan(\DateTimeInterface $cutoff): Collection;
 }

@@ -19,6 +19,8 @@ export default function DashboardPage() {
   const [libraryLoading, setLibraryLoading] = useState(true);
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [billingLoading, setBillingLoading] = useState(false);
+  const [deletingBookId, setDeletingBookId] = useState<number | null>(null);
+  const [accountDeleting, setAccountDeleting] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -139,6 +141,65 @@ export default function DashboardPage() {
     }
   };
 
+  const deleteBook = async (bookId: number) => {
+    if (!token || !window.confirm(t.deleteBookConfirm)) {
+      return;
+    }
+
+    setDeletingBookId(bookId);
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/books/${bookId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || t.deleteBookError);
+      }
+
+      setBooks((current) => current.filter((book) => book.id !== bookId));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t.deleteBookError;
+      alert(message);
+    } finally {
+      setDeletingBookId(null);
+    }
+  };
+
+  const deleteAccount = async () => {
+    if (!token || !window.confirm(t.deleteAccountConfirm)) {
+      return;
+    }
+
+    setAccountDeleting(true);
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/user`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ confirm: true }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || t.deleteAccountError);
+      }
+
+      await logout();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t.deleteAccountError;
+      alert(message);
+      setAccountDeleting(false);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -249,6 +310,19 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+
+            <div className={`${styles.card} ${styles.dangerCard}`}>
+              <h2 className={styles.cardTitle}>{t.deleteAccountTitle}</h2>
+              <p className={styles.dangerDesc}>{t.deleteAccountDesc}</p>
+              <button
+                type="button"
+                className={`${btn.btnGhost} ${styles.dangerButton}`}
+                onClick={deleteAccount}
+                disabled={accountDeleting}
+              >
+                {accountDeleting ? t.deleting : t.deleteAccountButton}
+              </button>
+            </div>
           </div>
 
           <div className={`${styles.card} ${styles.librarySection}`}>
@@ -285,13 +359,23 @@ export default function DashboardPage() {
                         <p>{book.child_name} · {book.child_goal}</p>
                         <p>{t.createdAt}: {createdLabel}</p>
                         <p>{book.book_pages.length} {t.pagesCount}</p>
-                        <button
-                          type="button"
-                          className={`${btn.btnPrimary} ${styles.libraryReadButton}`}
-                          onClick={() => router.push(`/books/${book.id}`)}
-                        >
-                          {t.readBook}
-                        </button>
+                        <div className={styles.libraryActions}>
+                          <button
+                            type="button"
+                            className={`${btn.btnPrimary} ${styles.libraryReadButton}`}
+                            onClick={() => router.push(`/books/${book.id}`)}
+                          >
+                            {t.readBook}
+                          </button>
+                          <button
+                            type="button"
+                            className={`${btn.btnGhost} ${styles.libraryDeleteButton}`}
+                            onClick={() => deleteBook(book.id)}
+                            disabled={deletingBookId === book.id}
+                          >
+                            {deletingBookId === book.id ? t.deleting : t.deleteBook}
+                          </button>
+                        </div>
                       </div>
                     </article>
                   );

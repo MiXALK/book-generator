@@ -321,10 +321,38 @@
 }
 
 .libraryReadButton {
-  margin-top: 0.5rem;
   align-self: flex-start;
   font-size: 0.9rem;
   padding: 0.5rem 1rem;
+}
+
+.libraryActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.libraryDeleteButton {
+  font-size: 0.85rem;
+  padding: 0.5rem 0.9rem;
+  color: var(--color-error);
+}
+
+.dangerCard {
+  border-color: rgba(185, 28, 28, 0.2);
+}
+
+.dangerDesc {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.dangerButton {
+  color: var(--color-error);
+  border-color: rgba(185, 28, 28, 0.35);
 }
 
 .safetyContent {

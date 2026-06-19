@@ -4,6 +4,7 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\UploadedPhoto;
 use App\Repositories\Contracts\UploadedPhotoRepositoryInterface;
+use Illuminate\Support\Collection;
 
 class EloquentUploadedPhotoRepository implements UploadedPhotoRepositoryInterface
 {
@@ -42,5 +43,20 @@ class EloquentUploadedPhotoRepository implements UploadedPhotoRepositoryInterfac
     public function markDeleted(UploadedPhoto $photo): void
     {
         $photo->update(['status' => 'deleted']);
+    }
+
+    public function listPendingOlderThan(\DateTimeInterface $cutoff): Collection
+    {
+        return UploadedPhoto::query()
+            ->where('status', 'pending')
+            ->where('created_at', '<', $cutoff)
+            ->get();
+    }
+
+    public function listForUser(int $userId): Collection
+    {
+        return UploadedPhoto::query()
+            ->where('user_id', $userId)
+            ->get();
     }
 }

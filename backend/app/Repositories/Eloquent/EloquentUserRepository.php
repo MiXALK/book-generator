@@ -99,4 +99,9 @@ class EloquentUserRepository implements UserRepositoryInterface
 
         return $user;
     }
+
+    public function delete(User $user): void
+    {
+        $user->delete();
+    }
 }
