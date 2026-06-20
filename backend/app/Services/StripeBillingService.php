@@ -9,7 +9,9 @@ use Stripe\Checkout\Session;
 use Stripe\Customer;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Stripe;
+use Stripe\Subscription;
 use Stripe\Webhook;
+use Throwable;
 use UnexpectedValueException;
 
 readonly class StripeBillingService
@@ -63,6 +65,29 @@ readonly class StripeBillingService
         ]);
 
         return $session->url;
+    }
+
+    public function cancelSubscriptionIfActive(User $user): void
+    {
+        if (! $this->isConfigured()) {
+            return;
+        }
+
+        $subscriptionId = $user->stripe_subscription_id;
+
+        if ($subscriptionId === null || $subscriptionId === '') {
+            return;
+        }
+
+        $this->bootstrapStripe();
+
+        try {
+            Subscription::cancel($subscriptionId);
+        } catch (Throwable $exception) {
+            Log::warning('Failed to cancel Stripe subscription during account deletion', [
+                'message' => $exception->getMessage(),
+            ]);
+        }
     }
 
     public function handleWebhook(string $payload, ?string $signatureHeader): void

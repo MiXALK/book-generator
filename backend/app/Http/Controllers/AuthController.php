@@ -2,14 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DeleteAccountRequest;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Services\UserDataDeletionService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    public function __construct(private readonly UserRepositoryInterface $users) {}
+    public function __construct(
+        private readonly UserRepositoryInterface $users,
+        private readonly UserDataDeletionService $dataDeletion,
+    ) {}
 
     /**
      * Get the Google Auth URL.
@@ -202,6 +208,18 @@ class AuthController extends Controller
             'success' => true,
             'language' => $user->language,
             'message' => 'Language preference updated successfully.',
+        ]);
+    }
+
+    public function destroy(DeleteAccountRequest $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $this->users->clearApiToken($user);
+        $this->dataDeletion->deleteAccount($user);
+
+        return response()->json([
+            'message' => 'Account and associated data deleted successfully.',
         ]);
     }
 }

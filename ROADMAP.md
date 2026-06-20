@@ -189,13 +189,13 @@ illustrations where the character resembles the child.
 
 Goal: reduce risk when processing child-related data.
 
-- [ ] Minimize collected data: child name, age, goal, and photo only when needed.
-- [ ] Require explicit parental consent before photo processing.
-- [ ] Support account deletion and deletion of photos and generated books.
-- [ ] Keep S3 objects private and use short-lived signed URLs.
-- [ ] Avoid logging personal data or private file URLs.
-- [ ] Add retention cleanup for temporary files and failed generations.
-- [ ] Protect upload endpoints with MIME validation, file size limits, and rate
+- [x] Minimize collected data: child name, age, goal, and photo only when needed.
+- [x] Require explicit parental consent before photo processing.
+- [x] Support account deletion and deletion of photos and generated books.
+- [x] Keep S3 objects private and use short-lived signed URLs.
+- [x] Avoid logging personal data or private file URLs.
+- [x] Add retention cleanup for temporary files and failed generations.
+- [x] Protect upload endpoints with MIME validation, file size limits, and rate
   limits.
 
 Success criteria: users can delete their data, private files are not directly

@@ -89,4 +89,35 @@ class EloquentBookGenerationRepository implements BookGenerationRepositoryInterf
             ->whereKey($generationId)
             ->first();
     }
+
+    public function delete(BookGeneration $generation): void
+    {
+        $generation->delete();
+    }
+
+    public function listImagePathsForGeneration(int $generationId): array
+    {
+        $generation = BookGeneration::query()
+            ->whereKey($generationId)
+            ->with(['bookPages' => fn ($query) => $query->select(['id', 'book_generation_id', 'image_url'])])
+            ->first();
+
+        if ($generation === null) {
+            return [];
+        }
+
+        return $generation->bookPages
+            ->map(fn ($page) => $page->getAttributes()['image_url'] ?? null)
+            ->filter(fn ($path) => is_string($path) && $path !== '')
+            ->values()
+            ->all();
+    }
+
+    public function listFailedOlderThan(\DateTimeInterface $cutoff): Collection
+    {
+        return BookGeneration::query()
+            ->where('status', 'failed')
+            ->where('created_at', '<', $cutoff)
+            ->get();
+    }
 }

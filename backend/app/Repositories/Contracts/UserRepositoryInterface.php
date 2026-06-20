@@ -34,4 +34,6 @@ interface UserRepositoryInterface
         string $subscriptionStatus,
         ?string $stripeSubscriptionId,
     ): User;
+
+    public function delete(User $user): void;
 }

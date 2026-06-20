@@ -261,8 +261,6 @@ class BookGenerationService
 
         if ($story === null) {
             Log::warning('Story text generation returned no story; using fallback text', [
-                'child_age' => $age,
-                'child_goal' => $goal,
                 'story_prompt_id' => $prompt?->id,
             ]);
         }

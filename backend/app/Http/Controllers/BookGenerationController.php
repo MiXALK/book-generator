@@ -10,6 +10,7 @@ use App\Services\BookGenerationService;
 use App\Services\BookIllustrationStorageService;
 use App\Services\IllustrationGenerationService;
 use App\Services\SubscriptionAccessService;
+use App\Services\UserDataDeletionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -24,6 +25,7 @@ class BookGenerationController extends Controller
         private readonly BookGenerationRepositoryInterface $bookGenerations,
         private readonly BookTemplateRepositoryInterface $bookTemplates,
         private readonly SubscriptionAccessService $subscriptionAccess,
+        private readonly UserDataDeletionService $dataDeletion,
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -116,6 +118,21 @@ class BookGenerationController extends Controller
         ]);
     }
 
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $deleted = $this->dataDeletion->deleteBookForUser($request->user(), $id);
+
+        if (! $deleted) {
+            return response()->json([
+                'message' => 'Book not found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Book deleted successfully.',
+        ]);
+    }
+
     public function pageImage(int $id, int $page): Response
     {
         $bookPage = BookPage::query()
@@ -141,7 +158,7 @@ class BookGenerationController extends Controller
 
         return response($payload['binary'], 200, [
             'Content-Type' => $payload['content_type'],
-            'Cache-Control' => 'private, max-age=3600',
+            'Cache-Control' => 'private, max-age='.$this->illustrationStorage->signedUrlTtlSeconds(),
         ]);
     }
 }

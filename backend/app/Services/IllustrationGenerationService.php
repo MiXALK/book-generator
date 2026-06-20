@@ -72,6 +72,12 @@ readonly class IllustrationGenerationService
             return;
         }
 
+        if (! $this->hasPhotoProcessingConsent($generation)) {
+            $this->failGeneration($generation, 'Parental consent is required before photo processing.');
+
+            return;
+        }
+
         try {
             foreach ($generation->bookPages as $page) {
                 if (! $page instanceof BookPage) {
@@ -192,5 +198,19 @@ readonly class IllustrationGenerationService
     {
         $this->bookGenerations->updateIllustrationStatus($generation, 'failed', $message);
         $this->bookGenerations->updateStatus($generation, 'failed');
+    }
+
+    private function hasPhotoProcessingConsent(BookGeneration $generation): bool
+    {
+        if ($generation->uploaded_photo_id === null) {
+            return true;
+        }
+
+        $photo = $this->uploadedPhotos->findForUser(
+            (int) $generation->user_id,
+            (int) $generation->uploaded_photo_id,
+        );
+
+        return $photo !== null && $photo->parental_consent_at !== null;
     }
 }

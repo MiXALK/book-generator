@@ -29,6 +29,7 @@ Route::get('/books/{id}/pages/{page}/image', [BookGenerationController::class, '
 Route::middleware('auth.api')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
     Route::put('/user/language', [AuthController::class, 'updateLanguage']);
+    Route::delete('/user', [AuthController::class, 'destroy']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
     Route::post('/billing/checkout', [BillingController::class, 'checkout']);
@@ -37,6 +38,7 @@ Route::middleware('auth.api')->group(function () {
     Route::get('/templates/catalog', [TemplateController::class, 'catalog']);
     Route::get('/books/history', [BookGenerationController::class, 'index']);
     Route::get('/books/{id}', [BookGenerationController::class, 'show'])->whereNumber('id');
+    Route::delete('/books/{id}', [BookGenerationController::class, 'destroy'])->whereNumber('id');
     Route::post('/books/{id}/retry-illustrations', [BookGenerationController::class, 'retryIllustrations'])->whereNumber('id');
     Route::post('/books/generate', [BookGenerationController::class, 'generate'])
         ->middleware('throttle:books-generate');
