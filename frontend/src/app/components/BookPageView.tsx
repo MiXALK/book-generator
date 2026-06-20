@@ -1,4 +1,5 @@
 import { BookPage } from "@/app/types/book";
+import BookIllustrationImage from "@/app/components/BookIllustrationImage";
 import styles from "./bookReader.module.css";
 
 interface BookPageViewProps {
@@ -26,7 +27,7 @@ export default function BookPageView({ page }: BookPageViewProps) {
     <article className={`${styles.pageCanvas} ${layoutClass(textPosition)}`}>
       <div className={styles.illustrationZone} data-category={category}>
         {page.image_url ? (
-          <img src={page.image_url} alt="" className={styles.illustrationImage} />
+          <BookIllustrationImage src={page.image_url} />
         ) : (
           <div className={styles.illustrationFallback} />
         )}
