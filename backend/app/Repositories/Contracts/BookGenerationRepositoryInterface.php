@@ -15,6 +15,13 @@ interface BookGenerationRepositoryInterface
 
     public function updateIllustrationStatus(BookGeneration $generation, ?string $status, ?string $errorMessage = null): void;
 
+    /**
+     * @param  array<string, int>  $metrics
+     */
+    public function updateLatencyMetrics(BookGeneration $generation, array $metrics): void;
+
+    public function findWithUser(int $generationId): ?BookGeneration;
+
     public function updatePersonalization(BookGeneration $generation, array $attributes): void;
 
     public function findForUserIllustrationRetry(int $userId, int $generationId): ?BookGeneration;

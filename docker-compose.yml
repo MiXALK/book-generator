@@ -39,9 +39,11 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:3000/auth/callback}
+      LOG_STACK: ${LOG_STACK:-structured}
+      OBSERVABILITY_BOOK_READER_URL: ${OBSERVABILITY_BOOK_READER_URL:-http://localhost:3000/books}
     command: sh -c "composer install && php artisan key:generate --force && frankenphp php-server --listen :8000 --root public"
 
-  queue:
+  horizon:
     image: book-generator-backend:local
     working_dir: /app
     volumes:
@@ -51,6 +53,8 @@ services:
       - redis
     environment:
       APP_ENV: ${APP_ENV:-local}
+      APP_URL: ${APP_URL:-http://localhost:8000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       DB_CONNECTION: ${DB_CONNECTION:-pgsql}
       DB_HOST: ${DB_HOST:-postgres}
       DB_PORT: ${DB_PORT:-5432}
@@ -60,9 +64,19 @@ services:
       QUEUE_CONNECTION: ${QUEUE_CONNECTION:-redis}
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
-      REDIS_QUEUE_RETRY_AFTER: ${REDIS_QUEUE_RETRY_AFTER:-3900}
+      REDIS_QUEUE_RETRY_AFTER: ${REDIS_QUEUE_RETRY_AFTER:-11100}
+      LOG_STACK: ${LOG_STACK:-structured}
+      FILESYSTEM_DISK: ${FILESYSTEM_DISK:-s3}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-minio}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-miniosecret}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
+      AWS_BUCKET: ${AWS_BUCKET:-book-generator-local}
+      AWS_ENDPOINT: ${AWS_ENDPOINT:-http://minio:9000}
+      AWS_URL: ${AWS_URL:-http://localhost:9000}
+      AWS_USE_PATH_STYLE_ENDPOINT: ${AWS_USE_PATH_STYLE_ENDPOINT:-true}
+      OBSERVABILITY_BOOK_READER_URL: ${OBSERVABILITY_BOOK_READER_URL:-http://localhost:3000/books}
     restart: unless-stopped
-    command: sh -c "composer install && php artisan queue:work redis --queue=default,generation-text,generation-image,generation-layout,mail --tries=3 --timeout=10800"
+    command: sh -c "composer install && php artisan horizon"
 
   frontend:
     image: node:22-alpine

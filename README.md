@@ -60,6 +60,7 @@ Service URLs:
 - Frontend: [http://localhost:3000](http://localhost:3000)
 - Backend API: [http://localhost:8000/api](http://localhost:8000/api)
 - Backend health check: [http://localhost:8000/api/health](http://localhost:8000/api/health)
+- Horizon dashboard: [http://localhost:8000/horizon](http://localhost:8000/horizon)
 - MinIO console: [http://localhost:9001](http://localhost:9001)
 
 Validation commands:

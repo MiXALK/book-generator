@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\LogFailedQueueJob;
 use App\Repositories\Contracts\BookGenerationRepositoryInterface;
 use App\Repositories\Contracts\BookPageRepositoryInterface;
 use App\Repositories\Contracts\BookTemplateRepositoryInterface;
@@ -28,6 +29,8 @@ use App\Services\Ai\IllustrationGenerationProviderFactory;
 use App\Services\Ai\StoryTextGenerationProviderFactory;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -63,6 +66,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(JobFailed::class, LogFailedQueueJob::class);
+
         RateLimiter::for('books-generate', function (Request $request) {
             $userId = $request->user()?->id;
 
