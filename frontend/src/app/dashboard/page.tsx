@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
@@ -211,7 +212,13 @@ export default function DashboardPage() {
           <LanguageSelect />
           <div className={styles.userInfo}>
             {user.avatar_url ? (
-              <img src={user.avatar_url} alt={user.name} className={styles.avatar} />
+              <Image
+                src={user.avatar_url}
+                alt={user.name}
+                width={40}
+                height={40}
+                className={styles.avatar}
+              />
             ) : (
               <div className={styles.avatarPlaceholder}>{user.name.charAt(0)}</div>
             )}
@@ -349,7 +356,14 @@ export default function DashboardPage() {
                     <article key={book.id} className={styles.libraryCard}>
                       <div className={styles.libraryCover}>
                         {coverImage ? (
-                          <img src={coverImage} alt="" />
+                          <Image
+                            src={coverImage}
+                            alt=""
+                            fill
+                            className={styles.libraryCoverImage}
+                            sizes="260px"
+                            unoptimized
+                          />
                         ) : (
                           <div className={styles.libraryCoverFallback} />
                         )}
