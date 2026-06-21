@@ -34,6 +34,18 @@ class EloquentBookGenerationRepository implements BookGenerationRepositoryInterf
         ]);
     }
 
+    public function updateLatencyMetrics(BookGeneration $generation, array $metrics): void
+    {
+        $generation->update($metrics);
+    }
+
+    public function findWithUser(int $generationId): ?BookGeneration
+    {
+        return BookGeneration::query()
+            ->with('user')
+            ->find($generationId);
+    }
+
     public function updatePersonalization(BookGeneration $generation, array $attributes): void
     {
         $generation->update($attributes);

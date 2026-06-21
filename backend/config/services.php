@@ -97,4 +97,11 @@ return [
         'pending_photo_retention_hours' => 24,
         'failed_generation_retention_days' => 7,
     ],
+
+    'observability' => [
+        'notify_on_book_ready' => env('OBSERVABILITY_NOTIFY_ON_BOOK_READY', true),
+        'book_reader_url' => env('OBSERVABILITY_BOOK_READER_URL', 'http://localhost:3000/books'),
+        'job_backoff_seconds' => [30, 120, 300],
+        'job_max_attempts' => 3,
+    ],
 ];

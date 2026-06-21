@@ -171,6 +171,28 @@ Child-related data is minimized to generation inputs (name, age, goal) and optio
 - Parental consent is required at upload and re-checked before illustration processing.
 - Logs avoid child PII and private storage paths.
 
+## Observability And Operations
+
+Queue monitoring uses Laravel Horizon (`php artisan horizon`). The dashboard is
+available at `/horizon` in local development.
+
+- Service: `BookGenerationObservabilityService` (correlation IDs, structured stage
+  logs, per-stage latency recording, book-ready notifications).
+- Each `BookGeneration` stores `correlation_id`, `text_duration_ms`,
+  `layout_duration_ms`, and `image_duration_ms`.
+- Structured JSON logs use the `structured` log channel (`php://stderr`) for
+  container-friendly output; set `LOG_STACK=structured` in Docker.
+- Illustration jobs (`GenerateBookIllustrationsJob`) retry transient AI/storage
+  failures with configurable exponential backoff
+  (`services.observability.job_backoff_seconds`).
+- Failed queue jobs are logged through `LogFailedQueueJob`; Horizon surfaces
+  failed jobs in the dashboard. `horizon:snapshot` and `queue:prune-failed` run
+  on the scheduler.
+- Book-ready email: `BookReadyNotification` on the `mail` queue when generation
+  completes. Frontend status polling remains the in-app notification path.
+- Configure via `OBSERVABILITY_NOTIFY_ON_BOOK_READY` and
+  `OBSERVABILITY_BOOK_READER_URL` in `.env`.
+
 ## Documentation Rules
 
 - Update this file when adding or changing conventions, dependencies, folder

@@ -22,6 +22,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'status',
     'illustration_status',
     'error_message',
+    'correlation_id',
+    'text_duration_ms',
+    'layout_duration_ms',
+    'image_duration_ms',
 ])]
 class BookGeneration extends Model
 {

@@ -30,7 +30,7 @@ Initial MVP decisions:
 - [x] Frontend: Next.js.
 - [x] Database: PostgreSQL.
 - [x] Cache and queues: Redis.
-- [ ] Queue runtime: Laravel Queue with Redis, with Laravel Horizon for monitoring.
+- [x] Queue runtime: Laravel Queue with Redis, with Laravel Horizon for monitoring.
 - [x] Local development: Docker Compose.
 - [x] Local object storage: MinIO.
 - [x] Production object storage: S3-compatible cloud storage.
@@ -205,12 +205,12 @@ public, and logs avoid personally identifiable information.
 
 Goal: make generation failures and bottlenecks visible.
 
-- [ ] Add Laravel Horizon for queue monitoring.
-- [ ] Add structured logs and a correlation ID per book generation.
-- [ ] Track latency for text generation, image generation, and paginated HTML assembly.
-- [ ] Add retry and backoff policies for external AI or rendering services.
-- [ ] Monitor failed jobs.
-- [ ] Add email or in-app notifications when a book is ready.
+- [x] Add Laravel Horizon for queue monitoring.
+- [x] Add structured logs and a correlation ID per book generation.
+- [x] Track latency for text generation, image generation, and paginated HTML assembly.
+- [x] Add retry and backoff policies for external AI or rendering services.
+- [x] Monitor failed jobs.
+- [x] Add email or in-app notifications when a book is ready.
 
 Success criteria: operators can see where a generation stalled and why jobs are
 failing.
