@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Listeners\LogFailedQueueJob;
+use App\Repositories\Contracts\Admin\AdminContentRepositoryInterface;
+use App\Repositories\Contracts\Admin\AdminVersionRepositoryInterface;
 use App\Repositories\Contracts\BookGenerationRepositoryInterface;
 use App\Repositories\Contracts\BookPageRepositoryInterface;
 use App\Repositories\Contracts\BookTemplateRepositoryInterface;
@@ -13,6 +15,8 @@ use App\Repositories\Contracts\StoryGoalRepositoryInterface;
 use App\Repositories\Contracts\StoryPromptRepositoryInterface;
 use App\Repositories\Contracts\UploadedPhotoRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\Eloquent\Admin\EloquentAdminContentRepository;
+use App\Repositories\Eloquent\Admin\EloquentAdminVersionRepository;
 use App\Repositories\Eloquent\EloquentBookGenerationRepository;
 use App\Repositories\Eloquent\EloquentBookPageRepository;
 use App\Repositories\Eloquent\EloquentBookTemplateRepository;
@@ -41,6 +45,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(AdminContentRepositoryInterface::class, EloquentAdminContentRepository::class);
+        $this->app->bind(AdminVersionRepositoryInterface::class, EloquentAdminVersionRepository::class);
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
         $this->app->bind(StoryGoalRepositoryInterface::class, EloquentStoryGoalRepository::class);
         $this->app->bind(BookTemplateRepositoryInterface::class, EloquentBookTemplateRepository::class);

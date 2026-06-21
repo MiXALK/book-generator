@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\PublicationStatus;
 use App\Models\LayoutTemplate;
 use App\Repositories\Contracts\LayoutTemplateRepositoryInterface;
 use Illuminate\Support\Collection;
@@ -12,6 +13,7 @@ class EloquentLayoutTemplateRepository implements LayoutTemplateRepositoryInterf
     {
         return LayoutTemplate::query()
             ->where('is_active', true)
+            ->where('publication_status', PublicationStatus::Published)
             ->where('category', $category)
             ->inRandomOrder()
             ->first();
@@ -21,6 +23,7 @@ class EloquentLayoutTemplateRepository implements LayoutTemplateRepositoryInterf
     {
         return LayoutTemplate::query()
             ->where('is_active', true)
+            ->where('publication_status', PublicationStatus::Published)
             ->where('category', $category)
             ->inRandomOrder()
             ->limit($limit)
@@ -31,6 +34,7 @@ class EloquentLayoutTemplateRepository implements LayoutTemplateRepositoryInterf
     {
         return LayoutTemplate::query()
             ->where('is_active', true)
+            ->where('publication_status', PublicationStatus::Published)
             ->inRandomOrder()
             ->first();
     }

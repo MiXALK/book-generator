@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 
@@ -96,6 +97,19 @@ class EloquentUserRepository implements UserRepositoryInterface
             'subscription_status' => $subscriptionStatus,
             'stripe_subscription_id' => $stripeSubscriptionId,
         ]);
+
+        return $user;
+    }
+
+    public function syncAdminRole(User $user, string $email): User
+    {
+        $adminEmails = config('services.admin.emails', []);
+        $shouldBeAdmin = in_array($email, $adminEmails, true);
+        $targetRole = $shouldBeAdmin ? UserRole::Admin : UserRole::User;
+
+        if ($user->role !== $targetRole) {
+            $user->update(['role' => $targetRole]);
+        }
 
         return $user;
     }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\AgeRange;
+use App\Enums\PublicationStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'rating_count',
     'usage_count',
     'is_active',
+    'publication_status',
+    'version',
 ])]
 class StoryPrompt extends Model
 {
@@ -31,6 +34,7 @@ class StoryPrompt extends Model
     {
         return [
             'age_range' => AgeRange::class,
+            'publication_status' => PublicationStatus::class,
         ];
     }
 
@@ -56,5 +60,10 @@ class StoryPrompt extends Model
     public function bookGenerations(): HasMany
     {
         return $this->hasMany(BookGeneration::class);
+    }
+
+    public function versions(): HasMany
+    {
+        return $this->hasMany(StoryPromptVersion::class);
     }
 }

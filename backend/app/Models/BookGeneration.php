@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'child_age',
     'child_goal',
     'prompt_snapshot',
+    'book_template_snapshot',
     'status',
     'illustration_status',
     'error_message',
@@ -30,6 +31,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class BookGeneration extends Model
 {
     use HasFactory;
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'book_template_snapshot' => 'array',
+        ];
+    }
 
     /**
      * Get the user who requested this generation.

@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\PublicationStatus;
 use App\Models\BookTemplate;
 use App\Repositories\Contracts\BookTemplateRepositoryInterface;
 use Illuminate\Support\Collection;
@@ -12,6 +13,7 @@ class EloquentBookTemplateRepository implements BookTemplateRepositoryInterface
     {
         return BookTemplate::query()
             ->where('is_active', true)
+            ->where('publication_status', PublicationStatus::Published)
             ->orderBy('title')
             ->get(['id', 'title', 'description', 'is_free', 'template_type']);
     }
@@ -21,6 +23,7 @@ class EloquentBookTemplateRepository implements BookTemplateRepositoryInterface
         return BookTemplate::query()
             ->where('id', $id)
             ->where('is_active', true)
+            ->where('publication_status', PublicationStatus::Published)
             ->firstOrFail();
     }
 
@@ -28,6 +31,7 @@ class EloquentBookTemplateRepository implements BookTemplateRepositoryInterface
     {
         return BookTemplate::query()
             ->where('is_active', true)
+            ->where('publication_status', PublicationStatus::Published)
             ->whereHas('storyGoal', function ($query) use ($goalName) {
                 $query->where('name', $goalName);
             })

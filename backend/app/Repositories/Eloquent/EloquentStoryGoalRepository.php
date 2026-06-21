@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\PublicationStatus;
 use App\Models\BookTemplate;
 use App\Models\StoryGoal;
 use App\Repositories\Contracts\StoryGoalRepositoryInterface;
@@ -14,7 +15,8 @@ class EloquentStoryGoalRepository implements StoryGoalRepositoryInterface
         return StoryGoal::query()
             ->with(['bookTemplate:id,story_goal_id,is_free,is_active'])
             ->whereHas('bookTemplate', function ($query) {
-                $query->where('is_active', true);
+                $query->where('is_active', true)
+                    ->where('publication_status', PublicationStatus::Published);
             })
             ->orderBy('name')
             ->get(['id', 'name', 'description'])
