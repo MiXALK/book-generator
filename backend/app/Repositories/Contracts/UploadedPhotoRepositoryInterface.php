@@ -3,6 +3,7 @@
 namespace App\Repositories\Contracts;
 
 use App\Models\UploadedPhoto;
+use Illuminate\Support\Collection;
 
 interface UploadedPhotoRepositoryInterface
 {
