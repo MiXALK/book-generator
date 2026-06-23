@@ -6,8 +6,6 @@ use App\Enums\PublicationStatus;
 use App\Enums\UserRole;
 use App\Models\BookTemplate;
 use App\Models\LayoutTemplate;
-use App\Models\StoryGoal;
-use App\Models\StoryPrompt;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;

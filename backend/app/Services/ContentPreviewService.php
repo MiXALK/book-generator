@@ -70,11 +70,11 @@ readonly class ContentPreviewService
             'image_url' => null,
             'layout_template' => [
                 'id' => $layout?->id,
-                'key' => $layout?->key ?? 'preview',
-                'title' => $layout?->title ?? 'Preview',
+                'key' => $layout !== null ? $layout->key : 'preview',
+                'title' => $layout !== null ? $layout->title : 'Preview',
                 'category' => $category,
                 'text_position' => $textPosition,
-                'ratio_profile' => $layout?->ratio_profile ?? '80_20',
+                'ratio_profile' => $layout !== null ? $layout->ratio_profile : '80_20',
             ],
         ];
     }

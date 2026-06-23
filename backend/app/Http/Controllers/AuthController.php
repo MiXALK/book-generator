@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\DeleteAccountRequest;
+use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Services\UserDataDeletionService;
 use Illuminate\Http\JsonResponse;
@@ -181,7 +182,7 @@ class AuthController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function formatUser(\App\Models\User $user): array
+    private function formatUser(User $user): array
     {
         return [
             'id' => $user->id,
@@ -191,7 +192,7 @@ class AuthController extends Controller
             'plan' => $user->plan,
             'subscription_status' => $user->subscription_status,
             'language' => $user->language,
-            'role' => $user->role?->value ?? 'user',
+            'role' => $user->role->value,
             'expires_at' => $user->api_token_expires_at,
         ];
     }

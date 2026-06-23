@@ -125,7 +125,7 @@ class BookGenerationObservabilityFeatureTest extends TestCase
             'child_profile_id' => $profile->id,
             'storage_path' => 'photos/test.jpg',
             'mime_type' => 'image/jpeg',
-            'size_bytes' => 1024,
+            'file_size_bytes' => 1024,
             'width' => 100,
             'height' => 100,
             'parental_consent_at' => now(),

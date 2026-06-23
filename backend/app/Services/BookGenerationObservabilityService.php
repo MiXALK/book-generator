@@ -103,7 +103,7 @@ readonly class BookGenerationObservabilityService
 
         $generation = $this->bookGenerations->findWithUser($generation->id);
 
-        if ($generation?->user === null) {
+        if ($generation === null || $generation->user === null) {
             return;
         }
 

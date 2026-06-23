@@ -110,9 +110,10 @@ class PrivacyComplianceFeatureTest extends TestCase
             'height' => 256,
             'parental_consent_at' => now()->subDays(2),
             'status' => 'pending',
-            'created_at' => now()->subDays(2),
-            'updated_at' => now()->subDays(2),
         ]);
+        $photo->created_at = now()->subDays(2);
+        $photo->updated_at = now()->subDays(2);
+        $photo->saveQuietly();
 
         Artisan::call('privacy:purge-expired');
 
@@ -132,10 +133,9 @@ class PrivacyComplianceFeatureTest extends TestCase
         Storage::disk('s3')->put($imagePath, '<svg></svg>', ['visibility' => 'private']);
         BookPage::query()->where('book_generation_id', $generation->id)->update(['image_url' => $imagePath]);
 
-        $generation->update([
-            'created_at' => now()->subDays(10),
-            'updated_at' => now()->subDays(10),
-        ]);
+        $generation->created_at = now()->subDays(10);
+        $generation->updated_at = now()->subDays(10);
+        $generation->saveQuietly();
 
         Artisan::call('privacy:purge-expired');
 

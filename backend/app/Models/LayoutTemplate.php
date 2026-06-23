@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $version
+ * @property PublicationStatus $publication_status
+ */
 #[Fillable(['key', 'title', 'category', 'ratio_profile', 'text_position', 'sort_order', 'is_active', 'publication_status', 'version'])]
 class LayoutTemplate extends Model
 {

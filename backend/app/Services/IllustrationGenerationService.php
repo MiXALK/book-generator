@@ -264,6 +264,6 @@ readonly class IllustrationGenerationService
             (int) $generation->uploaded_photo_id,
         );
 
-        return $photo !== null && $photo->parental_consent_at !== null;
+        return $photo !== null;
     }
 }

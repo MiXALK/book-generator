@@ -10,6 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $version
+ * @property PublicationStatus $publication_status
+ * @property AgeRange|null $age_range
+ */
 #[Fillable([
     'title',
     'prompt_text',

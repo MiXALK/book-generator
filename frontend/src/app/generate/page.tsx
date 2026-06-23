@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
@@ -24,7 +24,11 @@ export default function GeneratePage() {
   const { token, user, loading, locale } = useAuth();
   const t = locales[locale] || locales.ru;
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
-  const [hydrated, setHydrated] = useState(false);
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   const [goals, setGoals] = useState<CatalogGoal[]>([]);
   const [ageRanges, setAgeRanges] = useState<CatalogAgeRange[]>([]);
@@ -45,10 +49,6 @@ export default function GeneratePage() {
   const selectedGoalMeta = goals.find((goal) => goal.name === selectedGoal);
   const selectedGoalLocked = selectedGoalMeta?.is_locked === true;
   const isPaid = user?.plan === "paid" && user?.subscription_status === "active";
-
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
 
   useEffect(() => {
     if (!loading && !user) {

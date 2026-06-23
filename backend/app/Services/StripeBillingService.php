@@ -82,7 +82,7 @@ readonly class StripeBillingService
         $this->bootstrapStripe();
 
         try {
-            Subscription::cancel($subscriptionId);
+            Subscription::retrieve($subscriptionId)->cancel();
         } catch (Throwable $exception) {
             Log::warning('Failed to cancel Stripe subscription during account deletion', [
                 'message' => $exception->getMessage(),

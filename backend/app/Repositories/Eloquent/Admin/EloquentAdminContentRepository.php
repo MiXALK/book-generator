@@ -4,13 +4,10 @@ namespace App\Repositories\Eloquent\Admin;
 
 use App\Enums\PublicationStatus;
 use App\Models\BookTemplate;
-use App\Models\BookTemplateVersion;
 use App\Models\LayoutTemplate;
-use App\Models\LayoutTemplateVersion;
 use App\Models\StoryGoal;
 use App\Models\StoryPrompt;
 use App\Models\StoryPromptRating;
-use App\Models\StoryPromptVersion;
 use App\Repositories\Contracts\Admin\AdminContentRepositoryInterface;
 use Illuminate\Support\Collection;
 

@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $version
+ * @property PublicationStatus $publication_status
+ */
 #[Fillable(['title', 'description', 'is_free', 'template_type', 'is_active', 'publication_status', 'version', 'story_goal_id'])]
 class BookTemplate extends Model
 {
