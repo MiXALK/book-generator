@@ -63,6 +63,43 @@ Service URLs:
 - Horizon dashboard: [http://localhost:8000/horizon](http://localhost:8000/horizon)
 - MinIO console: [http://localhost:9001](http://localhost:9001)
 
+## Admin panel
+
+The content admin UI lives in the Next.js frontend. Access is granted by email,
+not by a separate login.
+
+1. Add your Google account email to `ADMIN_EMAILS` in `backend/.env` (comma-separated
+   for multiple admins):
+
+   ```sh
+   ADMIN_EMAILS=you@example.com,teammate@example.com
+   ```
+
+2. Restart the backend so the new value is loaded:
+
+   ```sh
+   docker compose restart backend
+   ```
+
+3. Sign in at [http://localhost:3000](http://localhost:3000) with Google using
+   one of those emails. On each Google OAuth login the backend promotes matching
+   accounts to the `admin` role automatically.
+
+4. Open the admin panel directly or from the **Content admin** link on the
+   [dashboard](http://localhost:3000/dashboard) (visible only when `role` is
+   `admin`).
+
+Admin URLs (frontend):
+
+- Dashboard and review queue: [http://localhost:3000/admin](http://localhost:3000/admin)
+- Goals: [http://localhost:3000/admin/goals](http://localhost:3000/admin/goals)
+- Templates: [http://localhost:3000/admin/templates](http://localhost:3000/admin/templates)
+- Prompts: [http://localhost:3000/admin/prompts](http://localhost:3000/admin/prompts)
+- Layouts: [http://localhost:3000/admin/layouts](http://localhost:3000/admin/layouts)
+
+Non-admin users are redirected away from `/admin/*`. Admin API routes under
+`/api/admin/*` require the same role and return `403` otherwise.
+
 Validation commands:
 
 ```sh
