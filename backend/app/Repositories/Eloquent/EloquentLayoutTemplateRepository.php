@@ -9,6 +9,11 @@ use Illuminate\Support\Collection;
 
 class EloquentLayoutTemplateRepository implements LayoutTemplateRepositoryInterface
 {
+    public function findById(int $id): ?LayoutTemplate
+    {
+        return LayoutTemplate::query()->find($id);
+    }
+
     public function findRandomActiveByCategory(string $category): ?LayoutTemplate
     {
         return LayoutTemplate::query()

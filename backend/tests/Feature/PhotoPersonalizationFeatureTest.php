@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\AssembleBookLayoutJob;
 use App\Jobs\GenerateBookIllustrationsJob;
+use App\Jobs\GenerateBookTextJob;
 use App\Models\BookTemplate;
 use App\Models\StoryGoal;
 use App\Models\User;
+use App\Services\BookGenerationService;
 use Database\Seeders\LayoutTemplateSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -162,6 +165,16 @@ class PhotoPersonalizationFeatureTest extends TestCase
         $response->assertCreated();
         $response->assertJsonPath('generation.status', 'processing');
         $response->assertJsonPath('generation.illustration_status', 'queued');
+
+        Queue::assertPushed(GenerateBookTextJob::class);
+
+        Queue::pushed(GenerateBookTextJob::class)->each(
+            fn (GenerateBookTextJob $job) => $job->handle(app(BookGenerationService::class)),
+        );
+
+        Queue::pushed(AssembleBookLayoutJob::class)->each(
+            fn (AssembleBookLayoutJob $job) => $job->handle(app(BookGenerationService::class)),
+        );
 
         Queue::assertPushed(GenerateBookIllustrationsJob::class);
     }

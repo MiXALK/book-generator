@@ -50,7 +50,7 @@ class OpenAiCompatibleStoryTextProviderTest extends TestCase
 
         $result = $provider->generateStory($this->sampleInput());
 
-        $this->assertSame('Anna found a star. She shared it with friends.', $result);
+        $this->assertSame('Anna found a star. She shared it with friends.', $result?->story);
 
         Http::assertSent(function ($request): bool {
             $body = $request->data();

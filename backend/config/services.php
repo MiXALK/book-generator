@@ -116,4 +116,23 @@ return [
         'prompt_min_quality_score' => 3.0,
         'prompt_min_rating_count' => 1,
     ],
+
+    'scaling' => [
+        'catalog_cache_ttl_seconds' => (int) env('CATALOG_CACHE_TTL_SECONDS', 3600),
+        'layout_cache_ttl_seconds' => 86400,
+        'idempotency_ttl_hours' => 24,
+        'ai_text_daily_limit' => 20,
+        'ai_image_daily_limit' => 50,
+        'text_job_timeout_seconds' => 120,
+        'layout_job_timeout_seconds' => 300,
+    ],
+
+    'cost' => [
+        'text_input_token_usd' => 0.0000001,
+        'text_output_token_usd' => 0.0000003,
+        'image_generation_usd' => 0.02,
+        'layout_cpu_second_usd' => 0.0,
+        'storage_gb_month_usd' => 0.023,
+        'bandwidth_gb_usd' => 0.09,
+    ],
 ];

@@ -98,7 +98,7 @@ return [
     'defaults' => [
         'supervisor-default' => [
             'connection' => 'redis',
-            'queue' => ['default', 'mail'],
+            'queue' => ['default'],
             'balance' => 'auto',
             'autoScalingStrategy' => 'time',
             'maxProcesses' => 1,
@@ -109,9 +109,50 @@ return [
             'timeout' => 300,
             'nice' => 0,
         ],
-        'supervisor-generation' => [
+        'supervisor-mail' => [
             'connection' => 'redis',
-            'queue' => ['generation-text', 'generation-layout', 'generation-image'],
+            'queue' => ['mail'],
+            'balance' => 'auto',
+            'autoScalingStrategy' => 'time',
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 128,
+            'tries' => 3,
+            'timeout' => 120,
+            'nice' => 0,
+        ],
+        'supervisor-generation-text' => [
+            'connection' => 'redis',
+            'queue' => ['generation-text'],
+            'balance' => 'auto',
+            'autoScalingStrategy' => 'time',
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 192,
+            'tries' => 3,
+            'timeout' => 120,
+            'backoff' => [15, 60, 180],
+            'nice' => 0,
+        ],
+        'supervisor-generation-layout' => [
+            'connection' => 'redis',
+            'queue' => ['generation-layout'],
+            'balance' => 'auto',
+            'autoScalingStrategy' => 'time',
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 192,
+            'tries' => 3,
+            'timeout' => 300,
+            'backoff' => [15, 60, 180],
+            'nice' => 0,
+        ],
+        'supervisor-generation-image' => [
+            'connection' => 'redis',
+            'queue' => ['generation-image'],
             'balance' => 'auto',
             'autoScalingStrategy' => 'time',
             'maxProcesses' => 1,
@@ -128,9 +169,18 @@ return [
     'environments' => [
         'production' => [
             'supervisor-default' => [
+                'maxProcesses' => 2,
+            ],
+            'supervisor-mail' => [
+                'maxProcesses' => 2,
+            ],
+            'supervisor-generation-text' => [
                 'maxProcesses' => 3,
             ],
-            'supervisor-generation' => [
+            'supervisor-generation-layout' => [
+                'maxProcesses' => 2,
+            ],
+            'supervisor-generation-image' => [
                 'maxProcesses' => 5,
             ],
         ],
@@ -139,7 +189,16 @@ return [
             'supervisor-default' => [
                 'maxProcesses' => 1,
             ],
-            'supervisor-generation' => [
+            'supervisor-mail' => [
+                'maxProcesses' => 1,
+            ],
+            'supervisor-generation-text' => [
+                'maxProcesses' => 1,
+            ],
+            'supervisor-generation-layout' => [
+                'maxProcesses' => 1,
+            ],
+            'supervisor-generation-image' => [
                 'maxProcesses' => 2,
             ],
         ],

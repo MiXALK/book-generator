@@ -54,4 +54,21 @@ class GenerateBookRequest extends FormRequest
 
         return (int) $value;
     }
+
+    public function idempotencyKey(): ?string
+    {
+        $header = $this->header('Idempotency-Key');
+
+        if (! is_string($header)) {
+            return null;
+        }
+
+        $key = trim($header);
+
+        if ($key === '' || strlen($key) > 128) {
+            return null;
+        }
+
+        return $key;
+    }
 }

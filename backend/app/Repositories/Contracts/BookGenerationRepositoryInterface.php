@@ -34,6 +34,17 @@ interface BookGenerationRepositoryInterface
 
     public function findForUserById(int $userId, int $generationId): ?BookGeneration;
 
+    public function findByUserAndIdempotencyKey(int $userId, string $idempotencyKey): ?BookGeneration;
+
+    public function generationHasPages(int $generationId): bool;
+
+    /**
+     * @param  array<string, mixed>  $metrics
+     */
+    public function updateCostMetrics(BookGeneration $generation, array $metrics): void;
+
+    public function updateStoryText(BookGeneration $generation, string $storyText): void;
+
     public function delete(BookGeneration $generation): void;
 
     /**

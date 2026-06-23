@@ -40,7 +40,9 @@ Route::middleware('auth.api')->group(function () {
     Route::get('/books/history', [BookGenerationController::class, 'index']);
     Route::get('/books/{id}', [BookGenerationController::class, 'show'])->whereNumber('id');
     Route::delete('/books/{id}', [BookGenerationController::class, 'destroy'])->whereNumber('id');
-    Route::post('/books/{id}/retry-illustrations', [BookGenerationController::class, 'retryIllustrations'])->whereNumber('id');
+    Route::post('/books/{id}/retry-illustrations', [BookGenerationController::class, 'retryIllustrations'])
+        ->whereNumber('id')
+        ->middleware('throttle:books-retry-illustrations');
     Route::post('/books/generate', [BookGenerationController::class, 'generate'])
         ->middleware('throttle:books-generate');
     Route::post('/photos/upload', [ChildPhotoController::class, 'upload'])

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState, useSyncExternalStore } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
@@ -45,6 +45,7 @@ export default function GeneratePage() {
   const [parentalConsent, setParentalConsent] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [uploadedPhotoId, setUploadedPhotoId] = useState<number | null>(null);
+  const idempotencyKeyRef = useRef<string>(crypto.randomUUID());
 
   const selectedGoalMeta = goals.find((goal) => goal.name === selectedGoal);
   const selectedGoalLocked = selectedGoalMeta?.is_locked === true;
@@ -194,6 +195,7 @@ export default function GeneratePage() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "Idempotency-Key": idempotencyKeyRef.current,
         },
         body: JSON.stringify(payload),
       });

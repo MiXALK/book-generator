@@ -102,6 +102,32 @@ class EloquentBookGenerationRepository implements BookGenerationRepositoryInterf
             ->first();
     }
 
+    public function findByUserAndIdempotencyKey(int $userId, string $idempotencyKey): ?BookGeneration
+    {
+        return BookGeneration::query()
+            ->where('user_id', $userId)
+            ->where('idempotency_key', $idempotencyKey)
+            ->first();
+    }
+
+    public function updateCostMetrics(BookGeneration $generation, array $metrics): void
+    {
+        $generation->update($metrics);
+    }
+
+    public function updateStoryText(BookGeneration $generation, string $storyText): void
+    {
+        $generation->update(['story_text' => $storyText]);
+    }
+
+    public function generationHasPages(int $generationId): bool
+    {
+        return BookGeneration::query()
+            ->whereKey($generationId)
+            ->whereHas('bookPages')
+            ->exists();
+    }
+
     public function delete(BookGeneration $generation): void
     {
         $generation->delete();

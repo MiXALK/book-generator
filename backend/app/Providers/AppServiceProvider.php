@@ -85,5 +85,11 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(5)->by($userId !== null ? 'user:'.$userId : $request->ip());
         });
+
+        RateLimiter::for('books-retry-illustrations', function (Request $request) {
+            $userId = $request->user()?->id;
+
+            return Limit::perHour(2)->by($userId !== null ? 'user:'.$userId : $request->ip());
+        });
     }
 }

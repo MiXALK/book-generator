@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Jobs\AssembleBookLayoutJob;
+use App\Jobs\GenerateBookTextJob;
 use App\Models\BookGeneration;
 use App\Models\BookTemplate;
 use App\Models\ChildProfile;
 use App\Models\GeneratedCharacter;
+use App\Models\LayoutTemplate;
 use App\Models\StoryPrompt;
 use App\Models\UploadedPhoto;
 use App\Models\User;
@@ -17,12 +20,17 @@ use App\Repositories\Contracts\StoryPromptRepositoryInterface;
 use App\Repositories\Contracts\UploadedPhotoRepositoryInterface;
 use App\Services\Ai\Contracts\StoryTextGenerationProviderInterface;
 use App\Services\Ai\Data\StoryTextGenerationInput;
+use App\Services\Ai\Data\StoryTextGenerationResult;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class BookGenerationService
 {
+    private const int ESTIMATED_ILLUSTRATION_PAGES = 8;
+
+    private const int FALLBACK_SENTENCE_COUNT = 8;
+
     private const string DEFAULT_PROMPT_TEXT = 'Напиши цельную добрую детскую сказку про {name} (возраст {age}) с целью {goal}. '.
         'Один мягкий сюжетный поворот, безопасный финал.';
 
@@ -39,6 +47,10 @@ class BookGenerationService
         private readonly UploadedPhotoRepositoryInterface $uploadedPhotos,
         private readonly IllustrationGenerationService $illustrationGeneration,
         private readonly BookGenerationObservabilityService $observability,
+        private readonly BookGenerationIdempotencyService $idempotency,
+        private readonly BookLayoutCacheService $layoutCache,
+        private readonly AiOperationQuotaService $aiQuotas,
+        private readonly BookGenerationCostService $costTracking,
     ) {}
 
     public function formatForApi(BookGeneration $generation): BookGeneration
@@ -69,11 +81,144 @@ class BookGenerationService
         int $age,
         string $goal,
         ?int $uploadedPhotoId = null,
+        ?string $idempotencyKey = null,
     ): BookGeneration {
+        $existing = $this->idempotency->findExisting($user, $idempotencyKey);
+
+        if ($existing !== null) {
+            return $this->formatForApi($existing);
+        }
+
         $photo = $this->resolveUploadedPhoto($user, $uploadedPhotoId);
         $prompt = $this->selectPrompt($user, $age, $goal);
+        $fingerprint = $this->idempotency->computeFingerprint(
+            $user,
+            $template,
+            $childName,
+            $age,
+            $goal,
+            $prompt,
+            $uploadedPhotoId,
+            $idempotencyKey,
+        );
 
-        return DB::transaction(function () use ($user, $template, $childName, $age, $goal, $prompt, $photo) {
+        $this->ensureAiQuotas($user, $photo);
+
+        $generation = $this->persistNewGeneration(
+            $user,
+            $template,
+            $childName,
+            $age,
+            $goal,
+            $prompt,
+            $photo,
+            $idempotencyKey,
+            $fingerprint,
+        );
+
+        return $this->startTextPipeline($generation);
+    }
+
+    public function runTextGeneration(int $generationId): void
+    {
+        $generation = $this->bookGenerations->findWithUser($generationId);
+
+        if ($generation === null || $generation->story_text !== null) {
+            return;
+        }
+
+        $correlationId = $this->correlationIdFor($generation);
+        $prompt = $this->findPromptForGeneration($generation);
+
+        $this->observability->withContext($generationId, $correlationId, function () use (
+            $generation,
+            $generationId,
+            $correlationId,
+            $prompt,
+        ) {
+            $this->logTextStageStarted($generationId, $correlationId);
+
+            $textMeasured = $this->observability->measure(
+                fn () => $this->resolveStoryText(
+                    $generationId,
+                    $correlationId,
+                    $generation->child_name,
+                    (int) $generation->child_age,
+                    $generation->child_goal,
+                    $prompt,
+                ),
+            );
+
+            $this->persistTextGenerationResults($generation, $generationId, $correlationId, $textMeasured);
+
+            AssembleBookLayoutJob::dispatch($generationId);
+        });
+    }
+
+    public function runLayoutAssembly(int $generationId): void
+    {
+        $generation = $this->bookGenerations->findWithUser($generationId);
+
+        if ($generation === null || ! is_string($generation->story_text) || $generation->story_text === '') {
+            return;
+        }
+
+        if ($this->bookGenerations->generationHasPages($generationId)) {
+            return;
+        }
+
+        $correlationId = $this->correlationIdFor($generation);
+        $prompt = $this->findPromptForGeneration($generation);
+
+        $this->observability->withContext($generationId, $correlationId, function () use (
+            $generation,
+            $generationId,
+            $correlationId,
+            $prompt,
+        ) {
+            $layoutMeasured = $this->observability->measure(
+                fn () => $this->assemblePages($generation->story_text),
+            );
+
+            $this->persistLayoutResults($generation, $generationId, $correlationId, $layoutMeasured);
+            $this->finalizeGeneration($generation, $generationId, $correlationId, $layoutMeasured['duration_ms']);
+            $this->recordPromptUsage($prompt);
+        });
+    }
+
+    private function ensureAiQuotas(User $user, ?UploadedPhoto $photo): void
+    {
+        if ($this->storyTextProvider->isConfigured()) {
+            $this->aiQuotas->ensureCanGenerateText($user);
+        }
+
+        if ($photo !== null && $this->illustrationGeneration->shouldGenerateIllustrations($photo)) {
+            $this->aiQuotas->ensureCanGenerateImages($user, self::ESTIMATED_ILLUSTRATION_PAGES);
+        }
+    }
+
+    private function persistNewGeneration(
+        User $user,
+        BookTemplate $template,
+        string $childName,
+        int $age,
+        string $goal,
+        ?StoryPrompt $prompt,
+        ?UploadedPhoto $photo,
+        ?string $idempotencyKey,
+        string $fingerprint,
+    ): BookGeneration {
+        return DB::transaction(function () use (
+            $user,
+            $template,
+            $childName,
+            $age,
+            $goal,
+            $prompt,
+            $photo,
+            $idempotencyKey,
+            $fingerprint,
+        ) {
             $correlationId = $this->observability->newCorrelationId();
             $profile = $this->resolveChildProfile($user, $childName, $age, $photo);
             $character = $photo !== null
@@ -91,54 +236,157 @@ class BookGenerationService
                 $photo,
                 $character,
                 $correlationId,
+                $idempotencyKey,
+                $fingerprint,
             );
 
-            return $this->observability->withContext($generation->id, $correlationId, function () use (
-                $generation,
-                $correlationId,
-                $childName,
-                $age,
-                $goal,
-                $prompt,
-                $photo,
-            ) {
-                $this->observability->logStage(
-                    $generation->id,
-                    $correlationId,
-                    'generation',
-                    'Book generation started',
-                );
+            if ($idempotencyKey !== null && $idempotencyKey !== '') {
+                $this->idempotency->remember($user, $idempotencyKey, $generation);
+            }
 
-                $built = $this->buildPages($generation->id, $correlationId, $childName, $age, $goal, $prompt);
-                $pages = $this->attachPlaceholderIllustrations($generation->id, $built['pages'], $built['layouts']);
-
-                $this->bookPages->createMany($generation, $pages);
-
-                if ($photo !== null && $this->illustrationGeneration->shouldGenerateIllustrations($photo)) {
-                    $this->bookGenerations->updateStatus($generation, 'processing');
-                    $this->illustrationGeneration->queueGeneration($generation);
-                } elseif ($photo !== null) {
-                    $this->illustrationGeneration->finalizeWithoutProvider($generation, $photo);
-                } else {
-                    $this->bookGenerations->updateStatus($generation, 'completed');
-                    $this->observability->logStage(
-                        $generation->id,
-                        $correlationId,
-                        'generation',
-                        'Book generation completed',
-                        [
-                            'text_duration_ms' => $built['text_duration_ms'],
-                            'layout_duration_ms' => $built['layout_duration_ms'],
-                        ],
-                    );
-                    $this->observability->notifyBookReady($generation);
-                }
-
-                $this->recordPromptUsage($prompt);
-
-                return $this->formatForApi($generation);
-            });
+            return $generation;
         });
+    }
+
+    private function startTextPipeline(BookGeneration $generation): BookGeneration
+    {
+        GenerateBookTextJob::dispatch($generation->id);
+        $generation->refresh();
+
+        return $this->formatForApi($generation);
+    }
+
+    private function correlationIdFor(BookGeneration $generation): string
+    {
+        return $generation->correlation_id ?? $this->observability->newCorrelationId();
+    }
+
+    private function findPromptForGeneration(BookGeneration $generation): ?StoryPrompt
+    {
+        if ($generation->story_prompt_id === null) {
+            return null;
+        }
+
+        return $this->storyPrompts->findById((int) $generation->story_prompt_id);
+    }
+
+    private function logTextStageStarted(int $generationId, string $correlationId): void
+    {
+        $this->observability->logStage(
+            $generationId,
+            $correlationId,
+            'text',
+            'Story text generation started',
+        );
+    }
+
+    /**
+     * @param  array{result: array{story: string, used_ai: bool, prompt_tokens: int|null, completion_tokens: int|null}, duration_ms: int}  $textMeasured
+     */
+    private function persistTextGenerationResults(
+        BookGeneration $generation,
+        int $generationId,
+        string $correlationId,
+        array $textMeasured,
+    ): void {
+        $result = $textMeasured['result'];
+
+        $this->bookGenerations->updateStoryText($generation, $result['story']);
+
+        $this->observability->recordLatencyMetrics($generation, [
+            'text_duration_ms' => $textMeasured['duration_ms'],
+        ]);
+
+        if ($result['used_ai'] && $generation->user !== null) {
+            $this->aiQuotas->recordTextGeneration($generation->user);
+        }
+
+        $this->costTracking->recordTextTokens(
+            $generation,
+            $result['prompt_tokens'],
+            $result['completion_tokens'],
+        );
+
+        $this->observability->logStage(
+            $generationId,
+            $correlationId,
+            'text',
+            'Story text generation completed',
+            ['text_duration_ms' => $textMeasured['duration_ms']],
+        );
+    }
+
+    /**
+     * @param  array{result: array{pages: list<array<string, mixed>>, layouts: Collection<int, LayoutTemplate|null>}, duration_ms: int}  $layoutMeasured
+     */
+    private function persistLayoutResults(
+        BookGeneration $generation,
+        int $generationId,
+        string $correlationId,
+        array $layoutMeasured,
+    ): void {
+        $built = $layoutMeasured['result'];
+        $pages = $this->attachPlaceholderIllustrations($generationId, $built['pages'], $built['layouts']);
+
+        $this->bookPages->createMany($generation, $pages);
+
+        $this->observability->recordLatencyMetrics($generation, [
+            'layout_duration_ms' => $layoutMeasured['duration_ms'],
+        ]);
+
+        $this->costTracking->recordLayoutDuration($generation, $layoutMeasured['duration_ms']);
+
+        $this->observability->logStage(
+            $generationId,
+            $correlationId,
+            'layout',
+            'Story text and layout assembly completed',
+            ['layout_duration_ms' => $layoutMeasured['duration_ms']],
+        );
+    }
+
+    private function finalizeGeneration(
+        BookGeneration $generation,
+        int $generationId,
+        string $correlationId,
+        int $layoutDurationMs,
+    ): void {
+        $photo = $this->resolvePhotoForGeneration($generation);
+
+        if ($photo !== null && $this->illustrationGeneration->shouldGenerateIllustrations($photo)) {
+            $this->bookGenerations->updateStatus($generation, 'processing');
+            $this->illustrationGeneration->queueGeneration($generation);
+
+            return;
+        }
+
+        if ($photo !== null) {
+            $this->illustrationGeneration->finalizeWithoutProvider($generation, $photo);
+
+            return;
+        }
+
+        $this->bookGenerations->updateStatus($generation, 'completed');
+        $this->observability->logStage(
+            $generationId,
+            $correlationId,
+            'generation',
+            'Book generation completed',
+            ['layout_duration_ms' => $layoutDurationMs],
+        );
+        $this->observability->notifyBookReady($generation);
+    }
+
+    private function resolvePhotoForGeneration(BookGeneration $generation): ?UploadedPhoto
+    {
+        if ($generation->uploaded_photo_id === null || $generation->user === null) {
+            return null;
+        }
+
+        return $this->uploadedPhotos->findForUser(
+            (int) $generation->user_id,
+            (int) $generation->uploaded_photo_id,
+        );
     }
 
     private function resolveUploadedPhoto(User $user, ?int $uploadedPhotoId): ?UploadedPhoto
@@ -196,6 +444,8 @@ class BookGenerationService
         ?UploadedPhoto $photo,
         ?GeneratedCharacter $character,
         string $correlationId,
+        ?string $idempotencyKey,
+        string $fingerprint,
     ): BookGeneration {
         return $this->bookGenerations->create([
             'user_id' => $user->id,
@@ -208,18 +458,28 @@ class BookGenerationService
             'child_age' => $age,
             'child_goal' => $goal,
             'prompt_snapshot' => $prompt?->prompt_text,
-            'book_template_snapshot' => [
-                'id' => $template->id,
-                'version' => $template->version,
-                'title' => $template->title,
-                'description' => $template->description,
-                'is_free' => $template->is_free,
-                'template_type' => $template->template_type,
-            ],
+            'book_template_snapshot' => $this->templateSnapshot($template),
             'status' => 'processing',
             'illustration_status' => $photo !== null ? 'queued' : null,
             'correlation_id' => $correlationId,
+            'idempotency_key' => $idempotencyKey,
+            'input_fingerprint' => $fingerprint,
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function templateSnapshot(BookTemplate $template): array
+    {
+        return [
+            'id' => $template->id,
+            'version' => $template->version,
+            'title' => $template->title,
+            'description' => $template->description,
+            'is_free' => $template->is_free,
+            'template_type' => $template->template_type,
+        ];
     }
 
     private function recordPromptUsage(?StoryPrompt $prompt): void
@@ -234,65 +494,55 @@ class BookGenerationService
         return $this->storyPrompts->findBestForGeneration($user->language ?? 'ru', $age, $goal);
     }
 
-    private function buildPages(
-        int $generationId,
-        string $correlationId,
-        string $name,
-        int $age,
-        string $goal,
-        ?StoryPrompt $prompt,
-    ): array {
-        $textMeasured = $this->observability->measure(
-            fn () => $this->resolveStoryText($generationId, $correlationId, $name, $age, $goal, $prompt),
-        );
-        $storyText = $textMeasured['result'];
-
-        $layoutMeasured = $this->observability->measure(function () use ($storyText) {
-            $pageTexts = $this->storyPaginator->paginate($storyText);
-            $pageCount = count($pageTexts);
-            $layouts = $this->pickLayouts($pageCount);
-
-            $pages = [];
-            foreach ($pageTexts as $index => $text) {
-                $pages[] = [
-                    'page_number' => $index + 1,
-                    'layout_template_id' => $layouts[$index]?->id,
-                    'text' => $text,
-                ];
-            }
-
-            return [
-                'pages' => $pages,
-                'layouts' => $layouts,
-            ];
-        });
-
-        $generation = $this->bookGenerations->findWithUser($generationId);
-
-        if ($generation !== null) {
-            $this->observability->recordLatencyMetrics($generation, [
-                'text_duration_ms' => $textMeasured['duration_ms'],
-                'layout_duration_ms' => $layoutMeasured['duration_ms'],
-            ]);
-        }
-
-        $this->observability->logStage(
-            $generationId,
-            $correlationId,
-            'layout',
-            'Story text and layout assembly completed',
-            [
-                'text_duration_ms' => $textMeasured['duration_ms'],
-                'layout_duration_ms' => $layoutMeasured['duration_ms'],
-            ],
-        );
+    /**
+     * @return array{pages: list<array<string, mixed>>, layouts: Collection<int, LayoutTemplate|null>}
+     */
+    private function assemblePages(string $storyText): array
+    {
+        $pageTexts = $this->resolvePageTexts($storyText);
+        $layouts = $this->pickLayouts(count($pageTexts));
 
         return [
-            'pages' => $layoutMeasured['result']['pages'],
-            'layouts' => $layoutMeasured['result']['layouts'],
-            'text_duration_ms' => $textMeasured['duration_ms'],
-            'layout_duration_ms' => $layoutMeasured['duration_ms'],
+            'pages' => $this->buildPageRecords($pageTexts, $layouts),
+            'layouts' => $layouts,
         ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function resolvePageTexts(string $storyText): array
+    {
+        $cachedPageTexts = $this->layoutCache->getPageTexts($storyText);
+
+        if ($cachedPageTexts !== null && $cachedPageTexts !== []) {
+            return $cachedPageTexts;
+        }
+
+        $pageTexts = $this->storyPaginator->paginate($storyText);
+        $this->layoutCache->putPageTexts($storyText, $pageTexts);
+
+        return $pageTexts;
+    }
+
+    /**
+     * @param  list<string>  $pageTexts
+     * @return list<array<string, mixed>>
+     */
+    private function buildPageRecords(array $pageTexts, Collection $layouts): array
+    {
+        $pages = [];
+
+        foreach ($pageTexts as $index => $text) {
+            $layout = $layouts[$index] ?? null;
+            $pages[] = [
+                'page_number' => $index + 1,
+                'layout_template_id' => $layout?->id,
+                'text' => $text,
+            ];
+        }
+
+        return $pages;
     }
 
     /**
@@ -302,7 +552,7 @@ class BookGenerationService
     {
         foreach ($pages as $index => $page) {
             $layout = $layouts[$index] ?? null;
-            $category = is_object($layout) && isset($layout->category)
+            $category = $layout instanceof LayoutTemplate
                 ? (string) $layout->category
                 : 'content';
             $pageNumber = (int) $page['page_number'];
@@ -316,6 +566,14 @@ class BookGenerationService
         return $pages;
     }
 
+    /**
+     * @return array{
+     *     story: string,
+     *     used_ai: bool,
+     *     prompt_tokens: int|null,
+     *     completion_tokens: int|null
+     * }
+     */
     private function resolveStoryText(
         int $generationId,
         string $correlationId,
@@ -323,14 +581,50 @@ class BookGenerationService
         int $age,
         string $goal,
         ?StoryPrompt $prompt,
-    ): string {
-        $story = $this->generateStoryWithAi($generationId, $correlationId, $name, $age, $goal, $prompt);
+    ): array {
+        $aiResult = $this->generateStoryWithAi($generationId, $correlationId, $name, $age, $goal, $prompt);
 
-        if ($story !== null && trim($story) !== '') {
-            return $story;
+        if ($aiResult !== null && trim($aiResult->story) !== '') {
+            return $this->storyTextFromAi($aiResult);
         }
 
-        return $this->buildFallbackStory($name, $age, $goal);
+        return $this->storyTextFromFallback($name, $age, $goal);
+    }
+
+    /**
+     * @return array{
+     *     story: string,
+     *     used_ai: bool,
+     *     prompt_tokens: int|null,
+     *     completion_tokens: int|null
+     * }
+     */
+    private function storyTextFromAi(StoryTextGenerationResult $result): array
+    {
+        return [
+            'story' => $result->story,
+            'used_ai' => true,
+            'prompt_tokens' => $result->promptTokens,
+            'completion_tokens' => $result->completionTokens,
+        ];
+    }
+
+    /**
+     * @return array{
+     *     story: string,
+     *     used_ai: bool,
+     *     prompt_tokens: null,
+     *     completion_tokens: null
+     * }
+     */
+    private function storyTextFromFallback(string $name, int $age, string $goal): array
+    {
+        return [
+            'story' => $this->buildFallbackStory($name, $age, $goal),
+            'used_ai' => false,
+            'prompt_tokens' => null,
+            'completion_tokens' => null,
+        ];
     }
 
     private function generateStoryWithAi(
@@ -340,23 +634,21 @@ class BookGenerationService
         int $age,
         string $goal,
         ?StoryPrompt $prompt,
-    ): ?string {
+    ): ?StoryTextGenerationResult {
         if (! $this->storyTextProvider->isConfigured()) {
             return null;
         }
 
-        $promptText = $this->resolvePromptText($prompt, $name, $age, $goal);
-
         $input = new StoryTextGenerationInput(
-            promptText: $promptText,
+            promptText: $this->resolvePromptText($prompt, $name, $age, $goal),
             childName: $name,
             childAge: $age,
             childGoal: $goal,
         );
 
-        $story = $this->storyTextProvider->generateStory($input);
+        $result = $this->storyTextProvider->generateStory($input);
 
-        if ($story === null) {
+        if ($result === null) {
             $this->observability->logStage(
                 $generationId,
                 $correlationId,
@@ -365,26 +657,24 @@ class BookGenerationService
                 ['story_prompt_id' => $prompt?->id],
                 'warning',
             );
-        } else {
-            $this->observability->logStage(
-                $generationId,
-                $correlationId,
-                'text',
-                'Story text generation completed',
-                ['story_prompt_id' => $prompt?->id],
-            );
+
+            return null;
         }
 
-        return $story;
+        $this->observability->logStage(
+            $generationId,
+            $correlationId,
+            'text',
+            'Story text generation completed',
+            ['story_prompt_id' => $prompt?->id],
+        );
+
+        return $result;
     }
 
     private function resolvePromptText(?StoryPrompt $prompt, string $name, int $age, string $goal): string
     {
-        if ($prompt === null) {
-            $template = self::DEFAULT_PROMPT_TEXT;
-        } else {
-            $template = $prompt->prompt_text;
-        }
+        $template = $prompt?->prompt_text ?? self::DEFAULT_PROMPT_TEXT;
 
         return strtr($template, [
             '{name}' => $name,
@@ -395,9 +685,9 @@ class BookGenerationService
 
     private function buildFallbackStory(string $name, int $age, string $goal): string
     {
-        $sentences = [];
-        $sentenceCount = 8;
+        $sentenceCount = self::FALLBACK_SENTENCE_COUNT;
         $midpoint = (int) ceil($sentenceCount / 2);
+        $sentences = [];
 
         for ($pageNumber = 1; $pageNumber <= $sentenceCount; $pageNumber++) {
             $sentences[] = $this->fallbackText($name, $age, $goal, $pageNumber, $sentenceCount, $midpoint);
@@ -406,8 +696,14 @@ class BookGenerationService
         return implode(' ', $sentences);
     }
 
-    private function fallbackText(string $name, int $age, string $goal, int $pageNumber, int $totalPages, int $midpoint): string
-    {
+    private function fallbackText(
+        string $name,
+        int $age,
+        string $goal,
+        int $pageNumber,
+        int $totalPages,
+        int $midpoint,
+    ): string {
         return match (true) {
             $pageNumber === 1 => "{$name}, {$age}, начинает историю о цели: {$goal}.",
             $pageNumber === $midpoint => "Неожиданно сюжет меняется, но {$name} не сдается.",
@@ -436,9 +732,11 @@ class BookGenerationService
 
         while ($layouts->count() < $pagesCount) {
             $fallback = $this->layoutTemplates->findRandomActive();
+
             if (! $fallback) {
                 break;
             }
+
             $layouts->push($fallback);
         }
 

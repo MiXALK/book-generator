@@ -4,6 +4,7 @@ namespace App\Services\Ai\Providers;
 
 use App\Services\Ai\Contracts\StoryTextGenerationProviderInterface;
 use App\Services\Ai\Data\StoryTextGenerationInput;
+use App\Services\Ai\Data\StoryTextGenerationResult;
 use App\Services\Ai\StoryTextPromptComposer;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
@@ -32,7 +33,7 @@ readonly class OpenAiCompatibleStoryTextProvider implements StoryTextGenerationP
         return $this->apiKey !== '' && $this->baseUrl !== '' && $this->model !== '';
     }
 
-    public function generateStory(StoryTextGenerationInput $input): ?string
+    public function generateStory(StoryTextGenerationInput $input): ?StoryTextGenerationResult
     {
         if (! $this->isConfigured()) {
             return null;
@@ -83,7 +84,14 @@ readonly class OpenAiCompatibleStoryTextProvider implements StoryTextGenerationP
                 return null;
             }
 
-            return $story;
+            $promptTokens = Arr::get($responseData, 'usage.prompt_tokens');
+            $completionTokens = Arr::get($responseData, 'usage.completion_tokens');
+
+            return new StoryTextGenerationResult(
+                story: $story,
+                promptTokens: is_numeric($promptTokens) ? (int) $promptTokens : null,
+                completionTokens: is_numeric($completionTokens) ? (int) $completionTokens : null,
+            );
         } catch (Throwable $exception) {
             Log::warning('Story text provider exception', [
                 'message' => $exception->getMessage(),

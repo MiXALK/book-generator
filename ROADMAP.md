@@ -42,10 +42,10 @@ Use Laravel Queue backed by Redis. Split work by queue name so workers can scale
 independently:
 
 - [x] `default` for light background work.
-- [ ] `generation-text` for story text generation.
+- [x] `generation-text` for story text generation.
 - [x] `generation-image` for illustration generation.
-- [ ] `generation-layout` for paginating book pages.
-- [ ] `mail` for email notifications.
+- [x] `generation-layout` for paginating book pages.
+- [x] `mail` for email notifications.
 
 ## Stage 0: Product Discovery And Constraints
 
@@ -237,12 +237,12 @@ developer changing code.
 
 Goal: prepare the product for growth after demand is validated.
 
-- [ ] Split worker pools by queue and resource requirements.
-- [ ] Cache the template catalog in Redis.
-- [ ] Store generation results and avoid regenerating unchanged paginated HTML storybook layouts.
-- [ ] Add idempotency keys for generation requests.
-- [ ] Add quotas and throttling for expensive AI operations.
-- [ ] Track per-book cost: text, images, layout assembly, storage, and bandwidth.
+- [x] Split worker pools by queue and resource requirements.
+- [x] Cache the template catalog in Redis.
+- [x] Store generation results and avoid regenerating unchanged paginated HTML storybook layouts.
+- [x] Add idempotency keys for generation requests.
+- [x] Add quotas and throttling for expensive AI operations.
+- [x] Track per-book cost: text, images, layout assembly, storage, and bandwidth.
 
 Success criteria: generation cost is measurable, queues scale independently, and
 duplicate requests do not create duplicate expensive work.

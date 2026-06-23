@@ -15,6 +15,7 @@ readonly class ContentPublicationService
         private AdminContentRepositoryInterface $adminContent,
         private AdminVersionRepositoryInterface $versions,
         private PromptQualityService $promptQuality,
+        private TemplateCatalogCacheService $catalogCache,
     ) {}
 
     public function submitBookTemplateForReview(BookTemplate $template): BookTemplate
@@ -34,10 +35,14 @@ readonly class ContentPublicationService
 
         $this->versions->snapshotBookTemplate($template);
 
-        return $this->adminContent->updateTemplate($template, [
+        $published = $this->adminContent->updateTemplate($template, [
             'publication_status' => PublicationStatus::Published,
             'is_active' => true,
         ]);
+
+        $this->catalogCache->bumpVersion();
+
+        return $published;
     }
 
     public function submitStoryPromptForReview(StoryPrompt $prompt): StoryPrompt
@@ -59,10 +64,14 @@ readonly class ContentPublicationService
 
         $this->versions->snapshotStoryPrompt($prompt);
 
-        return $this->adminContent->updatePrompt($prompt, [
+        $published = $this->adminContent->updatePrompt($prompt, [
             'publication_status' => PublicationStatus::Published,
             'is_active' => true,
         ]);
+
+        $this->catalogCache->bumpVersion();
+
+        return $published;
     }
 
     public function submitLayoutForReview(LayoutTemplate $layout): LayoutTemplate
@@ -82,9 +91,13 @@ readonly class ContentPublicationService
 
         $this->versions->snapshotLayoutTemplate($layout);
 
-        return $this->adminContent->updateLayout($layout, [
+        $published = $this->adminContent->updateLayout($layout, [
             'publication_status' => PublicationStatus::Published,
             'is_active' => true,
         ]);
+
+        $this->catalogCache->bumpVersion();
+
+        return $published;
     }
 }

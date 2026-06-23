@@ -32,6 +32,8 @@ readonly class IllustrationGenerationService
         private IllustrationPromptComposer $promptComposer,
         private CharacterBibleComposer $characterBibleComposer,
         private BookGenerationObservabilityService $observability,
+        private BookGenerationCostService $costTracking,
+        private AiOperationQuotaService $aiQuotas,
     ) {}
 
     public function shouldGenerateIllustrations(?UploadedPhoto $photo): bool
@@ -91,6 +93,8 @@ readonly class IllustrationGenerationService
                 );
 
                 $imageMeasured = $this->observability->measure(function () use ($generation, $character) {
+                    $generatedCount = 0;
+
                     foreach ($generation->bookPages as $page) {
                         if (! $page instanceof BookPage) {
                             continue;
@@ -137,8 +141,17 @@ readonly class IllustrationGenerationService
                         }
 
                         $this->bookPages->updateImageUrl($page->id, $path);
+                        $this->costTracking->recordStorageBytes($generation, strlen($binary));
+                        $this->costTracking->recordImageGenerations($generation, 1);
+                        $generatedCount++;
                     }
+
+                    return $generatedCount;
                 });
+
+                if ($generation->user !== null) {
+                    $this->aiQuotas->recordImageGenerations($generation->user, (int) $imageMeasured['result']);
+                }
 
                 $this->consumeUploadedPhoto($generation);
                 $this->bookGenerations->updateIllustrationStatus($generation, 'completed', null);

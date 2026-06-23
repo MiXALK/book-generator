@@ -215,6 +215,27 @@ Content managers manage catalog entities without code changes or re-seeding:
 - Frontend admin UI: `/admin` (goals, templates, prompts, layouts, preview, review
   queue). Visible to users with `role: admin`.
 
+## Scaling And Cost Optimization
+
+Generation runs as a queued pipeline so worker pools can scale independently:
+
+- Jobs: `GenerateBookTextJob` (`generation-text`), `AssembleBookLayoutJob`
+  (`generation-layout`), `GenerateBookIllustrationsJob` (`generation-image`),
+  `BookReadyNotification` (`mail`).
+- Horizon supervisors are split per queue with distinct memory and timeout settings
+  in `config/horizon.php`.
+- Template catalog reads are cached in Redis via `TemplateCatalogCacheService`;
+  cache version bumps on admin publish (`ContentPublicationService`).
+- Layout assembly is cached by story hash + catalog version (`BookLayoutCacheService`);
+  `book_generations.story_text` stores generated text for the pipeline.
+- Idempotency: clients send `Idempotency-Key`; replays return the existing
+  generation without duplicate work (`BookGenerationIdempotencyService`).
+- AI quotas: daily text/image limits via `AiOperationQuotaService`; illustration
+  retries throttled (`books-retry-illustrations`).
+- Cost tracking: `BookGenerationCostService` records `cost_breakdown` and
+  `total_cost_usd` on `book_generations` (text tokens, images, layout, storage,
+  bandwidth). Configure rates under `config/services.php` (`scaling`, `cost`).
+
 ## Documentation Rules
 
 - Update this file when adding or changing conventions, dependencies, folder

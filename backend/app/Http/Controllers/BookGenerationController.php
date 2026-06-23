@@ -6,6 +6,8 @@ use App\Http\Requests\GenerateBookRequest;
 use App\Models\BookPage;
 use App\Repositories\Contracts\BookGenerationRepositoryInterface;
 use App\Repositories\Contracts\BookTemplateRepositoryInterface;
+use App\Services\BookGenerationCostService;
+use App\Services\BookGenerationIdempotencyService;
 use App\Services\BookGenerationService;
 use App\Services\BookIllustrationStorageService;
 use App\Services\IllustrationGenerationService;
@@ -23,6 +25,8 @@ class BookGenerationController extends Controller
         private readonly BookIllustrationStorageService $illustrationStorage,
         private readonly IllustrationGenerationService $illustrationGeneration,
         private readonly BookGenerationRepositoryInterface $bookGenerations,
+        private readonly BookGenerationCostService $costTracking,
+        private readonly BookGenerationIdempotencyService $idempotency,
         private readonly BookTemplateRepositoryInterface $bookTemplates,
         private readonly SubscriptionAccessService $subscriptionAccess,
         private readonly UserDataDeletionService $dataDeletion,
@@ -72,6 +76,18 @@ class BookGenerationController extends Controller
             ], 429);
         }
 
+        $idempotencyKey = $request->idempotencyKey();
+        $existing = $this->idempotency->findExisting($user, $idempotencyKey);
+
+        if ($existing !== null) {
+            $lock->release();
+
+            return response()->json([
+                'message' => 'Book generation already exists.',
+                'generation' => $this->generationService->formatForApi($existing),
+            ]);
+        }
+
         try {
             $this->generationService->ensureGenerationLimit($user);
             $generation = $this->generationService->generate(
@@ -81,13 +97,14 @@ class BookGenerationController extends Controller
                 $request->age(),
                 $request->goal(),
                 $request->uploadedPhotoId(),
+                $idempotencyKey,
             );
         } finally {
             $lock->release();
         }
 
         return response()->json([
-            'message' => 'Book generation completed.',
+            'message' => 'Book generation started.',
             'generation' => $generation,
         ], 201);
     }
@@ -154,6 +171,12 @@ class BookGenerationController extends Controller
 
         if ($payload === null) {
             abort(404);
+        }
+
+        $generation = $this->bookGenerations->findWithUser($id);
+
+        if ($generation !== null) {
+            $this->costTracking->recordBandwidthBytes($generation, strlen($payload['binary']));
         }
 
         return response($payload['binary'], 200, [

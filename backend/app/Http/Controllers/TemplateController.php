@@ -3,15 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AgeRange;
-use App\Repositories\Contracts\StoryGoalRepositoryInterface;
 use App\Services\SubscriptionAccessService;
+use App\Services\TemplateCatalogCacheService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TemplateController extends Controller
 {
     public function __construct(
-        private readonly StoryGoalRepositoryInterface $storyGoals,
+        private readonly TemplateCatalogCacheService $catalogCache,
         private readonly SubscriptionAccessService $subscriptionAccess,
     ) {}
 
@@ -21,7 +21,7 @@ class TemplateController extends Controller
         $hasPaidAccess = $this->subscriptionAccess->hasActivePaidAccess($user);
 
         return response()->json([
-            'goals' => $this->storyGoals->listForCatalog($hasPaidAccess),
+            'goals' => $this->catalogCache->listGoalsForCatalog($hasPaidAccess),
             'age_ranges' => AgeRange::catalog(),
             'monthly_limit' => $this->subscriptionAccess->monthlyLimit($user),
             'has_paid_access' => $hasPaidAccess,

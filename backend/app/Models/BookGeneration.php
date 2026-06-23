@@ -27,9 +27,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'illustration_status',
     'error_message',
     'correlation_id',
+    'idempotency_key',
+    'input_fingerprint',
     'text_duration_ms',
     'layout_duration_ms',
     'image_duration_ms',
+    'cost_breakdown',
+    'total_cost_usd',
+    'story_text',
 ])]
 class BookGeneration extends Model
 {
@@ -42,6 +47,8 @@ class BookGeneration extends Model
     {
         return [
             'book_template_snapshot' => 'array',
+            'cost_breakdown' => 'array',
+            'total_cost_usd' => 'decimal:6',
         ];
     }
 

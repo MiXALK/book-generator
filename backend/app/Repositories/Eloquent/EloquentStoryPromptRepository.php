@@ -9,6 +9,11 @@ use App\Repositories\Contracts\StoryPromptRepositoryInterface;
 
 class EloquentStoryPromptRepository implements StoryPromptRepositoryInterface
 {
+    public function findById(int $id): ?StoryPrompt
+    {
+        return StoryPrompt::query()->find($id);
+    }
+
     public function findBestForGeneration(string $language, int $age, string $goal): ?StoryPrompt
     {
         $strategies = [
