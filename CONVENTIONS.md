@@ -72,7 +72,8 @@ To support multiple nationalities while maintaining local compliance, the applic
 ## Fixed Domain Constants
 
 Use backed PHP enums in `backend/app/Enums/` for small, fixed product constants
-that will not grow over time. Age bands are modeled this way (`AgeRange`).
+that will not grow over time. Age bands are modeled this way (`AgeRange`), and
+child gender must use fixed `boy` / `girl` values.
 
 Growable catalog entities (for example, `StoryGoal`, `BookTemplate`, and
 `StoryPrompt`) stay in the database and use repositories. UI labels for enum
@@ -142,7 +143,7 @@ Stripe monthly subscriptions gate paid templates and higher generation quotas:
 
 ## AI Image Generation
 
-Illustration generation for paid photo personalization uses provider abstractions:
+Illustration generation uses provider abstractions:
 
 - Contract: `backend/app/Services/Ai/Contracts/IllustrationGenerationProviderInterface.php`
 - Default driver: `yandexart` (Yandex Cloud Foundation Models YandexART async REST API)
@@ -157,7 +158,16 @@ Illustration generation for paid photo personalization uses provider abstraction
 
 Photo upload validation limits are defined in `config/services.php` under `book_photo`.
 
-Character reuse: one `GeneratedCharacter` per `ChildProfile` (unique per `user_id` + `child_name`). New uploads refresh the linked photo reference but keep the existing style bible for visual consistency across books.
+Character rules:
+
+- Free-tier and no-upload generation paths use default boy/girl character
+  presets selected from child gender, not user-provided media.
+- Paid uploads are character-basis inputs only. They generate or refresh a
+  reusable personalized character for the whole book, not a per-page image
+  reference.
+- Character reuse: one `GeneratedCharacter` per `ChildProfile` (unique per
+  `user_id` + `child_name`). New uploads refresh the linked photo reference but
+  keep the existing style bible for visual consistency across books.
 
 ## Privacy And Data Deletion
 

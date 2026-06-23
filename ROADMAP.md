@@ -3,22 +3,23 @@
 This roadmap captures the planned development stages for a SaaS product that
 generates personalized children's books. A parent enters the child's name, age,
 and a goal such as "stop being afraid of the dark" or "learn to share." The
-output is a paginated HTML digital storybook where the main character uses the child's name and, for
-paid users, can visually resemble the child based on an uploaded photo.
+output is a paginated HTML digital storybook where the main character uses the child's name, every
+page can receive an AI-generated illustration, and paid users can personalize
+the main character from an uploaded photo or presentation image.
 
 ## Product Scope
 
 The service has two main tiers:
 
 - [x] Free users can generate books from a limited set of prepared templates.
-- [x] Paid subscribers get an expanded template library and photo-based character
-  personalization.
+- [x] Paid subscribers get an expanded template library and photo/presentation-based
+  character personalization.
 
 Initial MVP decisions:
 
 - [x] Free tier: 2 free templates and 3 generated books per month.
-- [x] Paid tier: all templates, photo personalization, generated illustrations, book
-  history, and 10 generated books per month.
+- [x] Paid tier: all templates, photo/presentation-based character
+  personalization, book history, and 10 generated books per month.
 - [x] Paid billing: monthly subscription through Stripe; do not use credits in the
   MVP.
 - [x] Uploaded child photos require explicit parental consent, must be stored
@@ -247,6 +248,42 @@ Goal: prepare the product for growth after demand is validated.
 Success criteria: generation cost is measurable, queues scale independently, and
 duplicate requests do not create duplicate expensive work.
 
+## Stage 11: Gender-Aware Characters And Tiered Illustrations
+
+Goal: generate page illustrations for every book while separating free default
+characters from paid personalized character creation.
+
+- [ ] Add child gender to the generation form as a required `boy` or `girl`
+  selection.
+- [ ] Persist child gender with the child profile and book generation snapshot so
+  repeat generations, history, and illustration prompts remain reproducible.
+- [ ] Define two default character presets, one for a boy and one for a girl, for
+  free users and any no-upload generation path.
+- [ ] Generate AI illustrations for each page from the selected character preset,
+  page text, and stored layout metadata.
+- [ ] Keep media uploads unavailable for free users.
+- [ ] For paid users, accept a photo or presentation image only as the basis for
+  generating or refreshing a reusable personalized character for the whole fairy
+  tale.
+- [ ] Ensure cover, content, and ending page prompts reuse the resolved character
+  reference consistently across the full book.
+- [ ] Track and enforce image generation costs for free-tier books so page
+  illustrations do not bypass existing cost controls.
+
+Decisions:
+
+- [ ] Free users receive AI page illustrations without uploading a photo or
+  presentation image.
+- [ ] Free users use one of two ready-made default characters selected by child
+  gender.
+- [ ] Paid uploads are character-basis inputs only; they are not required as
+  per-page illustration inputs.
+
+Success criteria: a free user can select boy or girl and receive a fully
+illustrated book without uploading media; a paid user can upload one
+character-basis image and receive all page illustrations with that personalized
+character.
+
 ## MVP Boundary
 
 The first release should include:
@@ -276,5 +313,9 @@ The first release should not include:
   follow paid validation.
 - [x] Computationally expensive image/illustration generation needs separate worker resources.
 - [x] Free-tier limits must exist early to control generation costs.
+- [ ] Free-tier AI page illustrations can increase cost quickly and need quota,
+  throttling, and per-book cost tracking before broad rollout.
+- [ ] Character consistency across generated pages can drift unless prompts reuse a
+  stable character preset or personalized character reference.
 - [x] Content must remain safe for children, especially if free-form AI text
   generation is introduced later.
