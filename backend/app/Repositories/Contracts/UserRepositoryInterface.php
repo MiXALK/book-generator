@@ -35,5 +35,7 @@ interface UserRepositoryInterface
         ?string $stripeSubscriptionId,
     ): User;
 
+    public function syncAdminRole(User $user, string $email): User;
+
     public function delete(User $user): void;
 }

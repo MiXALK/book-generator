@@ -3,6 +3,7 @@
 namespace App\Repositories\Eloquent;
 
 use App\Enums\AgeRange;
+use App\Enums\PublicationStatus;
 use App\Models\StoryPrompt;
 use App\Repositories\Contracts\StoryPromptRepositoryInterface;
 
@@ -32,6 +33,7 @@ class EloquentStoryPromptRepository implements StoryPromptRepositoryInterface
     {
         return StoryPrompt::query()
             ->where('is_active', true)
+            ->where('publication_status', PublicationStatus::Published)
             ->where('language', $language)
             ->when($goal !== null, function ($query) use ($goal) {
                 $query->where(function ($inner) use ($goal) {

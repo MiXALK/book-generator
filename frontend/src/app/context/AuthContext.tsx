@@ -12,6 +12,7 @@ export interface User {
   plan: "free" | "paid";
   subscription_status: "active" | "inactive";
   language: Locale;
+  role?: "user" | "admin";
 }
 
 interface AuthContextType {

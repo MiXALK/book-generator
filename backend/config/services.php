@@ -104,4 +104,16 @@ return [
         'job_backoff_seconds' => [30, 120, 300],
         'job_max_attempts' => 3,
     ],
+
+    'admin' => [
+        'emails' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('ADMIN_EMAILS', '')),
+        ))),
+    ],
+
+    'content' => [
+        'prompt_min_quality_score' => 3.0,
+        'prompt_min_rating_count' => 1,
+    ],
 ];

@@ -193,6 +193,28 @@ available at `/horizon` in local development.
 - Configure via `OBSERVABILITY_NOTIFY_ON_BOOK_READY` and
   `OBSERVABILITY_BOOK_READER_URL` in `.env`.
 
+## Admin And Content Operations
+
+Content managers manage catalog entities without code changes or re-seeding:
+
+- Admin role: `users.role` enum (`user`, `admin`). Promoted automatically on Google
+  login when the email is listed in `ADMIN_EMAILS` (comma-separated in `.env`).
+- Middleware: `admin` (`EnsureAdmin`) on `/api/admin/*` routes (requires `auth.api`).
+- Admin API: CRUD for `StoryGoal`, `BookTemplate`, `StoryPrompt`, and
+  `LayoutTemplate`; publication workflow (`draft` → `pending_review` → `published`);
+  template preview endpoints; review queue.
+- Publication status: `publication_status` on catalog tables. Consumer catalog and
+  generation paths only use `published` + `is_active` records.
+- Versioning: `version` column plus `*_versions` snapshot tables
+  (`book_template_versions`, `story_prompt_versions`, `layout_template_versions`).
+  Snapshots are written on publish. `book_generations.book_template_snapshot` stores
+  template metadata at generation time (alongside existing `prompt_snapshot`).
+- Prompt quality: `StoryPromptRating` submissions via admin API; scores aggregated
+  into `quality_score` / `rating_count`. Publication requires minimum thresholds in
+  `config/services.php` under `content`.
+- Frontend admin UI: `/admin` (goals, templates, prompts, layouts, preview, review
+  queue). Visible to users with `role: admin`.
+
 ## Documentation Rules
 
 - Update this file when adding or changing conventions, dependencies, folder

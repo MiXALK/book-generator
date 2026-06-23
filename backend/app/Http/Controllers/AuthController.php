@@ -139,21 +139,14 @@ class AuthController extends Controller
             ]);
         }
 
+        $user = $this->users->syncAdminRole($user, $email);
+
         $apiToken = Str::random(80);
         $user = $this->users->updateApiToken($user, $apiToken, now()->addDays(30));
 
         return response()->json([
             'token' => $apiToken,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'avatar_url' => $user->avatar_url,
-                'plan' => $user->plan,
-                'subscription_status' => $user->subscription_status,
-                'language' => $user->language,
-                'expires_at' => $user->api_token_expires_at,
-            ],
+            'user' => $this->formatUser($user),
         ]);
     }
 
@@ -181,16 +174,26 @@ class AuthController extends Controller
         $user = $request->user();
 
         return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'avatar_url' => $user->avatar_url,
-                'plan' => $user->plan,
-                'subscription_status' => $user->subscription_status,
-                'language' => $user->language,
-            ],
+            'user' => $this->formatUser($user),
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function formatUser(\App\Models\User $user): array
+    {
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar_url' => $user->avatar_url,
+            'plan' => $user->plan,
+            'subscription_status' => $user->subscription_status,
+            'language' => $user->language,
+            'role' => $user->role?->value ?? 'user',
+            'expires_at' => $user->api_token_expires_at,
+        ];
     }
 
     /**

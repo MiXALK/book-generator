@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
@@ -210,6 +211,11 @@ export default function DashboardPage() {
         </div>
         <nav className={styles.nav}>
           <LanguageSelect />
+          {user.role === "admin" && (
+            <Link href="/admin" className={btn.btnGhost}>
+              {t.openAdmin}
+            </Link>
+          )}
           <div className={styles.userInfo}>
             {user.avatar_url ? (
               <Image

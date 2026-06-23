@@ -219,14 +219,14 @@ failing.
 
 Goal: manage templates without code changes.
 
-- [ ] Add an admin role.
-- [ ] Add CRUD for goals, templates, and free/paid availability.
-- [ ] Add CRUD for AI story prompts and prompt rating metadata.
-- [ ] Add template preview.
-- [ ] Add layout-template management for cover/content/ending variants.
-- [ ] Version templates so old generations remain reproducible.
-- [ ] Add moderation or manual review before publishing new templates.
-- [ ] Add prompt quality workflows: scoring, activation thresholds, and publication
+- [x] Add an admin role.
+- [x] Add CRUD for goals, templates, and free/paid availability.
+- [x] Add CRUD for AI story prompts and prompt rating metadata.
+- [x] Add template preview.
+- [x] Add layout-template management for cover/content/ending variants.
+- [x] Version templates so old generations remain reproducible.
+- [x] Add moderation or manual review before publishing new templates.
+- [x] Add prompt quality workflows: scoring, activation thresholds, and publication
   controls.
 
 Success criteria: a content manager can manage prompts, ratings, and layout
