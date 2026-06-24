@@ -28,7 +28,7 @@ class CharacterBibleComposerTest extends TestCase
 
         $this->assertStringContainsString('Masha', $result);
         $this->assertStringContainsString('age 6', $result);
-        $this->assertStringContainsString('Default girl character preset', $result);
+        $this->assertStringContainsString('lavender dress', $result);
     }
 
     public function test_builds_boy_default_preset(): void
@@ -38,6 +38,6 @@ class CharacterBibleComposerTest extends TestCase
         $result = $composer->compose('Misha', 5, 'boy', null);
 
         $this->assertStringContainsString('Misha', $result);
-        $this->assertStringContainsString('Default boy character preset', $result);
+        $this->assertStringContainsString('blue overalls', $result);
     }
 }

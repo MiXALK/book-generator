@@ -84,6 +84,7 @@ readonly class YandexArtIllustrationProvider implements IllustrationGenerationPr
             Log::warning('YandexART illustration request failed', [
                 'status' => $response->status(),
                 'page_number' => $input->pageNumber,
+                'body' => $response->body(),
             ]);
 
             return null;

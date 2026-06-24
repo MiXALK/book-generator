@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\TransientGenerationException;
 use App\Jobs\GenerateBookIllustrationsJob;
+use App\Jobs\GenerateBookPageIllustrationJob;
 use App\Models\BookGeneration;
 use App\Models\BookPage;
 use App\Models\ChildProfile;
@@ -69,11 +70,7 @@ readonly class IllustrationGenerationService
                 $this->bookGenerations->updateIllustrationStatus($generation, 'processing');
                 $this->bookGenerations->updateStatus($generation, 'processing');
 
-                $character = $generation->generated_character_id !== null
-                    ? $this->generatedCharacters->findById((int) $generation->generated_character_id)
-                    : null;
-
-                if ($character === null) {
+                if ($this->characterForGeneration($generation) === null) {
                     $this->failGeneration($generation, 'Character profile is missing for illustration generation.');
 
                     return;
@@ -92,81 +89,17 @@ readonly class IllustrationGenerationService
                     'Illustration generation started',
                 );
 
-                $imageMeasured = $this->observability->measure(function () use ($generation, $character) {
-                    $generatedCount = 0;
+                $missingPages = $this->bookPages->listMissingGeneratedImages($generationId);
 
-                    foreach ($generation->bookPages as $page) {
-                        if (! $page instanceof BookPage) {
-                            continue;
-                        }
+                if ($missingPages->isEmpty()) {
+                    $this->completeIfAllPagesReady($generation, $correlationId);
 
-                        $layoutTemplate = $page->layoutTemplate;
-                        $category = $layoutTemplate instanceof LayoutTemplate
-                            ? (string) $layoutTemplate->category
-                            : 'content';
-                        $prompt = $this->promptComposer->composePagePrompt(
-                            $character->style_bible,
-                            $page->text,
-                            $category,
-                            $page->page_number,
-                            $generation->child_name,
-                        );
-
-                        $input = new IllustrationGenerationInput(
-                            prompt: $prompt,
-                            childName: $generation->child_name,
-                            childAge: $generation->child_age,
-                            pageCategory: $category,
-                            pageNumber: $page->page_number,
-                        );
-
-                        $binary = $this->illustrationProvider->generateIllustration($input);
-
-                        if ($binary === null) {
-                            throw new TransientGenerationException(
-                                'Illustration provider failed for page '.$page->page_number,
-                            );
-                        }
-
-                        $path = $this->illustrationStorage->storeGeneratedImage(
-                            $generation->id,
-                            $page->page_number,
-                            $binary,
-                        );
-
-                        if ($path === null) {
-                            throw new TransientGenerationException(
-                                'Failed to store illustration for page '.$page->page_number,
-                            );
-                        }
-
-                        $this->bookPages->updateImageUrl($page->id, $path);
-                        $this->costTracking->recordStorageBytes($generation, strlen($binary));
-                        $this->costTracking->recordImageGenerations($generation, 1);
-                        $generatedCount++;
-                    }
-
-                    return $generatedCount;
-                });
-
-                if ($generation->user !== null) {
-                    $this->aiQuotas->recordImageGenerations($generation->user, (int) $imageMeasured['result']);
+                    return;
                 }
 
-                $this->consumeUploadedPhoto($generation);
-                $this->bookGenerations->updateIllustrationStatus($generation, 'completed', null);
-                $this->bookGenerations->updateStatus($generation, 'completed');
-                $this->observability->recordLatencyMetrics($generation, [
-                    'image_duration_ms' => $imageMeasured['duration_ms'],
-                ]);
-                $this->observability->logStage(
-                    $generationId,
-                    $correlationId,
-                    'image',
-                    'Illustration generation completed',
-                    ['image_duration_ms' => $imageMeasured['duration_ms']],
-                );
-                $this->observability->notifyBookReady($generation);
+                foreach ($missingPages as $page) {
+                    GenerateBookPageIllustrationJob::dispatch($generationId, $page->id);
+                }
             } catch (TransientGenerationException $exception) {
                 $this->observability->logStage(
                     $generationId,
@@ -193,6 +126,97 @@ readonly class IllustrationGenerationService
         });
     }
 
+    public function runForPage(int $generationId, int $pageId): void
+    {
+        $generation = $this->bookGenerations->findWithUser($generationId);
+        $page = $this->bookPages->findForGenerationWithLayout($generationId, $pageId);
+
+        if ($generation === null || $page === null) {
+            return;
+        }
+
+        $correlationId = $generation->correlation_id ?? $this->observability->newCorrelationId();
+
+        $this->observability->withContext($generationId, $correlationId, function () use ($generation, $page, $generationId, $correlationId) {
+            try {
+                if (! $this->pageNeedsGeneratedImage($page)) {
+                    $this->completeIfAllPagesReady($generation, $correlationId);
+
+                    return;
+                }
+
+                $this->bookGenerations->updateIllustrationStatus($generation, 'processing');
+                $this->bookGenerations->updateStatus($generation, 'processing');
+
+                $character = $this->characterForGeneration($generation);
+
+                if ($character === null) {
+                    $this->failGeneration($generation, 'Character profile is missing for illustration generation.');
+
+                    return;
+                }
+
+                if (! $this->hasPhotoProcessingConsent($generation)) {
+                    $this->failGeneration($generation, 'Parental consent is required before photo processing.');
+
+                    return;
+                }
+
+                $imageMeasured = $this->observability->measure(
+                    fn () => $this->generatePageIllustration($generation, $page, $character),
+                );
+
+                if ($generation->user !== null && $imageMeasured['result'] === true) {
+                    $this->aiQuotas->recordImageGenerations($generation->user, 1);
+                }
+
+                $this->observability->recordLatencyMetrics($generation, [
+                    'image_duration_ms' => ((int) $generation->image_duration_ms) + $imageMeasured['duration_ms'],
+                ]);
+                $this->observability->logStage(
+                    $generationId,
+                    $correlationId,
+                    'image',
+                    'Page illustration generation completed',
+                    [
+                        'page_number' => $page->page_number,
+                        'image_duration_ms' => $imageMeasured['duration_ms'],
+                    ],
+                );
+
+                $this->completeIfAllPagesReady($generation, $correlationId);
+            } catch (TransientGenerationException $exception) {
+                $this->observability->logStage(
+                    $generationId,
+                    $correlationId,
+                    'image',
+                    'Page illustration generation attempt failed; queue will retry',
+                    [
+                        'page_number' => $page->page_number,
+                        'message' => $exception->getMessage(),
+                    ],
+                    'warning',
+                );
+
+                throw $exception;
+            } catch (Throwable $exception) {
+                $this->observability->logStage(
+                    $generationId,
+                    $correlationId,
+                    'image',
+                    'Page illustration generation attempt failed with unexpected error',
+                    [
+                        'page_number' => $page->page_number,
+                        'message' => $exception->getMessage(),
+                    ],
+                    'error',
+                );
+
+                throw new TransientGenerationException($exception->getMessage(), 0, $exception);
+            }
+        });
+    }
+
     public function failAfterExhaustedRetries(int $generationId, ?Throwable $exception): void
     {
         $generation = $this->bookGenerations->findWithPagesForIllustration($generationId);
@@ -203,6 +227,23 @@ readonly class IllustrationGenerationService
 
         $message = $exception?->getMessage() ?: 'Illustration generation failed after retries.';
         $this->failGeneration($generation, $message);
+    }
+
+    public function failPageAfterExhaustedRetries(int $generationId, int $pageId, ?Throwable $exception): void
+    {
+        $generation = $this->bookGenerations->findWithUser($generationId);
+        $page = $this->bookPages->findForGenerationWithLayout($generationId, $pageId);
+
+        if ($generation === null || $page === null || $generation->status === 'completed') {
+            return;
+        }
+
+        $message = $exception?->getMessage() ?: 'Illustration generation failed after retries.';
+        $this->bookGenerations->updateIllustrationStatus(
+            $generation,
+            'failed',
+            'Page '.$page->page_number.': '.$message,
+        );
     }
 
     public function resolveOrCreateCharacter(
@@ -256,6 +297,103 @@ readonly class IllustrationGenerationService
         $this->observability->notifyBookReady($generation);
     }
 
+    private function generatePageIllustration(
+        BookGeneration $generation,
+        BookPage $page,
+        GeneratedCharacter $character,
+    ): bool {
+        if (! $this->pageNeedsGeneratedImage($page)) {
+            return false;
+        }
+
+        $layoutTemplate = $page->layoutTemplate;
+        $category = $layoutTemplate instanceof LayoutTemplate
+            ? (string) $layoutTemplate->category
+            : 'content';
+        $prompt = $this->promptComposer->composePagePrompt(
+            $character->style_bible,
+            $page->text,
+            $category,
+            $page->page_number,
+            $generation->child_name,
+            $this->maxPromptLength(),
+        );
+
+        $input = new IllustrationGenerationInput(
+            prompt: $prompt,
+            childName: $generation->child_name,
+            childAge: $generation->child_age,
+            pageCategory: $category,
+            pageNumber: $page->page_number,
+        );
+
+        $binary = $this->illustrationProvider->generateIllustration($input);
+
+        if ($binary === null) {
+            throw new TransientGenerationException(
+                'Illustration provider failed for page '.$page->page_number,
+            );
+        }
+
+        $path = $this->illustrationStorage->storeGeneratedImage(
+            $generation->id,
+            $page->page_number,
+            $binary,
+        );
+
+        if ($path === null) {
+            throw new TransientGenerationException(
+                'Failed to store illustration for page '.$page->page_number,
+            );
+        }
+
+        $this->bookPages->updateImageUrl($page->id, $path);
+        $this->costTracking->recordStorageBytes($generation, strlen($binary));
+        $this->costTracking->recordImageGenerations($generation, 1);
+
+        return true;
+    }
+
+    private function completeIfAllPagesReady(BookGeneration $generation, string $correlationId): void
+    {
+        if ($this->bookPages->countMissingGeneratedImages($generation->id) > 0) {
+            return;
+        }
+
+        $fresh = $this->bookGenerations->findWithUser($generation->id);
+
+        if ($fresh === null || $fresh->status === 'completed') {
+            return;
+        }
+
+        $this->consumeUploadedPhoto($fresh);
+        $this->bookGenerations->updateIllustrationStatus($fresh, 'completed', null);
+        $this->bookGenerations->updateStatus($fresh, 'completed');
+        $this->observability->logStage(
+            $fresh->id,
+            $correlationId,
+            'image',
+            'Illustration generation completed',
+        );
+        $this->observability->notifyBookReady($fresh);
+    }
+
+    private function characterForGeneration(BookGeneration $generation): ?GeneratedCharacter
+    {
+        if ($generation->generated_character_id === null) {
+            return null;
+        }
+
+        return $this->generatedCharacters->findById((int) $generation->generated_character_id);
+    }
+
+    private function pageNeedsGeneratedImage(BookPage $page): bool
+    {
+        $path = $page->getAttributes()['image_url'] ?? null;
+
+        return ! is_string($path) || $path === '' || str_ends_with($path, '.svg');
+    }
+
     private function consumeUploadedPhoto(BookGeneration $generation): void
     {
         if ($generation->uploaded_photo_id === null) {
@@ -279,6 +417,18 @@ readonly class IllustrationGenerationService
     {
         $this->bookGenerations->updateIllustrationStatus($generation, 'failed', $message);
         $this->bookGenerations->updateStatus($generation, 'failed');
+    }
+
+    private function maxPromptLength(): ?int
+    {
+        $driver = (string) config('services.ai_image.driver', 'yandexart');
+        $configured = config('services.ai_image.drivers.'.$driver.'.max_prompt_length');
+
+        if (! is_numeric($configured)) {
+            return null;
+        }
+
+        return (int) $configured;
     }
 
     private function hasPhotoProcessingConsent(BookGeneration $generation): bool

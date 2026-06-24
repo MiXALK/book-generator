@@ -67,7 +67,8 @@ return [
                 'base_url' => 'https://llm.api.cloud.yandex.net/foundationModels/v1',
                 'operations_url' => 'https://llm.api.cloud.yandex.net/operations',
                 'model' => 'yandex-art/latest',
-                'timeout' => 120,
+                'timeout' => 480,
+                'max_prompt_length' => 500,
                 'poll_interval_seconds' => 2,
                 'aspect_ratio' => [
                     'widthRatio' => '4',
@@ -77,7 +78,7 @@ return [
             'openai' => [
                 'base_url' => 'https://api.openai.com/v1',
                 'model' => 'dall-e-3',
-                'timeout' => 120,
+                'timeout' => 480,
                 'size' => '1024x1024',
             ],
         ],

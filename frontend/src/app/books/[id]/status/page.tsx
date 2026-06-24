@@ -19,6 +19,7 @@ export default function BookStatusPage() {
   const [message, setMessage] = useState(t.preparingBook);
   const [error, setError] = useState<string | null>(null);
   const [canRetryIllustrations, setCanRetryIllustrations] = useState(false);
+  const [canReadBook, setCanReadBook] = useState(false);
   const [retrying, setRetrying] = useState(false);
 
   useEffect(() => {
@@ -84,18 +85,23 @@ export default function BookStatusPage() {
           return;
         }
 
+        setCanReadBook((generation.book_pages?.length ?? 0) > 0);
+
         if (generation.status === "completed") {
           router.replace(`/books/${bookId}`);
           return;
         }
 
+        if (generation.illustration_status === "failed") {
+          setError(generation.error_message || t.illustrationFailed);
+          setCanRetryIllustrations(true);
+
+          return;
+        }
+
         if (generation.status === "failed") {
-          if (generation.illustration_status === "failed") {
-            setError(generation.error_message || t.illustrationFailed);
-            setCanRetryIllustrations(true);
-          } else {
-            setError(t.bookGenerationFailed);
-          }
+          setError(t.bookGenerationFailed);
+
           return;
         }
 
@@ -148,6 +154,11 @@ export default function BookStatusPage() {
             {retrying ? t.generating : t.retryIllustrations}
           </button>
         )}
+        {canReadBook && (
+          <button type="button" className={btn.btnPrimary} onClick={() => router.push(`/books/${bookId}`)}>
+            {t.readBook}
+          </button>
+        )}
         <button type="button" className={btn.btnPrimary} onClick={() => router.push("/dashboard")}>
           {t.backToDashboard}
         </button>
@@ -160,6 +171,11 @@ export default function BookStatusPage() {
       <div className={styles.spinner} />
       <h1>{t.generationStatusTitle}</h1>
       <p>{message}</p>
+      {canReadBook && (
+        <button type="button" className={btn.btnPrimary} onClick={() => router.push(`/books/${bookId}`)}>
+          {t.readBook}
+        </button>
+      )}
     </div>
   );
 }

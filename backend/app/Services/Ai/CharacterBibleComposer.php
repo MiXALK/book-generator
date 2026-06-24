@@ -19,18 +19,9 @@ readonly class CharacterBibleComposer
         }
 
         $preset = ChildGender::from($childGender) === ChildGender::Boy
-            ? 'Default boy character preset: bright curious boy with short chestnut hair, warm brown eyes, '.
-                'blue overalls, and yellow scarf.'
-            : 'Default girl character preset: bright curious girl with soft brown bob hair, warm brown eyes, '.
-                'lavender dress, and yellow scarf.';
+            ? 'Boy: chestnut hair, brown eyes, blue overalls, yellow scarf.'
+            : 'Girl: brown bob, brown eyes, lavender dress, yellow scarf.';
 
-        return implode(' ', [
-            "Children's storybook illustration style.",
-            "Main character: {$childName}, age {$childAge}.",
-            $preset,
-            'Soft watercolor textures, warm pastel palette, friendly rounded shapes.',
-            'Consistent character appearance across all pages: same face shape, hair, and outfit.',
-            'Safe, age-appropriate, no text in the image.',
-        ]);
+        return "Storybook watercolor. Hero: {$childName}, age {$childAge}. {$preset} Warm pastels, consistent character, no text in image.";
     }
 }

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Exceptions\TransientGenerationException;
 use App\Jobs\GenerateBookIllustrationsJob;
+use App\Jobs\GenerateBookPageIllustrationJob;
 use App\Models\BookGeneration;
 use App\Models\BookPage;
 use App\Models\BookTemplate;
@@ -100,6 +101,12 @@ class BookGenerationObservabilityFeatureTest extends TestCase
         $this->assertSame(4, $job->tries);
         $this->assertSame([10, 20, 40], $job->backoff);
         $this->assertSame(['book-generation', 'generation:42'], $job->tags());
+
+        $pageJob = new GenerateBookPageIllustrationJob(42, 7);
+
+        $this->assertSame(4, $pageJob->tries);
+        $this->assertSame([10, 20, 40], $pageJob->backoff);
+        $this->assertSame(['book-generation', 'generation:42', 'page:7'], $pageJob->tags());
     }
 
     public function test_transient_illustration_failures_are_rethrown_for_queue_retry(): void
@@ -184,8 +191,11 @@ class BookGenerationObservabilityFeatureTest extends TestCase
 
         Log::spy();
 
+        $page = BookPage::query()->where('book_generation_id', $generation->id)->first();
+        $this->assertNotNull($page);
+
         try {
-            $this->app->make(IllustrationGenerationService::class)->runForGeneration($generation->id);
+            $this->app->make(IllustrationGenerationService::class)->runForPage($generation->id, $page->id);
             $this->fail('Expected TransientGenerationException was not thrown.');
         } catch (TransientGenerationException) {
             // expected
@@ -197,6 +207,92 @@ class BookGenerationObservabilityFeatureTest extends TestCase
                     && str_contains($message, 'queue will retry')
                     && isset($context['correlation_id'], $context['generation_id'], $context['stage']);
             });
+    }
+
+    public function test_page_illustration_generation_skips_existing_generated_images(): void
+    {
+        Notification::fake();
+        Storage::fake('s3');
+
+        $user = User::query()->create([
+            'name' => 'Free User',
+            'email' => 'skip-existing@example.com',
+            'password' => bcrypt('password'),
+            'plan' => 'free',
+            'subscription_status' => 'inactive',
+            'api_token' => 'skip-existing-token',
+            'api_token_expires_at' => now()->addDay(),
+        ]);
+
+        $goal = StoryGoal::query()->create([
+            'name' => 'Делиться игрушками',
+            'description' => 'Sharing goal',
+        ]);
+
+        $template = BookTemplate::query()->create([
+            'title' => 'Делимся',
+            'story_goal_id' => $goal->id,
+            'description' => 'Sharing template',
+            'is_free' => true,
+            'template_type' => 'story',
+            'is_active' => true,
+        ]);
+
+        $profile = ChildProfile::query()->create([
+            'user_id' => $user->id,
+            'child_name' => 'Маша',
+            'child_age' => 5,
+            'child_gender' => 'girl',
+        ]);
+
+        $character = GeneratedCharacter::query()->create([
+            'child_profile_id' => $profile->id,
+            'style_bible' => 'test bible',
+        ]);
+
+        $generation = BookGeneration::query()->create([
+            'user_id' => $user->id,
+            'book_template_id' => $template->id,
+            'child_profile_id' => $profile->id,
+            'generated_character_id' => $character->id,
+            'child_name' => 'Маша',
+            'child_age' => 5,
+            'child_gender' => 'girl',
+            'child_goal' => 'Делиться игрушками',
+            'status' => 'processing',
+            'illustration_status' => 'processing',
+            'correlation_id' => (string) Str::uuid(),
+        ]);
+
+        $readyPage = BookPage::query()->create([
+            'book_generation_id' => $generation->id,
+            'page_number' => 1,
+            'text' => 'Готовая страница',
+            'image_url' => 'books/'.$generation->id.'/page-1.jpg',
+        ]);
+        $placeholderPage = BookPage::query()->create([
+            'book_generation_id' => $generation->id,
+            'page_number' => 2,
+            'text' => 'Страница с плейсхолдером',
+            'image_url' => 'books/'.$generation->id.'/page-2.svg',
+        ]);
+
+        $provider = Mockery::mock(IllustrationGenerationProviderInterface::class);
+        $provider->shouldReceive('generateIllustration')->once()->andReturn("\xFF\xD8\xFFtest");
+        $this->app->instance(IllustrationGenerationProviderInterface::class, $provider);
+
+        $service = $this->app->make(IllustrationGenerationService::class);
+        $service->runForPage($generation->id, $readyPage->id);
+        $service->runForPage($generation->id, $placeholderPage->id);
+
+        $readyPage->refresh();
+        $placeholderPage->refresh();
+        $generation->refresh();
+
+        $this->assertSame('books/'.$generation->id.'/page-1.jpg', $readyPage->image_url);
+        $this->assertSame('books/'.$generation->id.'/page-2.jpg', $placeholderPage->image_url);
+        $this->assertSame('completed', $generation->status);
+        $this->assertSame('completed', $generation->illustration_status);
     }
 
     public function test_illustration_job_marks_generation_failed_after_retries_exhausted(): void
@@ -237,13 +333,20 @@ class BookGenerationObservabilityFeatureTest extends TestCase
             'correlation_id' => (string) Str::uuid(),
         ]);
 
-        $job = new GenerateBookIllustrationsJob($generation->id);
+        $page = BookPage::query()->create([
+            'book_generation_id' => $generation->id,
+            'page_number' => 1,
+            'text' => 'Тестовая страница',
+            'image_url' => 'generations/'.$generation->id.'/page-1.svg',
+        ]);
+
+        $job = new GenerateBookPageIllustrationJob($generation->id, $page->id);
         $job->failed(new TransientGenerationException('Provider unavailable'));
 
         $generation->refresh();
-        $this->assertSame('failed', $generation->status);
+        $this->assertSame('processing', $generation->status);
         $this->assertSame('failed', $generation->illustration_status);
-        $this->assertSame('Provider unavailable', $generation->error_message);
+        $this->assertSame('Page 1: Provider unavailable', $generation->error_message);
     }
 
     private function createFreeUser(string $token): void

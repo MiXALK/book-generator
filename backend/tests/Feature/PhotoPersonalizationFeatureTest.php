@@ -4,11 +4,13 @@ namespace Tests\Feature;
 
 use App\Jobs\AssembleBookLayoutJob;
 use App\Jobs\GenerateBookIllustrationsJob;
+use App\Jobs\GenerateBookPageIllustrationJob;
 use App\Jobs\GenerateBookTextJob;
 use App\Models\BookTemplate;
 use App\Models\StoryGoal;
 use App\Models\User;
 use App\Services\BookGenerationService;
+use App\Services\IllustrationGenerationService;
 use Database\Seeders\LayoutTemplateSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -178,6 +180,12 @@ class PhotoPersonalizationFeatureTest extends TestCase
         );
 
         Queue::assertPushed(GenerateBookIllustrationsJob::class);
+
+        Queue::pushed(GenerateBookIllustrationsJob::class)->each(
+            fn (GenerateBookIllustrationsJob $job) => $job->handle(app(IllustrationGenerationService::class)),
+        );
+
+        Queue::assertPushed(GenerateBookPageIllustrationJob::class);
     }
 
     public function test_free_generation_without_upload_queues_illustrations_from_default_character(): void
@@ -248,5 +256,11 @@ class PhotoPersonalizationFeatureTest extends TestCase
         );
 
         Queue::assertPushed(GenerateBookIllustrationsJob::class);
+
+        Queue::pushed(GenerateBookIllustrationsJob::class)->each(
+            fn (GenerateBookIllustrationsJob $job) => $job->handle(app(IllustrationGenerationService::class)),
+        );
+
+        Queue::assertPushed(GenerateBookPageIllustrationJob::class);
     }
 }
