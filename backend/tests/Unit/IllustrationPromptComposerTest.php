@@ -27,6 +27,25 @@ class IllustrationPromptComposerTest extends TestCase
         $this->assertStringContainsString('Full-bleed illustration, no captions or letters.', $prompt);
     }
 
+    public function test_compose_page_prompt_preserves_plot_over_style_bible_when_limit_applied(): void
+    {
+        $composer = new IllustrationPromptComposer;
+        $styleBible = str_repeat('Style bible sentence. ', 20);
+        $pageText = 'Луна заглянула в окно и тихо прошептала: спи спокойно, моя хорошая.';
+
+        $prompt = $composer->composePagePrompt(
+            $styleBible,
+            $pageText,
+            'content',
+            2,
+            'Аня',
+            500,
+        );
+
+        $this->assertLessThanOrEqual(500, mb_strlen($prompt));
+        $this->assertStringContainsString($pageText, $prompt);
+    }
+
     public function test_compose_page_prompt_keeps_short_prompts_unchanged(): void
     {
         $composer = new IllustrationPromptComposer;
