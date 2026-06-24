@@ -15,7 +15,7 @@ class CharacterBibleComposerTest extends TestCase
         $existing = new GeneratedCharacter;
         $existing->style_bible = 'Existing style bible for Masha.';
 
-        $result = $composer->compose('Masha', 6, $existing);
+        $result = $composer->compose('Masha', 6, 'girl', $existing);
 
         $this->assertSame('Existing style bible for Masha.', $result);
     }
@@ -24,9 +24,20 @@ class CharacterBibleComposerTest extends TestCase
     {
         $composer = new CharacterBibleComposer;
 
-        $result = $composer->compose('Masha', 6, null);
+        $result = $composer->compose('Masha', 6, 'girl', null);
 
         $this->assertStringContainsString('Masha', $result);
         $this->assertStringContainsString('age 6', $result);
+        $this->assertStringContainsString('Default girl character preset', $result);
+    }
+
+    public function test_builds_boy_default_preset(): void
+    {
+        $composer = new CharacterBibleComposer;
+
+        $result = $composer->compose('Misha', 5, 'boy', null);
+
+        $this->assertStringContainsString('Misha', $result);
+        $this->assertStringContainsString('Default boy character preset', $result);
     }
 }

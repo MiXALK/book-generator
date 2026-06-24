@@ -40,6 +40,7 @@ export default function GeneratePage() {
   const [error, setError] = useState<string | null>(null);
 
   const [childName, setChildName] = useState("");
+  const [selectedGender, setSelectedGender] = useState("");
   const [selectedGoal, setSelectedGoal] = useState("");
   const [selectedAgeRange, setSelectedAgeRange] = useState("");
   const [parentalConsent, setParentalConsent] = useState(false);
@@ -157,7 +158,7 @@ export default function GeneratePage() {
 
   const submitGeneration = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!token || !selectedGoal || !selectedAgeRange || !childName.trim() || selectedGoalLocked) {
+    if (!token || !selectedGoal || !selectedAgeRange || !selectedGender || !childName.trim() || selectedGoalLocked) {
       return;
     }
 
@@ -183,6 +184,7 @@ export default function GeneratePage() {
       const payload: Record<string, string | number> = {
         child_name: childName.trim(),
         age: childAge,
+        child_gender: selectedGender,
         goal: selectedGoal,
       };
 
@@ -247,6 +249,15 @@ export default function GeneratePage() {
             maxLength={120}
             required
           />
+        </label>
+
+        <label className={styles.field}>
+          <span>{t.childGenderLabel}</span>
+          <select value={selectedGender} onChange={(event) => setSelectedGender(event.target.value)} required>
+            <option value="">{t.selectOption}</option>
+            <option value="girl">{t.childGenderLabels.girl}</option>
+            <option value="boy">{t.childGenderLabels.boy}</option>
+          </select>
         </label>
 
         <label className={styles.field}>

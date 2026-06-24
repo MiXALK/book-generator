@@ -177,6 +177,7 @@ class PrivacyComplianceFeatureTest extends TestCase
             'book_template_id' => $template->id,
             'child_name' => 'Маша',
             'child_age' => 5,
+            'child_gender' => 'girl',
             'child_goal' => 'Делиться игрушками',
             'status' => $status,
         ]);

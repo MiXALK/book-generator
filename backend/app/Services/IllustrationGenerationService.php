@@ -36,9 +36,9 @@ readonly class IllustrationGenerationService
         private AiOperationQuotaService $aiQuotas,
     ) {}
 
-    public function shouldGenerateIllustrations(?UploadedPhoto $photo): bool
+    public function shouldGenerateIllustrations(): bool
     {
-        return $photo !== null && $this->illustrationProvider->isConfigured();
+        return $this->illustrationProvider->isConfigured();
     }
 
     public function queueGeneration(BookGeneration $generation): void
@@ -209,16 +209,31 @@ readonly class IllustrationGenerationService
         ChildProfile $profile,
         string $childName,
         int $childAge,
+        string $childGender,
         ?UploadedPhoto $photo,
     ): GeneratedCharacter {
         $existing = $this->generatedCharacters->findForChildProfile($profile);
+        $reuseExisting = $photo !== null;
 
-        $styleBible = $this->characterBibleComposer->compose($childName, $childAge, $existing);
+        $styleBible = $this->characterBibleComposer->compose(
+            $childName,
+            $childAge,
+            $childGender,
+            $existing,
+            $reuseExisting,
+        );
 
         if ($existing !== null) {
             if ($photo !== null) {
                 $this->generatedCharacters->update($existing, [
                     'uploaded_photo_id' => $photo->id,
+                    'style_bible' => $styleBible,
+                ]);
+            } elseif (
+                $existing->uploaded_photo_id === null
+                && $existing->style_bible !== $styleBible
+            ) {
+                $this->generatedCharacters->update($existing, [
                     'style_bible' => $styleBible,
                 ]);
             }

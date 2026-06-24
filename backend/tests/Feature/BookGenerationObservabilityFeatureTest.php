@@ -48,6 +48,7 @@ class BookGenerationObservabilityFeatureTest extends TestCase
         $response = $this->withToken('obs-user-token')->postJson('/api/books/generate', [
             'child_name' => 'Маша',
             'age' => 5,
+            'child_gender' => 'girl',
             'goal' => 'Делиться игрушками',
         ]);
 
@@ -75,6 +76,7 @@ class BookGenerationObservabilityFeatureTest extends TestCase
         $response = $this->withToken('notify-user-token')->postJson('/api/books/generate', [
             'child_name' => 'Маша',
             'age' => 5,
+            'child_gender' => 'girl',
             'goal' => 'Делиться игрушками',
         ]);
 
@@ -118,6 +120,7 @@ class BookGenerationObservabilityFeatureTest extends TestCase
             'user_id' => $user->id,
             'child_name' => 'Маша',
             'child_age' => 5,
+            'child_gender' => 'girl',
         ]);
 
         $photo = UploadedPhoto::query()->create([
@@ -160,6 +163,7 @@ class BookGenerationObservabilityFeatureTest extends TestCase
             'generated_character_id' => $character->id,
             'child_name' => 'Маша',
             'child_age' => 5,
+            'child_gender' => 'girl',
             'child_goal' => 'Делиться игрушками',
             'status' => 'processing',
             'illustration_status' => 'queued',
@@ -226,6 +230,7 @@ class BookGenerationObservabilityFeatureTest extends TestCase
             'book_template_id' => $template->id,
             'child_name' => 'Маша',
             'child_age' => 5,
+            'child_gender' => 'girl',
             'child_goal' => 'Делиться игрушками',
             'status' => 'processing',
             'illustration_status' => 'processing',

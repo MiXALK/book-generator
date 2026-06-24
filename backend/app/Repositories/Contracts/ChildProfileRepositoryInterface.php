@@ -12,5 +12,5 @@ interface ChildProfileRepositoryInterface
 
     public function create(array $attributes): ChildProfile;
 
-    public function updateAge(ChildProfile $profile, int $childAge): void;
+    public function updateDemographics(ChildProfile $profile, int $childAge, string $childGender): void;
 }

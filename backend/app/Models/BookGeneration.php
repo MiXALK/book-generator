@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'generated_character_id',
     'child_name',
     'child_age',
+    'child_gender',
     'child_goal',
     'prompt_snapshot',
     'book_template_snapshot',

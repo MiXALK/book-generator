@@ -71,6 +71,11 @@ export const locales = {
     generateSubtitle: "Заполните данные ребенка — шаблон книги подберётся автоматически по цели развития.",
     childNameLabel: "Имя ребенка",
     childNamePlaceholder: "Например: Маша",
+    childGenderLabel: "Персонаж",
+    childGenderLabels: {
+      girl: "Девочка",
+      boy: "Мальчик",
+    },
     goalLabel: "Цель развития",
     ageRangeLabel: "Возраст",
     ageRangeLabels: {
@@ -219,6 +224,11 @@ export const locales = {
     generateSubtitle: "Fill in child details — the book template is chosen automatically from the development goal.",
     childNameLabel: "Child name",
     childNamePlaceholder: "For example: Emma",
+    childGenderLabel: "Character",
+    childGenderLabels: {
+      girl: "Girl",
+      boy: "Boy",
+    },
     goalLabel: "Development goal",
     ageRangeLabel: "Age range",
     ageRangeLabels: {

@@ -158,6 +158,7 @@ class PhotoPersonalizationFeatureTest extends TestCase
         $response = $this->withToken('paid-gen-token')->postJson('/api/books/generate', [
             'child_name' => 'Маша',
             'age' => 5,
+            'child_gender' => 'girl',
             'goal' => 'Делиться игрушками',
             'uploaded_photo_id' => $photoId,
         ]);
@@ -167,6 +168,76 @@ class PhotoPersonalizationFeatureTest extends TestCase
         $response->assertJsonPath('generation.illustration_status', 'queued');
 
         Queue::assertPushed(GenerateBookTextJob::class);
+
+        Queue::pushed(GenerateBookTextJob::class)->each(
+            fn (GenerateBookTextJob $job) => $job->handle(app(BookGenerationService::class)),
+        );
+
+        Queue::pushed(AssembleBookLayoutJob::class)->each(
+            fn (AssembleBookLayoutJob $job) => $job->handle(app(BookGenerationService::class)),
+        );
+
+        Queue::assertPushed(GenerateBookIllustrationsJob::class);
+    }
+
+    public function test_free_generation_without_upload_queues_illustrations_from_default_character(): void
+    {
+        Storage::fake('s3');
+        Queue::fake();
+        $this->seed(LayoutTemplateSeeder::class);
+        config([
+            'services.ai_text.api_key' => '',
+            'services.ai_image.api_key' => 'test-image-key',
+            'services.ai_image.folder_id' => 'b1gtestfolder',
+        ]);
+
+        $goal = StoryGoal::query()->create([
+            'name' => 'Делиться игрушками',
+            'description' => 'Sharing goal',
+        ]);
+
+        BookTemplate::query()->create([
+            'title' => 'Делимся',
+            'story_goal_id' => $goal->id,
+            'description' => 'Sharing template',
+            'is_free' => true,
+            'template_type' => 'story',
+            'is_active' => true,
+        ]);
+
+        User::query()->create([
+            'name' => 'Free User',
+            'email' => 'free-illustrated@example.com',
+            'password' => bcrypt('password'),
+            'plan' => 'free',
+            'subscription_status' => 'inactive',
+            'api_token' => 'free-illustrated-token',
+            'api_token_expires_at' => now()->addDay(),
+        ]);
+
+        $response = $this->withToken('free-illustrated-token')->postJson('/api/books/generate', [
+            'child_name' => 'Маша',
+            'age' => 5,
+            'child_gender' => 'girl',
+            'goal' => 'Делиться игрушками',
+        ]);
+
+        $response->assertCreated();
+        $response->assertJsonPath('generation.status', 'processing');
+        $response->assertJsonPath('generation.illustration_status', 'queued');
+
+        $this->assertDatabaseHas('child_profiles', [
+            'child_name' => 'Маша',
+            'child_gender' => 'girl',
+        ]);
+        $this->assertDatabaseHas('book_generations', [
+            'child_name' => 'Маша',
+            'child_gender' => 'girl',
+            'uploaded_photo_id' => null,
+        ]);
+        $this->assertDatabaseHas('generated_characters', [
+            'uploaded_photo_id' => null,
+        ]);
 
         Queue::pushed(GenerateBookTextJob::class)->each(
             fn (GenerateBookTextJob $job) => $job->handle(app(BookGenerationService::class)),

@@ -73,7 +73,9 @@ To support multiple nationalities while maintaining local compliance, the applic
 
 Use backed PHP enums in `backend/app/Enums/` for small, fixed product constants
 that will not grow over time. Age bands are modeled this way (`AgeRange`), and
-child gender must use fixed `boy` / `girl` values.
+child gender must use fixed `boy` / `girl` values. New book generation requests
+require `child_gender`, which is stored on both `ChildProfile` and the
+`BookGeneration` snapshot.
 
 Growable catalog entities (for example, `StoryGoal`, `BookTemplate`, and
 `StoryPrompt`) stay in the database and use repositories. UI labels for enum
@@ -161,7 +163,8 @@ Photo upload validation limits are defined in `config/services.php` under `book_
 Character rules:
 
 - Free-tier and no-upload generation paths use default boy/girl character
-  presets selected from child gender, not user-provided media.
+  presets selected from child gender, not user-provided media, and still queue
+  AI page illustrations when the image provider is configured.
 - Paid uploads are character-basis inputs only. They generate or refresh a
   reusable personalized character for the whole book, not a per-page image
   reference.

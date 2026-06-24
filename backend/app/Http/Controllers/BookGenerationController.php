@@ -95,6 +95,7 @@ class BookGenerationController extends Controller
                 $template,
                 $request->childName(),
                 $request->age(),
+                $request->childGender(),
                 $request->goal(),
                 $request->uploadedPhotoId(),
                 $idempotencyKey,

@@ -128,6 +128,7 @@ class SubscriptionAccessFeatureTest extends TestCase
         $response = $this->withToken('free-user-token-2')->postJson('/api/books/generate', [
             'child_name' => 'Маша',
             'age' => 5,
+            'child_gender' => 'girl',
             'goal' => 'Дружить и общаться',
         ]);
 

@@ -36,6 +36,7 @@ class Stage10ScalingFeatureTest extends TestCase
         $payload = [
             'child_name' => 'Маша',
             'age' => 5,
+            'child_gender' => 'girl',
             'goal' => 'Делиться игрушками',
         ];
 
@@ -86,6 +87,7 @@ class Stage10ScalingFeatureTest extends TestCase
         $response = $this->withToken('stage10-cost-token')->postJson('/api/books/generate', [
             'child_name' => 'Маша',
             'age' => 5,
+            'child_gender' => 'girl',
             'goal' => 'Делиться игрушками',
         ]);
 

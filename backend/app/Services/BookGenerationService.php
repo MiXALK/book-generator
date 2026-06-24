@@ -79,6 +79,7 @@ class BookGenerationService
         BookTemplate $template,
         string $childName,
         int $age,
+        string $childGender,
         string $goal,
         ?int $uploadedPhotoId = null,
         ?string $idempotencyKey = null,
@@ -96,19 +97,21 @@ class BookGenerationService
             $template,
             $childName,
             $age,
+            $childGender,
             $goal,
             $prompt,
             $uploadedPhotoId,
             $idempotencyKey,
         );
 
-        $this->ensureAiQuotas($user, $photo);
+        $this->ensureAiQuotas($user);
 
         $generation = $this->persistNewGeneration(
             $user,
             $template,
             $childName,
             $age,
+            $childGender,
             $goal,
             $prompt,
             $photo,
@@ -186,13 +189,13 @@ class BookGenerationService
         });
     }
 
-    private function ensureAiQuotas(User $user, ?UploadedPhoto $photo): void
+    private function ensureAiQuotas(User $user): void
     {
         if ($this->storyTextProvider->isConfigured()) {
             $this->aiQuotas->ensureCanGenerateText($user);
         }
 
-        if ($photo !== null && $this->illustrationGeneration->shouldGenerateIllustrations($photo)) {
+        if ($this->illustrationGeneration->shouldGenerateIllustrations()) {
             $this->aiQuotas->ensureCanGenerateImages($user, self::ESTIMATED_ILLUSTRATION_PAGES);
         }
     }
@@ -202,6 +205,7 @@ class BookGenerationService
         BookTemplate $template,
         string $childName,
         int $age,
+        string $childGender,
         string $goal,
         ?StoryPrompt $prompt,
         ?UploadedPhoto $photo,
@@ -213,6 +217,7 @@ class BookGenerationService
             $template,
             $childName,
             $age,
+            $childGender,
             $goal,
             $prompt,
             $photo,
@@ -220,16 +225,21 @@ class BookGenerationService
             $fingerprint,
         ) {
             $correlationId = $this->observability->newCorrelationId();
-            $profile = $this->resolveChildProfile($user, $childName, $age, $photo);
-            $character = $photo !== null
-                ? $this->illustrationGeneration->resolveOrCreateCharacter($profile, $childName, $age, $photo)
-                : null;
+            $profile = $this->resolveChildProfile($user, $childName, $age, $childGender, $photo);
+            $character = $this->illustrationGeneration->resolveOrCreateCharacter(
+                $profile,
+                $childName,
+                $age,
+                $childGender,
+                $photo,
+            );
 
             $generation = $this->createGeneration(
                 $user,
                 $template,
                 $childName,
                 $age,
+                $childGender,
                 $goal,
                 $prompt,
                 $profile,
@@ -317,7 +327,7 @@ class BookGenerationService
     }
 
     /**
-     * @param  array{result: array{pages: list<array<string, mixed>>, layouts: Collection<int, LayoutTemplate|null>}, duration_ms: int}  $layoutMeasured
+     * @param  array{result: array{pages: list<array<string, mixed>>, layouts: Collection<int, LayoutTemplate>}, duration_ms: int}  $layoutMeasured
      */
     private function persistLayoutResults(
         BookGeneration $generation,
@@ -353,7 +363,7 @@ class BookGenerationService
     ): void {
         $photo = $this->resolvePhotoForGeneration($generation);
 
-        if ($photo !== null && $this->illustrationGeneration->shouldGenerateIllustrations($photo)) {
+        if ($this->illustrationGeneration->shouldGenerateIllustrations()) {
             $this->bookGenerations->updateStatus($generation, 'processing');
             $this->illustrationGeneration->queueGeneration($generation);
 
@@ -412,8 +422,13 @@ class BookGenerationService
         return $photo;
     }
 
-    private function resolveChildProfile(User $user, string $childName, int $age, ?UploadedPhoto $photo): ChildProfile
-    {
+    private function resolveChildProfile(
+        User $user,
+        string $childName,
+        int $age,
+        string $childGender,
+        ?UploadedPhoto $photo,
+    ): ChildProfile {
         $profile = $this->childProfiles->findForUserByName($user->id, $childName);
 
         if ($profile === null) {
@@ -421,9 +436,10 @@ class BookGenerationService
                 'user_id' => $user->id,
                 'child_name' => $childName,
                 'child_age' => $age,
+                'child_gender' => $childGender,
             ]);
         } else {
-            $this->childProfiles->updateAge($profile, $age);
+            $this->childProfiles->updateDemographics($profile, $age, $childGender);
         }
 
         if ($photo !== null && $photo->child_profile_id === null) {
@@ -438,6 +454,7 @@ class BookGenerationService
         BookTemplate $template,
         string $childName,
         int $age,
+        string $childGender,
         string $goal,
         ?StoryPrompt $prompt,
         ChildProfile $profile,
@@ -456,11 +473,14 @@ class BookGenerationService
             'generated_character_id' => $character?->id,
             'child_name' => $childName,
             'child_age' => $age,
+            'child_gender' => $childGender,
             'child_goal' => $goal,
             'prompt_snapshot' => $prompt?->prompt_text,
             'book_template_snapshot' => $this->templateSnapshot($template),
             'status' => 'processing',
-            'illustration_status' => $photo !== null ? 'queued' : null,
+            'illustration_status' => $this->illustrationGeneration->shouldGenerateIllustrations()
+                ? 'queued'
+                : null,
             'correlation_id' => $correlationId,
             'idempotency_key' => $idempotencyKey,
             'input_fingerprint' => $fingerprint,
@@ -495,7 +515,7 @@ class BookGenerationService
     }
 
     /**
-     * @return array{pages: list<array<string, mixed>>, layouts: Collection<int, LayoutTemplate|null>}
+     * @return array{pages: list<array<string, mixed>>, layouts: Collection<int, LayoutTemplate>}
      */
     private function assemblePages(string $storyText): array
     {
@@ -674,7 +694,7 @@ class BookGenerationService
 
     private function resolvePromptText(?StoryPrompt $prompt, string $name, int $age, string $goal): string
     {
-        $template = $prompt?->prompt_text ?? self::DEFAULT_PROMPT_TEXT;
+        $template = $prompt->prompt_text ?? self::DEFAULT_PROMPT_TEXT;
 
         return strtr($template, [
             '{name}' => $name,

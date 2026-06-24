@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['user_id', 'child_name', 'child_age'])]
+#[Fillable(['user_id', 'child_name', 'child_age', 'child_gender'])]
 class ChildProfile extends Model
 {
     use HasFactory;

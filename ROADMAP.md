@@ -253,30 +253,30 @@ duplicate requests do not create duplicate expensive work.
 Goal: generate page illustrations for every book while separating free default
 characters from paid personalized character creation.
 
-- [ ] Add child gender to the generation form as a required `boy` or `girl`
+- [x] Add child gender to the generation form as a required `boy` or `girl`
   selection.
-- [ ] Persist child gender with the child profile and book generation snapshot so
+- [x] Persist child gender with the child profile and book generation snapshot so
   repeat generations, history, and illustration prompts remain reproducible.
-- [ ] Define two default character presets, one for a boy and one for a girl, for
+- [x] Define two default character presets, one for a boy and one for a girl, for
   free users and any no-upload generation path.
-- [ ] Generate AI illustrations for each page from the selected character preset,
+- [x] Generate AI illustrations for each page from the selected character preset,
   page text, and stored layout metadata.
-- [ ] Keep media uploads unavailable for free users.
-- [ ] For paid users, accept a photo or presentation image only as the basis for
+- [x] Keep media uploads unavailable for free users.
+- [x] For paid users, accept a photo or presentation image only as the basis for
   generating or refreshing a reusable personalized character for the whole fairy
   tale.
-- [ ] Ensure cover, content, and ending page prompts reuse the resolved character
+- [x] Ensure cover, content, and ending page prompts reuse the resolved character
   reference consistently across the full book.
-- [ ] Track and enforce image generation costs for free-tier books so page
+- [x] Track and enforce image generation costs for free-tier books so page
   illustrations do not bypass existing cost controls.
 
 Decisions:
 
-- [ ] Free users receive AI page illustrations without uploading a photo or
+- [x] Free users receive AI page illustrations without uploading a photo or
   presentation image.
-- [ ] Free users use one of two ready-made default characters selected by child
+- [x] Free users use one of two ready-made default characters selected by child
   gender.
-- [ ] Paid uploads are character-basis inputs only; they are not required as
+- [x] Paid uploads are character-basis inputs only; they are not required as
   per-page illustration inputs.
 
 Success criteria: a free user can select boy or girl and receive a fully
@@ -313,9 +313,9 @@ The first release should not include:
   follow paid validation.
 - [x] Computationally expensive image/illustration generation needs separate worker resources.
 - [x] Free-tier limits must exist early to control generation costs.
-- [ ] Free-tier AI page illustrations can increase cost quickly and need quota,
+- [x] Free-tier AI page illustrations can increase cost quickly and need quota,
   throttling, and per-book cost tracking before broad rollout.
-- [ ] Character consistency across generated pages can drift unless prompts reuse a
+- [x] Character consistency across generated pages can drift unless prompts reuse a
   stable character preset or personalized character reference.
 - [x] Content must remain safe for children, especially if free-form AI text
   generation is introduced later.

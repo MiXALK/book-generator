@@ -28,8 +28,11 @@ class EloquentChildProfileRepository implements ChildProfileRepositoryInterface
         return ChildProfile::query()->create($attributes);
     }
 
-    public function updateAge(ChildProfile $profile, int $childAge): void
+    public function updateDemographics(ChildProfile $profile, int $childAge, string $childGender): void
     {
-        $profile->update(['child_age' => $childAge]);
+        $profile->update([
+            'child_age' => $childAge,
+            'child_gender' => $childGender,
+        ]);
     }
 }

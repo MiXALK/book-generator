@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\ChildGender;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class GenerateBookRequest extends FormRequest
 {
@@ -24,6 +26,7 @@ class GenerateBookRequest extends FormRequest
         return [
             'child_name' => ['required', 'string', 'max:120'],
             'age' => ['required', 'integer', 'min:2', 'max:12'],
+            'child_gender' => ['required', 'string', Rule::in(ChildGender::values())],
             'goal' => ['required', 'string', 'max:255', 'exists:story_goals,name'],
             'uploaded_photo_id' => ['nullable', 'integer', 'min:1'],
         ];
@@ -42,6 +45,11 @@ class GenerateBookRequest extends FormRequest
     public function goal(): string
     {
         return (string) $this->validated('goal');
+    }
+
+    public function childGender(): string
+    {
+        return (string) $this->validated('child_gender');
     }
 
     public function uploadedPhotoId(): ?int
