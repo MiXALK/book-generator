@@ -1,0 +1,118 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-4) var(--space-8);
+  background: var(--color-chrome-bg);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--color-chrome-border);
+  box-shadow: var(--shadow-soft);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.logoMark {
+  font-size: 1.35rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.logoText {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.langSlot {
+  flex-shrink: 0;
+}
+
+.sessionBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand lang"
+      "session session";
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    align-items: center;
+  }
+
+  .header:not(:has(.sessionBar)) {
+    grid-template-areas: "brand lang";
+  }
+
+  .brand {
+    grid-area: brand;
+    min-width: 0;
+  }
+
+  .logoText {
+    font-size: var(--font-size-lg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .langSlot {
+    grid-area: lang;
+    justify-self: end;
+  }
+
+  .sessionBar {
+    grid-area: session;
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .sessionBar > :only-child {
+    width: 100%;
+  }
+}
+
+@media (min-width: 769px) {
+  .header:not(:has(.sessionBar)) {
+    display: flex;
+  }
+
+  .header:has(.sessionBar) {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "brand session lang";
+    align-items: center;
+  }
+
+  .header:has(.sessionBar) .brand {
+    grid-area: brand;
+  }
+
+  .header:has(.sessionBar) .sessionBar {
+    grid-area: session;
+    justify-content: flex-end;
+  }
+
+  .header:has(.sessionBar) .langSlot {
+    grid-area: lang;
+  }
+}

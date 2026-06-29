@@ -77,6 +77,21 @@
   box-shadow: inset 3px 0 0 var(--color-mustard);
 }
 
+@media (max-width: 768px) {
+  .triggerLabel {
+    display: none;
+  }
+
+  .trigger {
+    padding: 0.45rem 0.6rem;
+    min-width: 2.5rem;
+  }
+
+  .chevron {
+    display: none;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   .menu {
     background-color: var(--color-surface);

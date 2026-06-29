@@ -6,10 +6,29 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
-import LanguageSelect from "@/app/components/LanguageSelect";
-import btn from "@/app/components/storyButton.module.css";
+import AppFooter from "@/app/components/AppFooter";
+import AppHeader from "@/app/components/AppHeader";
+import PageShell, { PageShellMain } from "@/app/components/PageShell";
+import ui from "@/app/components/ui.module.css";
 import { BookGeneration } from "@/app/types/book";
 import styles from "./dashboard.module.css";
+
+function BookBasketIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
+      <path d="M6 7h12l-1 12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7z" />
+      <path d="M9 7V5a3 3 0 0 1 6 0v2" />
+      <path d="M4 7h16" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -72,8 +91,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
+      <div className={ui.loadingCenter}>
+        <div className={ui.spinnerLarge} />
         <p>{t.loadingDashboard}</p>
       </div>
     );
@@ -203,20 +222,22 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <div className={styles.brand}>
-          <span className={styles.logo}>📖</span>
-          <span className={styles.logoText}>{t.brandName}</span>
-        </div>
-        <nav className={styles.nav}>
-          <LanguageSelect />
+    <PageShell variant="landing">
+      <div className={styles.mesh} aria-hidden="true" />
+      <div className={styles.glassDecor} aria-hidden="true">
+        <span className={styles.glassOrbA} />
+        <span className={styles.glassOrbB} />
+        <span className={styles.glassOrbC} />
+      </div>
+
+      <AppHeader brandName={t.brandName} homeHref="/dashboard" className={styles.dashboardChrome}>
+        <div className={styles.headerSession}>
           {user.role === "admin" && (
-            <Link href="/admin" className={btn.btnGhost}>
+            <Link href="/admin" className={`${ui.btnGhost} ${styles.headerAdminLink}`}>
               {t.openAdmin}
             </Link>
           )}
-          <div className={styles.userInfo}>
+          <div className={styles.userChip}>
             {user.avatar_url ? (
               <Image
                 src={user.avatar_url}
@@ -235,70 +256,147 @@ export default function DashboardPage() {
               </span>
             </div>
           </div>
-          <button className={btn.btnGhost} onClick={logout}>
+          <button type="button" className={`${ui.btnGhost} ${styles.headerLogout}`} onClick={logout}>
             {t.signOut}
           </button>
-        </nav>
-      </header>
+        </div>
+      </AppHeader>
 
-      <main className={styles.main}>
-        <div className={styles.dashboardGrid}>
-          <section className={styles.welcomeBanner}>
-            <div className={styles.welcomeText}>
-              <h1>{t.welcomeBack}, {user.name.split(" ")[0]}!</h1>
-              <p>{t.letInspire}</p>
-            </div>
-            <div className={styles.quickCta}>
+      <PageShellMain variant="full">
+        <div className={styles.dashboardLayout}>
+          <section className={styles.heroRow}>
+            <div className={styles.heroMain}>
+              <p className={styles.welcomeEyebrow}>{t.dashboardEyebrow}</p>
+              <h1>
+                {t.welcomeBack}, {user.name.split(" ")[0]}!
+              </h1>
+              <p className={styles.heroSubtitle}>{t.letInspire}</p>
               <button
                 type="button"
-                className={`${btn.btnPrimary} ${btn.btnLarge}`}
+                className={`${ui.btnPrimary} ${ui.btnLarge} ${styles.createButton}`}
                 onClick={() => router.push("/generate")}
               >
                 {t.createNewStorybook}
               </button>
             </div>
-          </section>
 
-          <div className={styles.sideStack}>
-            <div className={styles.card}>
-              <h2 className={styles.cardTitle}>{t.monthlyUsageLimit}</h2>
-              <div className={styles.limitTracker}>
-                <div className={styles.limitNumbers}>
-                  <span className={styles.limitCurrent}>{monthlyUsage}</span>
-                  <span className={styles.limitTotal}>/ {monthlyLimit} {t.books}</span>
-                </div>
-                <p className={styles.limitSub}>{t.quotaResets}</p>
-                <div className={styles.progressBarBg}>
-                  <div className={styles.progressBarFill} style={{ width: `${usagePercent}%` }}></div>
-                </div>
+            <aside className={styles.quotaPanel}>
+              <h2 className={styles.quotaPanelTitle}>{t.monthlyUsageLimit}</h2>
+              <div className={styles.quotaNumbers}>
+                <span className={styles.quotaCurrent}>{monthlyUsage}</span>
+                <span className={styles.quotaTotal}>
+                  / {monthlyLimit} {t.books}
+                </span>
               </div>
+              <div className={styles.progressBarBg}>
+                <div className={styles.progressBarFill} style={{ width: `${usagePercent}%` }} />
+              </div>
+              <p className={styles.quotaSub}>{t.quotaResets}</p>
               {!isPaid && (
-                <div className={styles.upgradeBox}>
-                  <p>{t.unlockPremium}</p>
-                  <button
-                    className={`${btn.btnPrimary} ${styles.upgradeButton}`}
-                    onClick={startCheckout}
-                    disabled={billingLoading}
-                  >
-                    {billingLoading ? t.billingRedirecting : t.upgradeToPremium}
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  className={`${ui.btnPrimary} ${styles.quotaAction}`}
+                  onClick={startCheckout}
+                  disabled={billingLoading}
+                >
+                  {billingLoading ? t.billingRedirecting : t.upgradeToPremium}
+                </button>
               )}
               {isPaid && (
-                <div className={styles.upgradeBox}>
-                  <button
-                    className={`${btn.btnPrimary} ${styles.upgradeButton}`}
-                    onClick={openBillingPortal}
-                    disabled={billingLoading}
-                  >
-                    {billingLoading ? t.billingRedirecting : t.manageBilling}
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  className={`${ui.btnGhost} ${styles.quotaAction}`}
+                  onClick={openBillingPortal}
+                  disabled={billingLoading}
+                >
+                  {billingLoading ? t.billingRedirecting : t.manageBilling}
+                </button>
+              )}
+            </aside>
+          </section>
+
+          <section className={styles.librarySection}>
+            <div className={styles.libraryHeader}>
+              <h2 className={styles.libraryTitle}>{t.myLibraryTitle}</h2>
+              {!libraryLoading && !libraryError && books.length > 0 && (
+                <span className={styles.libraryCount}>
+                  {books.length} {t.books}
+                </span>
               )}
             </div>
+            {libraryLoading && <p className={styles.libraryState}>{t.loading}</p>}
+            {libraryError && <p className={styles.libraryError}>{libraryError}</p>}
+            {!libraryLoading && !libraryError && books.length === 0 && (
+              <div className={styles.emptyState}>
+                <span className={styles.emptyIcon}>📚</span>
+                <h3>{t.noBooksYet}</h3>
+                <p>{t.noBooksDesc}</p>
+                <button className={ui.btnPrimary} onClick={() => router.push("/generate")}>
+                  {t.getFirstBook}
+                </button>
+              </div>
+            )}
+            {!libraryLoading && !libraryError && books.length > 0 && (
+              <div className={styles.libraryGrid}>
+                {books.map((book) => {
+                  const coverImage = book.book_pages[0]?.image_url;
+                  const title = book.book_template?.title ?? book.child_name;
+                  const openLabel = `${t.readBook}: ${title}`;
 
-            <div className={styles.card}>
-              <h2 className={styles.cardTitle}>{t.privacyConsentTitle}</h2>
+                  return (
+                    <article key={book.id} className={styles.bookCard}>
+                      <button
+                        type="button"
+                        className={styles.bookOpen}
+                        onClick={() => router.push(`/books/${book.id}`)}
+                        aria-label={openLabel}
+                      >
+                        <span className={styles.bookSpine} aria-hidden="true" />
+                        <span className={styles.bookCover}>
+                          {coverImage ? (
+                            <Image
+                              src={coverImage}
+                              alt=""
+                              fill
+                              className={styles.bookCoverImage}
+                              sizes="(max-width: 768px) 200px, 280px"
+                              unoptimized
+                            />
+                          ) : (
+                            <span className={styles.bookCoverFallback} aria-hidden="true" />
+                          )}
+                          <span className={styles.bookPagesEdge} aria-hidden="true" />
+                          <span className={styles.bookCoverScrim}>
+                            <h3>{title}</h3>
+                            <p>
+                              {book.child_name} · {book.child_goal}
+                            </p>
+                          </span>
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.bookDelete}
+                        onClick={() => deleteBook(book.id)}
+                        disabled={deletingBookId === book.id}
+                        aria-label={t.deleteBook}
+                      >
+                        {deletingBookId === book.id ? (
+                          <span className={styles.bookDeleteSpinner} aria-hidden="true" />
+                        ) : (
+                          <BookBasketIcon className={styles.bookDeleteIcon} />
+                        )}
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          <div className={styles.auxRow}>
+            <div className={styles.miniPanel}>
+              <h2 className={styles.miniPanelTitle}>{t.privacyConsentTitle}</h2>
               <div className={styles.safetyContent}>
                 <div className={styles.safetyItem}>
                   <span className={styles.safetyIcon}>✓</span>
@@ -324,12 +422,12 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className={`${styles.card} ${styles.dangerCard}`}>
-              <h2 className={styles.cardTitle}>{t.deleteAccountTitle}</h2>
+            <div className={`${styles.miniPanel} ${styles.dangerPanel}`}>
+              <h2 className={styles.miniPanelTitle}>{t.deleteAccountTitle}</h2>
               <p className={styles.dangerDesc}>{t.deleteAccountDesc}</p>
               <button
                 type="button"
-                className={`${btn.btnGhost} ${styles.dangerButton}`}
+                className={`${ui.btnGhost} ${styles.dangerButton}`}
                 onClick={deleteAccount}
                 disabled={accountDeleting}
               >
@@ -337,78 +435,12 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
-
-          <div className={`${styles.card} ${styles.librarySection}`}>
-            <h2 className={styles.cardTitle}>{t.myLibraryTitle}</h2>
-            {libraryLoading && <p className={styles.libraryState}>{t.loading}</p>}
-            {libraryError && <p className={styles.libraryError}>{libraryError}</p>}
-            {!libraryLoading && !libraryError && books.length === 0 && (
-              <div className={styles.emptyState}>
-                <span className={styles.emptyIcon}>📚</span>
-                <h3>{t.noBooksYet}</h3>
-                <p>{t.noBooksDesc}</p>
-                <button className={`${btn.btnPrimary} ${styles.emptyCta}`} onClick={() => router.push("/generate")}>
-                  {t.getFirstBook}
-                </button>
-              </div>
-            )}
-            {!libraryLoading && !libraryError && books.length > 0 && (
-              <div className={styles.libraryGrid}>
-                {books.map((book) => {
-                  const coverImage = book.book_pages[0]?.image_url;
-                  const createdLabel = new Date(book.created_at).toLocaleDateString();
-
-                  return (
-                    <article key={book.id} className={styles.libraryCard}>
-                      <div className={styles.libraryCover}>
-                        {coverImage ? (
-                          <Image
-                            src={coverImage}
-                            alt=""
-                            fill
-                            className={styles.libraryCoverImage}
-                            sizes="260px"
-                            unoptimized
-                          />
-                        ) : (
-                          <div className={styles.libraryCoverFallback} />
-                        )}
-                      </div>
-                      <div className={styles.libraryMeta}>
-                        <h3>{book.book_template?.title ?? book.child_name}</h3>
-                        <p>{book.child_name} · {book.child_goal}</p>
-                        <p>{t.createdAt}: {createdLabel}</p>
-                        <p>{book.book_pages.length} {t.pagesCount}</p>
-                        <div className={styles.libraryActions}>
-                          <button
-                            type="button"
-                            className={`${btn.btnPrimary} ${styles.libraryReadButton}`}
-                            onClick={() => router.push(`/books/${book.id}`)}
-                          >
-                            {t.readBook}
-                          </button>
-                          <button
-                            type="button"
-                            className={`${btn.btnGhost} ${styles.libraryDeleteButton}`}
-                            onClick={() => deleteBook(book.id)}
-                            disabled={deletingBookId === book.id}
-                          >
-                            {deletingBookId === book.id ? t.deleting : t.deleteBook}
-                          </button>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </div>
         </div>
-      </main>
+      </PageShellMain>
 
-      <footer className={styles.footer}>
-        <p>&copy; {new Date().getFullYear()} {t.brandName}. {t.privacyBuiltIn}</p>
-      </footer>
-    </div>
+      <AppFooter>
+        &copy; {new Date().getFullYear()} {t.brandName}. {t.privacyBuiltIn}
+      </AppFooter>
+    </PageShell>
   );
 }

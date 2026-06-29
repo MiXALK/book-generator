@@ -1,0 +1,19 @@
+.footer {
+  text-align: center;
+  padding: var(--space-8) var(--space-6);
+  border-top: 1px solid var(--color-chrome-border);
+  background: linear-gradient(180deg, transparent, var(--landing-footer-fade, rgba(217, 201, 168, 0.35)));
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.footer p {
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .footer {
+    background: linear-gradient(180deg, transparent, var(--landing-footer-fade));
+    color: var(--color-text-muted);
+  }
+}

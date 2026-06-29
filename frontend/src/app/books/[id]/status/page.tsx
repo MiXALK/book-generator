@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
-import btn from "@/app/components/storyButton.module.css";
+import PageShell, { PageShellMain } from "@/app/components/PageShell";
+import ui from "@/app/components/ui.module.css";
 import { BookGeneration } from "@/app/types/book";
 import styles from "./status.module.css";
 
@@ -139,43 +140,58 @@ export default function BookStatusPage() {
 
   if (loading) {
     return (
-      <div className={styles.state}>
+      <div className={ui.loadingCenter}>
+        <div className={ui.spinnerLarge} />
         <p>{t.loading}</p>
       </div>
     );
   }
 
+  const actionButtons = (
+    <div className={styles.actions}>
+      {canRetryIllustrations && (
+        <button type="button" className={ui.btnPrimary} onClick={retryIllustrations} disabled={retrying}>
+          {retrying ? t.generating : t.retryIllustrations}
+        </button>
+      )}
+      {canReadBook && (
+        <button type="button" className={ui.btnPrimary} onClick={() => router.push(`/books/${bookId}`)}>
+          {t.readBook}
+        </button>
+      )}
+      <button type="button" className={ui.btnGhost} onClick={() => router.push("/dashboard")}>
+        {t.backToDashboard}
+      </button>
+    </div>
+  );
+
   if (error) {
     return (
-      <div className={styles.state}>
-        <p className={styles.error}>{error}</p>
-        {canRetryIllustrations && (
-          <button type="button" className={btn.btnPrimary} onClick={retryIllustrations} disabled={retrying}>
-            {retrying ? t.generating : t.retryIllustrations}
-          </button>
-        )}
-        {canReadBook && (
-          <button type="button" className={btn.btnPrimary} onClick={() => router.push(`/books/${bookId}`)}>
-            {t.readBook}
-          </button>
-        )}
-        <button type="button" className={btn.btnPrimary} onClick={() => router.push("/dashboard")}>
-          {t.backToDashboard}
-        </button>
-      </div>
+      <PageShell>
+        <PageShellMain variant="centered">
+          <div className={`${ui.card} ${styles.card}`}>
+            <p className={styles.error}>{error}</p>
+            {actionButtons}
+          </div>
+        </PageShellMain>
+      </PageShell>
     );
   }
 
   return (
-    <div className={styles.state}>
-      <div className={styles.spinner} />
-      <h1>{t.generationStatusTitle}</h1>
-      <p>{message}</p>
-      {canReadBook && (
-        <button type="button" className={btn.btnPrimary} onClick={() => router.push(`/books/${bookId}`)}>
-          {t.readBook}
-        </button>
-      )}
-    </div>
+    <PageShell>
+      <PageShellMain variant="centered">
+        <div className={`${ui.card} ${styles.card}`}>
+          <div className={ui.spinnerLarge} />
+          <h1>{t.generationStatusTitle}</h1>
+          <p>{message}</p>
+          {canReadBook && (
+            <button type="button" className={ui.btnPrimary} onClick={() => router.push(`/books/${bookId}`)}>
+              {t.readBook}
+            </button>
+          )}
+        </div>
+      </PageShellMain>
+    </PageShell>
   );
 }

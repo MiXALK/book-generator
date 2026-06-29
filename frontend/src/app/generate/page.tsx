@@ -1,10 +1,13 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
-import btn from "@/app/components/storyButton.module.css";
+import AppHeader from "@/app/components/AppHeader";
+import PageShell, { PageShellMain } from "@/app/components/PageShell";
+import ui from "@/app/components/ui.module.css";
 import styles from "./generate.module.css";
 
 interface CatalogGoal {
@@ -226,97 +229,122 @@ export default function GeneratePage() {
 
   if (!hydrated || loading || !user) {
     return (
-      <div className={styles.state}>
+      <div className={ui.loadingCenter}>
+        <div className={ui.spinnerLarge} />
         <p>{t.loading}</p>
       </div>
     );
   }
 
   return (
-    <main className={styles.page}>
-      <div className={styles.header}>
-        <h1>{t.generateTitle}</h1>
-        <p>{t.generateSubtitle}</p>
-      </div>
+    <PageShell>
+      <AppHeader brandName={t.brandName} homeHref="/dashboard">
+        <Link href="/dashboard" className={ui.btnGhost}>
+          {t.backToDashboard}
+        </Link>
+      </AppHeader>
 
-      <form className={styles.form} onSubmit={submitGeneration}>
-        <label className={styles.field}>
-          <span>{t.childNameLabel}</span>
-          <input
-            value={childName}
-            onChange={(event) => setChildName(event.target.value)}
-            placeholder={t.childNamePlaceholder}
-            maxLength={120}
-            required
-          />
-        </label>
+      <PageShellMain variant="centered">
+        <div className={styles.header}>
+          <h1>{t.generateTitle}</h1>
+          <p>{t.generateSubtitle}</p>
+        </div>
 
-        <label className={styles.field}>
-          <span>{t.childGenderLabel}</span>
-          <select value={selectedGender} onChange={(event) => setSelectedGender(event.target.value)} required>
-            <option value="">{t.selectOption}</option>
-            <option value="girl">{t.childGenderLabels.girl}</option>
-            <option value="boy">{t.childGenderLabels.boy}</option>
-          </select>
-        </label>
+        <form className={`${ui.card} ${styles.form}`} onSubmit={submitGeneration}>
+          <label className={ui.field}>
+            <span className={ui.fieldLabel}>{t.childNameLabel}</span>
+            <input
+              className={ui.input}
+              value={childName}
+              onChange={(event) => setChildName(event.target.value)}
+              placeholder={t.childNamePlaceholder}
+              maxLength={120}
+              required
+            />
+          </label>
 
-        <label className={styles.field}>
-          <span>{t.goalLabel}</span>
-          <select value={selectedGoal} onChange={(event) => setSelectedGoal(event.target.value)} required>
-            <option value="">{t.selectOption}</option>
-            {goals.map((goal) => (
-              <option key={goal.id} value={goal.name} disabled={goal.is_locked}>
-                {goal.is_locked ? `${goal.name} (${t.goalLockedLabel})` : goal.name}
-              </option>
-            ))}
-          </select>
-          {selectedGoalLocked && <p className={styles.warning}>{t.goalLockedHint}</p>}
-        </label>
+          <label className={ui.field}>
+            <span className={ui.fieldLabel}>{t.childGenderLabel}</span>
+            <select
+              className={ui.select}
+              value={selectedGender}
+              onChange={(event) => setSelectedGender(event.target.value)}
+              required
+            >
+              <option value="">{t.selectOption}</option>
+              <option value="girl">{t.childGenderLabels.girl}</option>
+              <option value="boy">{t.childGenderLabels.boy}</option>
+            </select>
+          </label>
 
-        <label className={styles.field}>
-          <span>{t.ageRangeLabel}</span>
-          <select value={selectedAgeRange} onChange={(event) => setSelectedAgeRange(event.target.value)} required>
-            <option value="">{t.selectOption}</option>
-            {ageRanges.map((ageRange) => (
-              <option key={ageRange.value} value={ageRange.value}>
-                {t.ageRangeLabels[ageRange.value as keyof typeof t.ageRangeLabels] ?? ageRange.value}
-              </option>
-            ))}
-          </select>
-        </label>
+          <label className={ui.field}>
+            <span className={ui.fieldLabel}>{t.goalLabel}</span>
+            <select
+              className={ui.select}
+              value={selectedGoal}
+              onChange={(event) => setSelectedGoal(event.target.value)}
+              required
+            >
+              <option value="">{t.selectOption}</option>
+              {goals.map((goal) => (
+                <option key={goal.id} value={goal.name} disabled={goal.is_locked}>
+                  {goal.is_locked ? `${goal.name} (${t.goalLockedLabel})` : goal.name}
+                </option>
+              ))}
+            </select>
+            {selectedGoalLocked && <p className={styles.warning}>{t.goalLockedHint}</p>}
+          </label>
 
-        {isPaid && hasPaidAccess && (
-          <div className={styles.photoSection}>
-            <h2>{t.photoUploadTitle}</h2>
-            <p className={styles.photoHint}>{t.photoUploadHint}</p>
-            <label className={styles.field}>
-              <span>{t.photoUploadLabel}</span>
-              <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoChange} />
-            </label>
-            <label className={styles.consentField}>
-              <input
-                type="checkbox"
-                checked={parentalConsent}
-                onChange={(event) => setParentalConsent(event.target.checked)}
-              />
-              <span>{t.parentalConsentCheckbox}</span>
-            </label>
-            {uploadingPhoto && <p className={styles.state}>{t.photoUploading}</p>}
-          </div>
-        )}
+          <label className={ui.field}>
+            <span className={ui.fieldLabel}>{t.ageRangeLabel}</span>
+            <select
+              className={ui.select}
+              value={selectedAgeRange}
+              onChange={(event) => setSelectedAgeRange(event.target.value)}
+              required
+            >
+              <option value="">{t.selectOption}</option>
+              {ageRanges.map((ageRange) => (
+                <option key={ageRange.value} value={ageRange.value}>
+                  {t.ageRangeLabels[ageRange.value as keyof typeof t.ageRangeLabels] ?? ageRange.value}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <button
-          type="submit"
-          disabled={fetching || submitting || uploadingPhoto || selectedGoalLocked}
-          className={`${btn.btnPrimary} ${styles.submit}`}
-        >
-          {submitting ? t.generating : t.generateButton}
-        </button>
-      </form>
+          {isPaid && hasPaidAccess && (
+            <div className={styles.photoSection}>
+              <h2>{t.photoUploadTitle}</h2>
+              <p className={styles.photoHint}>{t.photoUploadHint}</p>
+              <label className={ui.field}>
+                <span className={ui.fieldLabel}>{t.photoUploadLabel}</span>
+                <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoChange} />
+              </label>
+              <label className={ui.checkboxField}>
+                <input
+                  type="checkbox"
+                  checked={parentalConsent}
+                  onChange={(event) => setParentalConsent(event.target.checked)}
+                />
+                <span>{t.parentalConsentCheckbox}</span>
+              </label>
+              {uploadingPhoto && <p className={styles.state}>{t.photoUploading}</p>}
+            </div>
+          )}
 
-      {fetching && <p className={styles.state}>{t.loading}</p>}
-      {message && <p className={styles.success}>{message}</p>}
-      {error && <p className={styles.error}>{error}</p>}
-    </main>
+          <button
+            type="submit"
+            disabled={fetching || submitting || uploadingPhoto || selectedGoalLocked}
+            className={`${ui.btnPrimary} ${ui.btnLarge} ${styles.submit}`}
+          >
+            {submitting ? t.generating : t.generateButton}
+          </button>
+        </form>
+
+        {fetching && <p className={styles.state}>{t.loading}</p>}
+        {message && <p className={styles.success}>{message}</p>}
+        {error && <p className={styles.error}>{error}</p>}
+      </PageShellMain>
+    </PageShell>
   );
 }

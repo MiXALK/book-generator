@@ -1,65 +1,28 @@
-.container {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  background:
-    radial-gradient(circle at 20% 15%, rgba(224, 122, 95, 0.1), transparent 40%),
-    var(--color-bg);
-  color: var(--color-text);
-  padding: 2rem;
-}
-
 .card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-soft);
-  border-radius: 1.5rem;
-  padding: 3rem 2.5rem;
+  composes: card from "../../components/ui.module.css";
   width: 100%;
   max-width: 480px;
+  margin: 0 auto;
   text-align: center;
+  padding: var(--space-12) var(--space-8);
 }
 
-.loadingState,
-.successState,
-.errorState {
+.stateBlock {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
+  gap: var(--space-5);
 }
 
-.loadingState h2,
-.successState h2,
-.errorState h2 {
-  font-size: 1.5rem;
+.stateBlock h2 {
+  font-size: var(--font-size-2xl);
   font-weight: 700;
-  margin-top: 0.5rem;
 }
 
-.loadingState p,
-.successState p,
-.errorState p {
+.stateBlock p {
   font-size: 0.95rem;
   color: var(--color-text-muted);
   line-height: 1.5;
-}
-
-.spinner {
-  width: 3.5rem;
-  height: 3.5rem;
-  border: 4px solid var(--color-accent-soft);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .successIcon {
@@ -103,15 +66,20 @@
 .errorText {
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.75rem;
-  font-family: ui-monospace, "Cascadia Code", monospace;
-  font-size: 0.85rem;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   width: 100%;
-  word-break: break-all;
+  word-break: break-word;
 }
 
 .retryButton {
-  margin-top: 1rem;
+  margin-top: var(--space-2);
+}
+
+@media (prefers-color-scheme: dark) {
+  .errorIcon {
+    background-color: rgba(184, 69, 56, 0.18);
+  }
 }

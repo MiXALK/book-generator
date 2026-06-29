@@ -1,0 +1,78 @@
+.pageBackground {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 85% 55% at 8% 6%, rgba(242, 234, 216, 0.75), transparent 58%),
+    radial-gradient(ellipse 75% 50% at 92% 94%, rgba(216, 201, 168, 0.55), transparent 52%),
+    radial-gradient(circle at 50% 35%, rgba(216, 235, 230, 0.28), transparent 45%),
+    linear-gradient(
+      168deg,
+      var(--color-parchment-light) 0%,
+      var(--color-parchment-mid) 45%,
+      var(--color-parchment-dark) 100%
+    );
+  color: var(--color-text);
+}
+
+.pageLandingBackground {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--landing-base);
+  color: var(--color-text);
+}
+
+.pageMain {
+  flex: 1;
+  width: 100%;
+}
+
+.pageMainCentered {
+  composes: pageMain;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-6) var(--space-12);
+}
+
+.pageMainWide {
+  composes: pageMain;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-8);
+}
+
+.pageMainFull {
+  composes: pageMain;
+  width: 100%;
+  max-width: none;
+  padding: var(--space-5) var(--space-6) var(--space-8);
+}
+
+@media (min-width: 960px) {
+  .pageMainFull {
+    padding: var(--space-6) clamp(1.5rem, 3vw, 3.5rem) var(--space-10);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .pageBackground {
+    background:
+      radial-gradient(ellipse 85% 55% at 8% 6%, rgba(74, 63, 52, 0.75), transparent 58%),
+      radial-gradient(ellipse 75% 50% at 92% 94%, rgba(61, 50, 40, 0.65), transparent 52%),
+      linear-gradient(
+        168deg,
+        var(--color-parchment-light) 0%,
+        var(--color-parchment-mid) 45%,
+        #2e2520 100%
+      );
+  }
+}
+
+@media (max-width: 768px) {
+  .pageMainCentered,
+  .pageMainWide,
+  .pageMainFull {
+    padding: var(--space-3) var(--space-4) var(--space-5);
+  }
+}

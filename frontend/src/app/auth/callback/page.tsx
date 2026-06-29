@@ -3,13 +3,16 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
-import btn from "@/app/components/storyButton.module.css";
+import { locales } from "@/app/context/locales";
+import PageShell, { PageShellMain } from "@/app/components/PageShell";
+import ui from "@/app/components/ui.module.css";
 import styles from "./callback.module.css";
 
 function CallbackHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const { login, locale } = useAuth();
+  const t = locales[locale] || locales.ru;
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -20,7 +23,11 @@ function CallbackHandler() {
     if (error) {
       Promise.resolve().then(() => {
         setStatus("error");
-        setErrorMessage(error === "access_denied" ? "Google sign-in was cancelled." : `Google error: ${error}`);
+        setErrorMessage(
+          error === "access_denied"
+            ? t.authGoogleCancelled
+            : t.authGoogleError.replace("{error}", error),
+        );
       });
       return;
     }
@@ -28,7 +35,7 @@ function CallbackHandler() {
     if (!code) {
       Promise.resolve().then(() => {
         setStatus("error");
-        setErrorMessage("No authorization code received from Google.");
+        setErrorMessage(t.authNoCode);
       });
       return;
     }
@@ -45,7 +52,7 @@ function CallbackHandler() {
       .then(async (res) => {
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.message || "Failed to exchange authorization token.");
+          throw new Error(errData.message || t.authExchangeFailed);
         }
         return res.json();
       })
@@ -55,71 +62,77 @@ function CallbackHandler() {
           Promise.resolve().then(() => {
             setStatus("success");
           });
-          // Redirect to authenticated dashboard after a short delay
           setTimeout(() => {
             router.push("/dashboard");
           }, 1000);
         } else {
-          throw new Error("Invalid response payload from authentication server.");
+          throw new Error(t.authInvalidResponse);
         }
       })
       .catch((err) => {
         console.error("Authentication callback exchange failed:", err);
         Promise.resolve().then(() => {
           setStatus("error");
-          setErrorMessage(err.message || "Internal authentication server error.");
+          setErrorMessage(err.message || t.authServerError);
         });
       });
-  }, [searchParams, login, router]);
+  }, [searchParams, login, router, t]);
 
   return (
-    <div className={styles.container}>
+    <PageShellMain variant="centered">
       <div className={styles.card}>
         {status === "loading" && (
-          <div className={styles.loadingState}>
-            <div className={styles.spinner}></div>
-            <h2>Authenticating...</h2>
-            <p>Verifying secure identity details with Google, please wait.</p>
+          <div className={styles.stateBlock}>
+            <div className={ui.spinnerLarge} />
+            <h2>{t.authenticating}</h2>
+            <p>{t.verifyingIdentity}</p>
           </div>
         )}
 
         {status === "success" && (
-          <div className={styles.successState}>
+          <div className={styles.stateBlock}>
             <div className={styles.successIcon}>✓</div>
-            <h2>Sign-In Successful!</h2>
-            <p>Redirecting you to your StorySprout workspace.</p>
+            <h2>{t.signInSuccess}</h2>
+            <p>{t.redirectingWorkspace}</p>
           </div>
         )}
 
         {status === "error" && (
-          <div className={styles.errorState}>
+          <div className={styles.stateBlock}>
             <div className={styles.errorIcon}>✕</div>
-            <h2>Sign-In Failed</h2>
+            <h2>{t.signInFailed}</h2>
             <p className={styles.errorText}>{errorMessage}</p>
-            <button className={`${btn.btnPrimary} ${styles.retryButton}`} onClick={() => router.push("/")}>
-              Return to Landing Page
+            <button className={`${ui.btnPrimary} ${styles.retryButton}`} onClick={() => router.push("/")}>
+              {t.returnLanding}
             </button>
           </div>
         )}
       </div>
-    </div>
+    </PageShellMain>
   );
 }
 
 export default function CallbackPage() {
+  const { locale } = useAuth();
+  const t = locales[locale] || locales.ru;
+
   return (
-    <Suspense fallback={
-      <div className={styles.container}>
-        <div className={styles.card}>
-          <div className={styles.loadingState}>
-            <div className={styles.spinner}></div>
-            <h2>Initializing...</h2>
-            <p>Loading application session details.</p>
-          </div>
-        </div>
-      </div>
-    }>
-      <CallbackHandler />
-    </Suspense>
+    <PageShell>
+      <Suspense
+        fallback={
+          <PageShellMain variant="centered">
+            <div className={styles.card}>
+              <div className={styles.stateBlock}>
+                <div className={ui.spinnerLarge} />
+                <h2>{t.initializing}</h2>
+                <p>{t.loadingSession}</p>
+              </div>
+            </div>
+          </PageShellMain>
+        }
+      >
+        <CallbackHandler />
+      </Suspense>
+    </PageShell>
   );
 }

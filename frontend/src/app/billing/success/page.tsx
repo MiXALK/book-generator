@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
-import btn from "@/app/components/storyButton.module.css";
+import PageShell, { PageShellMain } from "@/app/components/PageShell";
+import ui from "@/app/components/ui.module.css";
 import styles from "./success.module.css";
 
 export default function BillingSuccessPage() {
@@ -28,19 +29,25 @@ export default function BillingSuccessPage() {
 
   if (loading || !user) {
     return (
-      <main className={styles.page}>
+      <div className={ui.loadingCenter}>
+        <div className={ui.spinnerLarge} />
         <p>{t.loading}</p>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className={styles.page}>
-      <h1>{t.billingSuccessTitle}</h1>
-      <p>{t.billingSuccessMessage}</p>
-      <button type="button" className={btn.btnPrimary} onClick={() => router.push("/dashboard")}>
-        {t.billingSuccessContinue}
-      </button>
-    </main>
+    <PageShell>
+      <PageShellMain variant="centered">
+        <div className={`${ui.card} ${styles.card}`}>
+          <div className={styles.icon}>★</div>
+          <h1>{t.billingSuccessTitle}</h1>
+          <p>{t.billingSuccessMessage}</p>
+          <button type="button" className={`${ui.btnPrimary} ${ui.btnLarge}`} onClick={() => router.push("/dashboard")}>
+            {t.billingSuccessContinue}
+          </button>
+        </div>
+      </PageShellMain>
+    </PageShell>
   );
 }

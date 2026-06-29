@@ -249,6 +249,31 @@ Generation runs as a queued pipeline so worker pools can scale independently:
   `total_cost_usd` on `book_generations` (text tokens, images, layout, storage,
   bandwidth). Configure rates under `config/services.php` (`scaling`, `cost`).
 
+## Frontend Design System
+
+Visual design for the Next.js app is token-driven. **Design reference artifacts live in
+the repository** under [`frontend/design/`](frontend/design/); Open Design may be used
+for exploration, but committed mockups and `DESIGN.md` stay in git.
+
+- **Design artifacts**: [`frontend/design/`](frontend/design/) — `DESIGN.md`, `tokens.css`,
+  and standalone `pages/*.html` previews before porting to Next.js.
+- **Tokens**: [`frontend/src/app/globals.css`](frontend/src/app/globals.css) is the runtime
+  source for `--color-*`, spacing, radius, shadow, and typography variables (Lora via
+  `layout.tsx`). Keep [`frontend/design/tokens.css`](frontend/design/tokens.css) in sync
+  when changing the `:root` block.
+- **Shared UI primitives**: [`frontend/src/app/components/ui.module.css`](frontend/src/app/components/ui.module.css)
+  defines buttons, form controls, cards, badges, and loading states. User and admin surfaces
+  reuse these classes (admin maps legacy `.button` names via CSS module `composes`).
+- **App shell**: [`AppHeader`](frontend/src/app/components/AppHeader.tsx),
+  [`AppFooter`](frontend/src/app/components/AppFooter.tsx), and
+  [`PageShell`](frontend/src/app/components/PageShell.tsx) with
+  [`appShell.module.css`](frontend/src/app/components/appShell.module.css) provide the common
+  parchment background and page width constraints.
+- **Book reader**: [`bookReader.module.css`](frontend/src/app/components/bookReader.module.css)
+  keeps a fixed dark-wood palette independent of site dark mode; do not change 80/20 page
+  geometry in `BookPageView`.
+- **Integration**: Port artifact markup/CSS into route CSS Modules; do not add npm UI libraries.
+
 ## Documentation Rules
 
 - Update this file when adding or changing conventions, dependencies, folder
@@ -274,6 +299,8 @@ Generation runs as a queued pipeline so worker pools can scale independently:
 │           └── Eloquent/
 ├── docker-compose.yml
 ├── frontend/
+│   ├── design/
+│   └── src/
 ├── .github/
 └── .gitignore
 ```

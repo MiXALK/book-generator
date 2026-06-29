@@ -5,6 +5,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
+import AppHeader from "@/app/components/AppHeader";
+import PageShell, { PageShellMain } from "@/app/components/PageShell";
+import ui from "@/app/components/ui.module.css";
 import styles from "./admin.module.css";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -20,7 +23,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [user, loading, router]);
 
   if (loading || !user || user.role !== "admin") {
-    return <div className={styles.loading}>{t.loading}</div>;
+    return (
+      <div className={ui.loadingCenter}>
+        <div className={ui.spinnerLarge} />
+        <p>{t.loading}</p>
+      </div>
+    );
   }
 
   const links = [
@@ -32,9 +40,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <strong>{t.adminTitle}</strong>
+    <PageShell>
+      <AppHeader brandName={t.adminTitle} homeHref="/admin">
+        <Link href="/dashboard" className={ui.btnGhost}>
+          {t.goToDashboard}
+        </Link>
+      </AppHeader>
+
+      <div className={styles.subnav}>
         <nav className={styles.nav}>
           {links.map((link) => (
             <Link
@@ -45,12 +58,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {link.label}
             </Link>
           ))}
-          <Link href="/dashboard" className={styles.navLink}>
-            {t.goToDashboard}
-          </Link>
         </nav>
-      </header>
-      <main className={styles.main}>{children}</main>
-    </div>
+      </div>
+
+      <PageShellMain variant="wide">{children}</PageShellMain>
+    </PageShell>
   );
 }

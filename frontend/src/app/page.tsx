@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
-import LanguageSelect from "@/app/components/LanguageSelect";
-import btn from "@/app/components/storyButton.module.css";
+import AppFooter from "@/app/components/AppFooter";
+import AppHeader from "@/app/components/AppHeader";
+import PageShell, { PageShellMain } from "@/app/components/PageShell";
+import ui from "@/app/components/ui.module.css";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -15,12 +17,11 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
 
-  // Load correct translations
   const t = locales[locale] || locales.ru;
 
   useEffect(() => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
-    
+
     fetch(`${apiBaseUrl}/health`)
       .then((res) => {
         if (!res.ok) {
@@ -57,95 +58,105 @@ export default function Home() {
     }
   };
 
+  const statusClass =
+    apiStatus === "loading"
+      ? styles.statusLoading
+      : apiStatus === "connected"
+        ? styles.statusConnected
+        : styles.statusFailed;
+
+  const statusLabel =
+    apiStatus === "loading"
+      ? t.connecting
+      : apiStatus === "connected"
+        ? t.connected
+        : `${t.offline}${errorMessage ? `: ${errorMessage}` : ""}`;
+
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.logoContainer}>
-          <span className={styles.logoText}>📖 {t.brandName}</span>
-        </div>
-        <div className={styles.navActions}>
-          <LanguageSelect />
-          {loading ? (
-            <button className={btn.btnGhost} disabled>
-              {t.loading}
-            </button>
-          ) : user ? (
-            <button className={btn.btnGhost} onClick={() => router.push("/dashboard")}>
-              {t.goToDashboard}
-            </button>
-          ) : (
-            <button className={btn.btnGhost} onClick={handleSignIn} disabled={authLoading}>
-              {authLoading ? t.redirecting : t.signInWithGoogle}
-            </button>
-          )}
-        </div>
-      </header>
+    <PageShell variant="landing">
+      <div className={styles.mesh} aria-hidden="true" />
 
-      <main className={styles.main}>
-        <div className={styles.hero}>
-          <h1 className={styles.title}>
-            {t.heroTitle}
-          </h1>
-          <p className={styles.subtitle}>
-            {t.heroSubtitle}
-          </p>
-          
-          <div className={styles.features}>
-            <div className={styles.featureCard}>
-              <span className={styles.featureIcon}>✨</span>
-              <h3>{t.featureTemplatesTitle}</h3>
-              <p>{t.featureTemplatesDesc}</p>
+      <AppHeader brandName={t.brandName} className={styles.landingChrome}>
+        {loading ? (
+          <button className={ui.btnGhost} disabled>
+            {t.loading}
+          </button>
+        ) : user ? (
+          <button className={ui.btnGhost} onClick={() => router.push("/dashboard")}>
+            {t.goToDashboard}
+          </button>
+        ) : (
+          <button className={ui.btnGhost} onClick={handleSignIn} disabled={authLoading}>
+            {authLoading ? t.redirecting : t.signInWithGoogle}
+          </button>
+        )}
+      </AppHeader>
+
+      <PageShellMain variant="wide">
+        <section className={styles.hero}>
+          <div className={styles.heroCopy}>
+            <p className={styles.eyebrow}>{t.featuresTitle}</p>
+            <h1 className={styles.title}>{t.heroTitle}</h1>
+            <p className={styles.subtitle}>{t.heroSubtitle}</p>
+
+            <div className={styles.ctaRow}>
+              {loading ? (
+                <button className={`${ui.btnPrimary} ${ui.btnLarge}`} disabled>
+                  {t.checkingSession}
+                </button>
+              ) : user ? (
+                <button className={`${ui.btnPrimary} ${ui.btnLarge}`} onClick={() => router.push("/dashboard")}>
+                  {t.goToDashboard}
+                </button>
+              ) : (
+                <button className={`${ui.btnPrimary} ${ui.btnLarge}`} onClick={handleSignIn} disabled={authLoading}>
+                  {authLoading ? t.preparingGoogle : t.getStartedFree}
+                </button>
+              )}
+
+              <span className={statusClass} title={t.systemStatus}>
+                <span className={styles.statusDot} aria-hidden="true" />
+                {t.backendApi}: {statusLabel}
+              </span>
             </div>
-            <div className={styles.featureCard}>
-              <span className={styles.featureIcon}>🎨</span>
-              <h3>{t.featureIllustrationsTitle}</h3>
-              <p>{t.featureIllustrationsDesc}</p>
+          </div>
+
+          <div className={styles.heroVisual} aria-hidden="true">
+            <div className={styles.bookStack}>
+              <div className={`${styles.book} ${styles.bookBack}`} />
+              <div className={`${styles.book} ${styles.bookMid}`} />
+              <div className={`${styles.book} ${styles.bookFront}`}>
+                <div className={styles.bookCoverArt} />
+                <p className={styles.bookTitle}>{t.landingBookPreviewTitle}</p>
+              </div>
             </div>
+            <span className={`${styles.spark} ${styles.sparkA}`}>✨</span>
+            <span className={`${styles.spark} ${styles.sparkB}`}>🌿</span>
           </div>
+        </section>
 
-          <div className={styles.ctaGroup}>
-            {loading ? (
-              <button className={`${btn.btnPrimary} ${btn.btnLarge}`} disabled>
-                {t.checkingSession}
-              </button>
-            ) : user ? (
-              <button className={`${btn.btnPrimary} ${btn.btnLarge}`} onClick={() => router.push("/dashboard")}>
-                {t.goToDashboard}
-              </button>
-            ) : (
-              <button className={`${btn.btnPrimary} ${btn.btnLarge}`} onClick={handleSignIn} disabled={authLoading}>
-                {authLoading ? t.preparingGoogle : t.getStartedFree}
-              </button>
-            )}
-          </div>
-        </div>
+        <section className={styles.bento} aria-label={t.featuresTitle}>
+          <article className={styles.bentoCard}>
+            <span className={styles.bentoIcon}>✨</span>
+            <h3>{t.featureTemplatesTitle}</h3>
+            <p>{t.featureTemplatesDesc}</p>
+          </article>
+          <article className={styles.bentoCard}>
+            <span className={styles.bentoIcon}>🎨</span>
+            <h3>{t.featureIllustrationsTitle}</h3>
+            <p>{t.featureIllustrationsDesc}</p>
+          </article>
+          <article className={`${styles.bentoCard} ${styles.bentoAccent}`}>
+            <span className={styles.bentoIcon}>📖</span>
+            <h3>{t.featureReaderTitle}</h3>
+            <p>{t.featureReaderDesc}</p>
+          </article>
+        </section>
+      </PageShellMain>
 
-        <div className={styles.statusWidget}>
-          <h3 className={styles.widgetTitle}>{t.systemStatus}</h3>
-          <div className={styles.statusRow}>
-            <span>{t.backendApi}:</span>
-            {apiStatus === "loading" && (
-              <span className={`${styles.statusBadge} ${styles.statusLoading}`}>
-                {t.connecting}
-              </span>
-            )}
-            {apiStatus === "connected" && (
-              <span className={`${styles.statusBadge} ${styles.statusConnected}`}>
-                {t.connected}
-              </span>
-            )}
-            {apiStatus === "failed" && (
-              <span className={`${styles.statusBadge} ${styles.statusFailed}`}>
-                {t.offline} ({errorMessage})
-              </span>
-            )}
-          </div>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <p>&copy; {new Date().getFullYear()} {t.brandName}. {t.rightsReserved}</p>
-      </footer>
-    </div>
+      <AppFooter>
+        &copy; {new Date().getFullYear()} {t.brandName}. {t.rightsReserved}
+      </AppFooter>
+    </PageShell>
   );
 }

@@ -284,6 +284,42 @@ illustrated book without uploading media; a paid user can upload one
 character-basis image and receive all page illustrations with that personalized
 character.
 
+## Stage 12: OpenDesign UI Refresh And Frontend Integration
+
+Goal: create a cohesive modern visual design for all user and admin routes via
+OpenDesign MCP, then integrate the design into the existing Next.js frontend
+without changing business logic, API wiring, or book layout constraints.
+
+- [x] Create OpenDesign project `StorySprout`.
+- [x] Generate design system (`DESIGN.md` + tokens CSS): palette, typography,
+  spacing, and component specimens.
+- [x] Design user shell pages: landing, dashboard, generate, generation status,
+  billing success, and auth callback.
+- [x] Design book reader chrome (progress, flip controls, page canvas) while
+  preserving 80% illustration / 20% text geometry in all text positions.
+- [x] Design admin shell, CRUD tables/forms, and content preview page.
+- [x] Port design tokens to `frontend/src/app/globals.css`.
+- [x] Introduce shared layout components (`AppHeader`, `AppFooter`, `PageShell`).
+- [x] Integrate page-by-page into existing TSX and CSS modules; keep hooks and
+  API logic unchanged.
+- [x] Unify button, input, and form primitives across user and admin surfaces.
+- [x] Localize auth callback strings (RU + EN) and verify bilingual visual QA.
+- [x] Update `CONVENTIONS.md` with frontend design-system conventions.
+
+Decisions:
+
+- [x] No new npm dependencies; CSS Modules + existing Lora font only.
+- [x] OpenDesign produces HTML/CSS reference artifacts; integration is a
+  deliberate port into Next.js, not a drop-in replacement.
+- [x] Design reference files (`DESIGN.md`, page mockups) are committed under
+  `frontend/design/`, not only in Open Design.
+- [x] Book reader keeps its fixed dark-wood palette independent of site dark
+  mode; page layout ratios remain enforced in `BookPageView`.
+
+Success criteria: all routes share a polished modern storybook aesthetic;
+`npm run lint` and `npm run build` pass; auth, generation, billing, reader flip
+behavior, and admin CRUD remain functionally unchanged.
+
 ## MVP Boundary
 
 The first release should include:
