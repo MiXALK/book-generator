@@ -22,7 +22,7 @@ values in the copied files (never commit `.env` or `.env.local`):
 
 ```sh
 cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env.local
+cp .env.example .env
 ```
 
 Example files list variable names only. For local Docker Compose, service
