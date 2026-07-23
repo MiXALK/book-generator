@@ -43,11 +43,10 @@ export default function AdminDashboardPage() {
     if (item.type === "book_template") {
       return `/admin/preview/templates/${item.id}`;
     }
-    if (item.type === "story_prompt") {
-      return `/admin/preview/prompts/${item.id}`;
-    }
-    return `/admin/preview/layouts/${item.id}`;
+    return `/admin/preview/prompts/${item.id}`;
   };
+
+  const reviewItems = items.filter((item) => item.type !== "layout_template");
 
   return (
     <section>
@@ -55,7 +54,7 @@ export default function AdminDashboardPage() {
       {error && <p className={styles.error}>{error}</p>}
       <div className={styles.card}>
         <h2>{t.adminReviewQueue}</h2>
-        {items.length === 0 ? (
+        {reviewItems.length === 0 ? (
           <p>{t.adminReviewEmpty}</p>
         ) : (
           <table className={styles.table}>
@@ -67,7 +66,7 @@ export default function AdminDashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
+              {reviewItems.map((item) => (
                 <tr key={`${item.type}-${item.id}`}>
                   <td>{item.type}</td>
                   <td>{item.title}</td>

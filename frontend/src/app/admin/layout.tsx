@@ -36,7 +36,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin/goals", label: t.adminGoals },
     { href: "/admin/templates", label: t.adminTemplates },
     { href: "/admin/prompts", label: t.adminPrompts },
-    { href: "/admin/layouts", label: t.adminLayouts },
   ];
 
   return (

@@ -95,7 +95,6 @@ Admin URLs (frontend):
 - Goals: [http://localhost:3000/admin/goals](http://localhost:3000/admin/goals)
 - Templates: [http://localhost:3000/admin/templates](http://localhost:3000/admin/templates)
 - Prompts: [http://localhost:3000/admin/prompts](http://localhost:3000/admin/prompts)
-- Layouts: [http://localhost:3000/admin/layouts](http://localhost:3000/admin/layouts)
 
 Non-admin users are redirected away from `/admin/*`. Admin API routes under
 `/api/admin/*` require the same role and return `403` otherwise.

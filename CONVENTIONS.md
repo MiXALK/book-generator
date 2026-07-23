@@ -215,9 +215,10 @@ Content managers manage catalog entities without code changes or re-seeding:
 - Admin role: `users.role` enum (`user`, `admin`). Promoted automatically on Google
   login when the email is listed in `ADMIN_EMAILS` (comma-separated in `.env`).
 - Middleware: `admin` (`EnsureAdmin`) on `/api/admin/*` routes (requires `auth.api`).
-- Admin API: CRUD for `StoryGoal`, `BookTemplate`, `StoryPrompt`, and
-  `LayoutTemplate`; publication workflow (`draft` → `pending_review` → `published`);
-  template preview endpoints; review queue.
+- Admin API: CRUD for `StoryGoal`, `BookTemplate`, and `StoryPrompt`; publication
+  workflow (`draft` → `pending_review` → `published`); template/prompt preview
+  endpoints; review queue. `LayoutTemplate` rows stay seed/developer-managed and
+  are not exposed in the admin UI or review queue.
 - Publication status: `publication_status` on catalog tables. Consumer catalog and
   generation paths only use `published` + `is_active` records.
 - Versioning: `version` column plus `*_versions` snapshot tables
@@ -227,7 +228,7 @@ Content managers manage catalog entities without code changes or re-seeding:
 - Prompt quality: `StoryPromptRating` submissions via admin API; scores aggregated
   into `quality_score` / `rating_count`. Publication requires minimum thresholds in
   `config/services.php` under `content`.
-- Frontend admin UI: `/admin` (goals, templates, prompts, layouts, preview, review
+- Frontend admin UI: `/admin` (goals, templates, prompts, preview, review
   queue). Visible to users with `role: admin`.
 
 ## Scaling And Cost Optimization

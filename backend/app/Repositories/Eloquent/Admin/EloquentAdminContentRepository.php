@@ -174,19 +174,8 @@ class EloquentAdminContentRepository implements AdminContentRepositoryInterface
                 'updated_at' => $item->updated_at?->toIso8601String(),
             ]);
 
-        $layouts = LayoutTemplate::query()
-            ->where('publication_status', PublicationStatus::PendingReview)
-            ->get()
-            ->map(fn (LayoutTemplate $item) => [
-                'type' => 'layout_template',
-                'id' => $item->id,
-                'title' => $item->title,
-                'updated_at' => $item->updated_at?->toIso8601String(),
-            ]);
-
         return $templates
             ->concat($prompts)
-            ->concat($layouts)
             ->sortByDesc('updated_at')
             ->values();
     }

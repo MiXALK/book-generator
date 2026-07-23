@@ -160,65 +160,8 @@ export function ratePrompt(token: string, id: number, rating: number, notes?: st
   });
 }
 
-export function fetchLayouts(token: string) {
-  return adminFetch<{ items: import("@/app/types/admin").LayoutTemplate[] }>(token, "/layouts");
-}
-
-export function createLayout(
-  token: string,
-  body: {
-    key: string;
-    title: string;
-    category: string;
-    ratio_profile: string;
-    text_position: string;
-    sort_order: number;
-  },
-) {
-  return adminFetch<{ item: import("@/app/types/admin").LayoutTemplate }>(token, "/layouts", {
-    method: "POST",
-    body: JSON.stringify(body),
-  });
-}
-
-export function updateLayout(
-  token: string,
-  id: number,
-  body: Partial<{
-    key: string;
-    title: string;
-    category: string;
-    text_position: string;
-    sort_order: number;
-    is_active: boolean;
-  }>,
-) {
-  return adminFetch<{ item: import("@/app/types/admin").LayoutTemplate }>(token, `/layouts/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(body),
-  });
-}
-
-export function deleteLayout(token: string, id: number) {
-  return adminFetch<{ message: string }>(token, `/layouts/${id}`, { method: "DELETE" });
-}
-
-export function submitLayoutReview(token: string, id: number) {
-  return adminFetch<{ item: import("@/app/types/admin").LayoutTemplate }>(token, `/layouts/${id}/submit-review`, {
-    method: "POST",
-  });
-}
-
-export function publishLayout(token: string, id: number) {
-  return adminFetch<{ item: import("@/app/types/admin").LayoutTemplate }>(token, `/layouts/${id}/publish`, {
-    method: "POST",
-  });
-}
-
 export function fetchPreview(token: string, type: string, id: number) {
-  const path = type === "templates" ? `/templates/${id}/preview`
-    : type === "prompts" ? `/prompts/${id}/preview`
-    : `/layouts/${id}/preview`;
+  const path = type === "templates" ? `/templates/${id}/preview` : `/prompts/${id}/preview`;
 
   return adminFetch<import("@/app/types/admin").ContentPreview>(token, path);
 }
