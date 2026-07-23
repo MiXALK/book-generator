@@ -7,14 +7,14 @@ readonly class IllustrationPromptComposer
     public function composePagePrompt(
         string $styleBible,
         string $pageText,
-        string $pageCategory,
         int $pageNumber,
         string $childName,
         ?int $maxLength = null,
+        ?int $totalPages = null,
     ): string {
-        $scene = match ($pageCategory) {
-            'cover' => "Book cover featuring {$childName} as the hero.",
-            'ending' => "Happy ending scene with {$childName} celebrating.",
+        $scene = match (true) {
+            $pageNumber === 1 => "Book cover featuring {$childName} as the hero.",
+            $totalPages !== null && $pageNumber === $totalPages => "Happy ending scene with {$childName} celebrating.",
             default => "Story scene for page {$pageNumber}.",
         };
         $footer = 'Full-bleed illustration, no captions or letters.';

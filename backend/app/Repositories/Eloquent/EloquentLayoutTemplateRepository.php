@@ -14,24 +14,13 @@ class EloquentLayoutTemplateRepository implements LayoutTemplateRepositoryInterf
         return LayoutTemplate::query()->find($id);
     }
 
-    public function findRandomActiveByCategory(string $category): ?LayoutTemplate
+    public function listRandomActive(int $limit): Collection
     {
         return LayoutTemplate::query()
             ->where('is_active', true)
             ->where('publication_status', PublicationStatus::Published)
-            ->where('category', $category)
             ->inRandomOrder()
-            ->first();
-    }
-
-    public function listRandomActiveByCategory(string $category, int $limit): Collection
-    {
-        return LayoutTemplate::query()
-            ->where('is_active', true)
-            ->where('publication_status', PublicationStatus::Published)
-            ->where('category', $category)
-            ->inRandomOrder()
-            ->limit($limit)
+            ->limit(max(0, $limit))
             ->get();
     }
 

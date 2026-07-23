@@ -41,7 +41,6 @@ export interface LayoutTemplate {
   id: number;
   key: string;
   title: string;
-  category: "cover" | "content" | "ending";
   ratio_profile: string;
   text_position: string;
   sort_order: number;
@@ -65,7 +64,6 @@ export interface PreviewPage {
     id?: number;
     key: string;
     title: string;
-    category: string;
     text_position: string;
     ratio_profile: string;
   };

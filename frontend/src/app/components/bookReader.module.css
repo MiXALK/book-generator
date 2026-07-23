@@ -373,14 +373,6 @@
   z-index: 0;
 }
 
-.illustrationZone[data-category="cover"] {
-  background: linear-gradient(135deg, #f5c4a8, #e8937f);
-}
-
-.illustrationZone[data-category="ending"] {
-  background: linear-gradient(135deg, #c8e6dc, var(--color-accent));
-}
-
 .illustrationImage {
   object-fit: cover;
 }

@@ -123,8 +123,8 @@ class EloquentAdminContentRepository implements AdminContentRepositoryInterface
     public function listLayouts(): Collection
     {
         return LayoutTemplate::query()
-            ->orderBy('category')
             ->orderBy('sort_order')
+            ->orderBy('title')
             ->get();
     }
 

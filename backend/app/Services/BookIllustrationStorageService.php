@@ -87,14 +87,14 @@ readonly class BookIllustrationStorageService
         }
     }
 
-    public function storePlaceholder(int $generationId, int $pageNumber, string $category): ?string
+    public function storePlaceholder(int $generationId, int $pageNumber): ?string
     {
         $path = "books/{$generationId}/page-{$pageNumber}.svg";
 
         try {
             Storage::disk('s3')->put(
                 $path,
-                $this->svgForCategory($category, $pageNumber),
+                $this->svgForPage($pageNumber),
                 [
                     'ContentType' => 'image/svg+xml',
                     'visibility' => 'private',
@@ -176,19 +176,14 @@ readonly class BookIllustrationStorageService
         }
     }
 
-    private function svgForCategory(string $category, int $pageNumber): string
+    private function svgForPage(int $pageNumber): string
     {
-        $palette = match ($category) {
-            'cover' => ['#7c3aed', '#a78bfa', '#c4b5fd'],
-            'ending' => ['#059669', '#34d399', '#6ee7b7'],
-            default => ['#2563eb', '#60a5fa', '#93c5fd'],
-        };
-
-        [$primary, $secondary, $accent] = $palette;
-        $label = htmlspecialchars(strtoupper($category), ENT_QUOTES, 'UTF-8');
+        $primary = '#2563eb';
+        $secondary = '#60a5fa';
+        $accent = '#93c5fd';
 
         return <<<SVG
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 640" role="img" aria-label="{$label} illustration">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 640" role="img" aria-label="Page {$pageNumber} illustration">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="{$primary}"/>

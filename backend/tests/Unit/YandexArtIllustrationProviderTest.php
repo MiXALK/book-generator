@@ -174,7 +174,6 @@ class YandexArtIllustrationProviderTest extends TestCase
             prompt: 'A cozy forest scene.',
             childName: 'Anna',
             childAge: 5,
-            pageCategory: 'story',
             pageNumber: 1,
         );
     }

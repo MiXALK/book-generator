@@ -20,9 +20,9 @@ readonly class ContentPreviewService
             'description' => $template->description,
             'is_free' => $template->is_free,
             'pages' => [
-                $this->samplePage(1, 'cover', 'bottom', 'Обложка: '.$template->title),
-                $this->samplePage(2, 'content', 'bottom', self::SAMPLE_TEXT),
-                $this->samplePage(3, 'ending', 'bottom', 'Конец. '.$template->title),
+                $this->samplePage(1, 'bottom', 'Обложка: '.$template->title),
+                $this->samplePage(2, 'bottom', self::SAMPLE_TEXT),
+                $this->samplePage(3, 'bottom', 'Конец. '.$template->title),
             ],
         ];
     }
@@ -36,9 +36,9 @@ readonly class ContentPreviewService
             'quality_score' => $prompt->quality_score,
             'rating_count' => $prompt->rating_count,
             'pages' => [
-                $this->samplePage(1, 'cover', 'bottom', $prompt->title),
-                $this->samplePage(2, 'content', 'left', self::SAMPLE_TEXT),
-                $this->samplePage(3, 'ending', 'bottom', 'Финал истории'),
+                $this->samplePage(1, 'bottom', $prompt->title),
+                $this->samplePage(2, 'left', self::SAMPLE_TEXT),
+                $this->samplePage(3, 'bottom', 'Финал истории'),
             ],
         ];
     }
@@ -48,10 +48,9 @@ readonly class ContentPreviewService
         return [
             'type' => 'layout_template',
             'title' => $layout->title,
-            'category' => $layout->category,
             'text_position' => $layout->text_position,
             'pages' => [
-                $this->samplePage(1, $layout->category, $layout->text_position, self::SAMPLE_TEXT, $layout),
+                $this->samplePage(1, $layout->text_position, self::SAMPLE_TEXT, $layout),
             ],
         ];
     }
@@ -61,7 +60,6 @@ readonly class ContentPreviewService
      */
     private function samplePage(
         int $pageNumber,
-        string $category,
         string $textPosition,
         string $text,
         ?LayoutTemplate $layout = null,
@@ -74,7 +72,6 @@ readonly class ContentPreviewService
                 'id' => $layout?->id,
                 'key' => $layout !== null ? $layout->key : 'preview',
                 'title' => $layout !== null ? $layout->title : 'Preview',
-                'category' => $category,
                 'text_position' => $textPosition,
                 'ratio_profile' => $layout !== null ? $layout->ratio_profile : '80_20',
             ],

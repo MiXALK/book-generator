@@ -21,11 +21,10 @@ function layoutClass(textPosition: string | undefined): string {
 
 export default function BookPageView({ page }: BookPageViewProps) {
   const textPosition = page.layout_template?.text_position ?? "bottom";
-  const category = page.layout_template?.category ?? "content";
 
   return (
     <article className={`${styles.pageCanvas} ${layoutClass(textPosition)}`}>
-      <div className={styles.illustrationZone} data-category={category}>
+      <div className={styles.illustrationZone}>
         {page.image_url ? (
           <BookIllustrationImage src={page.image_url} />
         ) : (

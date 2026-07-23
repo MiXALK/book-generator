@@ -44,7 +44,6 @@ export default function AdminPreviewPage() {
       ? {
           id: page.layout_template.id ?? 0,
           key: page.layout_template.key,
-          category: page.layout_template.category,
           ratio_profile: page.layout_template.ratio_profile,
           text_position: page.layout_template.text_position as "top" | "bottom" | "left" | "right",
         }

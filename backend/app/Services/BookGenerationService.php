@@ -336,7 +336,7 @@ class BookGenerationService
         array $layoutMeasured,
     ): void {
         $built = $layoutMeasured['result'];
-        $pages = $this->attachPlaceholderIllustrations($generationId, $built['pages'], $built['layouts']);
+        $pages = $this->attachPlaceholderIllustrations($generationId, $built['pages']);
 
         $this->bookPages->createMany($generation, $pages);
 
@@ -570,18 +570,13 @@ class BookGenerationService
     /**
      * @param  list<array<string, mixed>>  $pages
      */
-    private function attachPlaceholderIllustrations(int $generationId, array $pages, Collection $layouts): array
+    private function attachPlaceholderIllustrations(int $generationId, array $pages): array
     {
         foreach ($pages as $index => $page) {
-            $layout = $layouts[$index] ?? null;
-            $category = $layout instanceof LayoutTemplate
-                ? (string) $layout->category
-                : 'content';
             $pageNumber = (int) $page['page_number'];
             $pages[$index]['image_url'] = $this->illustrationStorage->storePlaceholder(
                 $generationId,
                 $pageNumber,
-                $category,
             );
         }
 
@@ -736,21 +731,7 @@ class BookGenerationService
 
     private function pickLayouts(int $pagesCount): Collection
     {
-        $cover = $this->layoutTemplates->findRandomActiveByCategory('cover');
-        $ending = $this->layoutTemplates->findRandomActiveByCategory('ending');
-        $content = $this->layoutTemplates->listRandomActiveByCategory('content', max(0, $pagesCount - 2));
-
-        $layouts = collect();
-
-        if ($cover) {
-            $layouts->push($cover);
-        }
-
-        $layouts = $layouts->merge($content);
-
-        if ($ending) {
-            $layouts->push($ending);
-        }
+        $layouts = $this->layoutTemplates->listRandomActive($pagesCount);
 
         while ($layouts->count() < $pagesCount) {
             $fallback = $this->layoutTemplates->findRandomActive();

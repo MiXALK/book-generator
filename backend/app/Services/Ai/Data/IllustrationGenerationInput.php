@@ -8,7 +8,6 @@ readonly class IllustrationGenerationInput
         public string $prompt,
         public string $childName,
         public int $childAge,
-        public string $pageCategory,
         public int $pageNumber,
     ) {}
 }

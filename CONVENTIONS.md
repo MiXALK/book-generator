@@ -218,7 +218,9 @@ Content managers manage catalog entities without code changes or re-seeding:
 - Admin API: CRUD for `StoryGoal`, `BookTemplate`, and `StoryPrompt`; publication
   workflow (`draft` → `pending_review` → `published`); template/prompt preview
   endpoints; review queue. `LayoutTemplate` rows stay seed/developer-managed and
-  are not exposed in the admin UI or review queue.
+  are not exposed in the admin UI or review queue. Layouts have no `category`
+  column; illustration scene role is inferred from page number (first / middle /
+  last).
 - Publication status: `publication_status` on catalog tables. Consumer catalog and
   generation paths only use `published` + `is_active` records.
 - Versioning: `version` column plus `*_versions` snapshot tables

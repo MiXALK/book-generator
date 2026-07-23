@@ -16,7 +16,6 @@ class IllustrationPromptComposerTest extends TestCase
         $prompt = $composer->composePagePrompt(
             $styleBible,
             $pageText,
-            'content',
             3,
             'Anna',
             500,
@@ -36,7 +35,6 @@ class IllustrationPromptComposerTest extends TestCase
         $prompt = $composer->composePagePrompt(
             $styleBible,
             $pageText,
-            'content',
             2,
             'Аня',
             500,
@@ -53,7 +51,6 @@ class IllustrationPromptComposerTest extends TestCase
         $prompt = $composer->composePagePrompt(
             'Short style bible.',
             'Short scene.',
-            'cover',
             1,
             'Anna',
             500,
@@ -63,5 +60,21 @@ class IllustrationPromptComposerTest extends TestCase
             "Short style bible.\nBook cover featuring Anna as the hero.\nScene context: Short scene.\nFull-bleed illustration, no captions or letters.",
             $prompt,
         );
+    }
+
+    public function test_compose_page_prompt_uses_ending_scene_for_last_page(): void
+    {
+        $composer = new IllustrationPromptComposer;
+
+        $prompt = $composer->composePagePrompt(
+            'Short style bible.',
+            'Short scene.',
+            5,
+            'Anna',
+            null,
+            5,
+        );
+
+        $this->assertStringContainsString('Happy ending scene with Anna celebrating.', $prompt);
     }
 }

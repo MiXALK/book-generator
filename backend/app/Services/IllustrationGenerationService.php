@@ -9,7 +9,6 @@ use App\Models\BookGeneration;
 use App\Models\BookPage;
 use App\Models\ChildProfile;
 use App\Models\GeneratedCharacter;
-use App\Models\LayoutTemplate;
 use App\Models\UploadedPhoto;
 use App\Repositories\Contracts\BookGenerationRepositoryInterface;
 use App\Repositories\Contracts\BookPageRepositoryInterface;
@@ -306,24 +305,20 @@ readonly class IllustrationGenerationService
             return false;
         }
 
-        $layoutTemplate = $page->layoutTemplate;
-        $category = $layoutTemplate instanceof LayoutTemplate
-            ? (string) $layoutTemplate->category
-            : 'content';
+        $totalPages = $generation->bookPages()->count();
         $prompt = $this->promptComposer->composePagePrompt(
             $character->style_bible,
             $page->text,
-            $category,
             $page->page_number,
             $generation->child_name,
             $this->maxPromptLength(),
+            $totalPages > 0 ? $totalPages : null,
         );
 
         $input = new IllustrationGenerationInput(
             prompt: $prompt,
             childName: $generation->child_name,
             childAge: $generation->child_age,
-            pageCategory: $category,
             pageNumber: $page->page_number,
         );
 
