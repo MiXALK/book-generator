@@ -19,7 +19,6 @@ class UpdateBookTemplateRequest extends FormRequest
     {
         return [
             'title' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string|max:2000',
             'is_free' => 'sometimes|required|boolean',
             'template_type' => 'sometimes|required|string|in:story',
             'is_active' => 'sometimes|boolean',

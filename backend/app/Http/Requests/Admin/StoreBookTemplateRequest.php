@@ -18,7 +18,6 @@ class StoreBookTemplateRequest extends FormRequest
     {
         return [
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:2000',
             'is_free' => 'required|boolean',
             'template_type' => 'required|string|in:story',
             'is_active' => 'sometimes|boolean',

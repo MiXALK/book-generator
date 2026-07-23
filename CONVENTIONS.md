@@ -78,8 +78,10 @@ require `child_gender`, which is stored on both `ChildProfile` and the
 `BookGeneration` snapshot.
 
 Growable catalog entities (for example, `StoryGoal`, `BookTemplate`, and
-`StoryPrompt`) stay in the database and use repositories. UI labels for enum
-values are resolved on the frontend through `frontend/src/app/context/locales.ts`.
+`StoryPrompt`) stay in the database and use repositories. `BookTemplate` does
+not store its own `description`; it borrows `StoryGoal.description` via the
+`story_goal_id` relation. UI labels for enum values are resolved on the
+frontend through `frontend/src/app/context/locales.ts`.
 
 ## PHP Rules
 

@@ -12,6 +12,8 @@ readonly class ContentPreviewService
 
     public function previewBookTemplate(BookTemplate $template): array
     {
+        $template->loadMissing('storyGoal');
+
         return [
             'type' => 'book_template',
             'title' => $template->title,

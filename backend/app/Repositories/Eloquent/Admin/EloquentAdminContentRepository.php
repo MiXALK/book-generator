@@ -48,7 +48,7 @@ class EloquentAdminContentRepository implements AdminContentRepositoryInterface
     public function listTemplates(): Collection
     {
         return BookTemplate::query()
-            ->with('storyGoal:id,name')
+            ->with('storyGoal:id,name,description')
             ->orderBy('title')
             ->get();
     }
@@ -62,7 +62,7 @@ class EloquentAdminContentRepository implements AdminContentRepositoryInterface
 
     public function createTemplate(array $attributes): BookTemplate
     {
-        return BookTemplate::query()->create($attributes);
+        return BookTemplate::query()->create($attributes)->fresh(['storyGoal', 'versions']);
     }
 
     public function updateTemplate(BookTemplate $template, array $attributes): BookTemplate

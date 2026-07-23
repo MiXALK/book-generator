@@ -166,7 +166,6 @@ class PrivacyComplianceFeatureTest extends TestCase
         $template = BookTemplate::query()->create([
             'title' => 'Тестовая сказка',
             'story_goal_id' => $goal->id,
-            'description' => 'Test template',
             'is_free' => true,
             'template_type' => 'story',
             'is_active' => true,

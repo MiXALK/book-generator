@@ -57,7 +57,6 @@ export function createTemplate(
   token: string,
   body: {
     title: string;
-    description?: string;
     is_free: boolean;
     template_type: string;
     story_goal_id?: number | null;
@@ -74,7 +73,6 @@ export function updateTemplate(
   id: number,
   body: Partial<{
     title: string;
-    description: string;
     is_free: boolean;
     is_active: boolean;
     story_goal_id: number | null;

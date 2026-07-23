@@ -492,6 +492,8 @@ class BookGenerationService
      */
     private function templateSnapshot(BookTemplate $template): array
     {
+        $template->loadMissing('storyGoal');
+
         return [
             'id' => $template->id,
             'version' => $template->version,

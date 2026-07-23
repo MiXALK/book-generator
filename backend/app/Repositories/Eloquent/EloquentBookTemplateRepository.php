@@ -12,15 +12,17 @@ class EloquentBookTemplateRepository implements BookTemplateRepositoryInterface
     public function listActiveForCatalog(): Collection
     {
         return BookTemplate::query()
+            ->with('storyGoal:id,description')
             ->where('is_active', true)
             ->where('publication_status', PublicationStatus::Published)
             ->orderBy('title')
-            ->get(['id', 'title', 'description', 'is_free', 'template_type']);
+            ->get(['id', 'title', 'is_free', 'template_type', 'story_goal_id']);
     }
 
     public function findActiveById(int $id): BookTemplate
     {
         return BookTemplate::query()
+            ->with('storyGoal:id,description')
             ->where('id', $id)
             ->where('is_active', true)
             ->where('publication_status', PublicationStatus::Published)
@@ -30,6 +32,7 @@ class EloquentBookTemplateRepository implements BookTemplateRepositoryInterface
     public function findActiveByStoryGoalName(string $goalName): BookTemplate
     {
         return BookTemplate::query()
+            ->with('storyGoal:id,name,description')
             ->where('is_active', true)
             ->where('publication_status', PublicationStatus::Published)
             ->whereHas('storyGoal', function ($query) use ($goalName) {

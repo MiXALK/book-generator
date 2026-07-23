@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PublicationStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,11 +13,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property int $version
  * @property PublicationStatus $publication_status
+ * @property-read string|null $description
  */
-#[Fillable(['title', 'description', 'is_free', 'template_type', 'is_active', 'publication_status', 'version', 'story_goal_id'])]
+#[Fillable(['title', 'is_free', 'template_type', 'is_active', 'publication_status', 'version', 'story_goal_id'])]
 class BookTemplate extends Model
 {
     use HasFactory;
+
+    /**
+     * @var list<string>
+     */
+    protected $appends = [
+        'description',
+    ];
 
     /**
      * @return array<string, string>
@@ -29,7 +38,25 @@ class BookTemplate extends Model
     }
 
     /**
+     * Borrow description from the linked StoryGoal (single source of truth).
+     *
+     * @return Attribute<string|null, never>
+     */
+    protected function description(): Attribute
+    {
+        return Attribute::make(
+            get: function (): ?string {
+                $goal = $this->storyGoal;
+
+                return $goal instanceof StoryGoal ? $goal->description : null;
+            },
+        );
+    }
+
+    /**
      * Get the development goal this template is linked to.
+     *
+     * @return BelongsTo<StoryGoal, $this>
      */
     public function storyGoal(): BelongsTo
     {

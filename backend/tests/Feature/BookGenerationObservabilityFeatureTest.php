@@ -156,7 +156,6 @@ class BookGenerationObservabilityFeatureTest extends TestCase
         $template = BookTemplate::query()->create([
             'title' => 'Делимся',
             'story_goal_id' => $goal->id,
-            'description' => 'Sharing template',
             'is_free' => true,
             'template_type' => 'story',
             'is_active' => true,
@@ -232,7 +231,6 @@ class BookGenerationObservabilityFeatureTest extends TestCase
         $template = BookTemplate::query()->create([
             'title' => 'Делимся',
             'story_goal_id' => $goal->id,
-            'description' => 'Sharing template',
             'is_free' => true,
             'template_type' => 'story',
             'is_active' => true,
@@ -315,7 +313,6 @@ class BookGenerationObservabilityFeatureTest extends TestCase
         $template = BookTemplate::query()->create([
             'title' => 'Делимся',
             'story_goal_id' => $goal->id,
-            'description' => 'Sharing template',
             'is_free' => true,
             'template_type' => 'story',
             'is_active' => true,
@@ -372,7 +369,6 @@ class BookGenerationObservabilityFeatureTest extends TestCase
         BookTemplate::query()->create([
             'title' => 'Делимся',
             'story_goal_id' => $goal->id,
-            'description' => 'Sharing template',
             'is_free' => true,
             'template_type' => 'story',
             'is_active' => true,

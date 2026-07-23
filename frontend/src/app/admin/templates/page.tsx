@@ -32,7 +32,6 @@ export default function AdminTemplatesPage() {
   const [items, setItems] = useState<BookTemplate[]>([]);
   const [goals, setGoals] = useState<StoryGoal[]>([]);
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
   const [isFree, setIsFree] = useState(true);
   const [storyGoalId, setStoryGoalId] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -81,13 +80,11 @@ export default function AdminTemplatesPage() {
     try {
       await createTemplate(token, {
         title,
-        description,
         is_free: isFree,
         template_type: "story",
         story_goal_id: storyGoalId ? Number(storyGoalId) : null,
       });
       setTitle("");
-      setDescription("");
       await reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : t.adminSaveError);
@@ -102,10 +99,6 @@ export default function AdminTemplatesPage() {
         <label className={styles.label}>
           {t.adminTitleLabel}
           <input className={styles.input} value={title} onChange={(e) => setTitle(e.target.value)} required />
-        </label>
-        <label className={styles.label}>
-          {t.adminDescription}
-          <textarea className={styles.textarea} value={description} onChange={(e) => setDescription(e.target.value)} />
         </label>
         <label className={styles.label}>
           {t.adminGoal}

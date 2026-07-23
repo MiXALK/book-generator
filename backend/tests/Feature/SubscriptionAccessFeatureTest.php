@@ -72,7 +72,6 @@ class SubscriptionAccessFeatureTest extends TestCase
         BookTemplate::query()->create([
             'title' => 'Спокойные чувства',
             'story_goal_id' => $goal->id,
-            'description' => 'Premium template',
             'is_free' => false,
             'template_type' => 'story',
             'is_active' => true,
@@ -109,7 +108,6 @@ class SubscriptionAccessFeatureTest extends TestCase
         BookTemplate::query()->create([
             'title' => 'Дружная компания',
             'story_goal_id' => $goal->id,
-            'description' => 'Premium template',
             'is_free' => false,
             'template_type' => 'story',
             'is_active' => true,

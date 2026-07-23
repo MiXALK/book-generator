@@ -17,7 +17,6 @@ class BookTemplateSeeder extends Seeder
             [
                 'title' => 'Маленький обмен',
                 'goal_name' => 'Делиться игрушками',
-                'description' => 'RU: История о дружбе. | EN: A short sharing story.',
                 'is_free' => true,
                 'template_type' => 'story',
                 'is_active' => true,
@@ -25,7 +24,6 @@ class BookTemplateSeeder extends Seeder
             [
                 'title' => 'Сонный фонарик',
                 'goal_name' => 'Засыпать самостоятельно',
-                'description' => 'RU: Ритуал перед сном. | EN: Bedtime courage routine.',
                 'is_free' => true,
                 'template_type' => 'story',
                 'is_active' => true,
@@ -33,7 +31,6 @@ class BookTemplateSeeder extends Seeder
             [
                 'title' => 'Смелый шаг',
                 'goal_name' => 'Преодолевать страхи',
-                'description' => 'RU: История храбрости. | EN: Brave steps every day.',
                 'is_free' => false,
                 'template_type' => 'story',
                 'is_active' => true,
@@ -41,7 +38,6 @@ class BookTemplateSeeder extends Seeder
             [
                 'title' => 'Волшебное спасибо',
                 'goal_name' => 'Говорить «спасибо»',
-                'description' => 'RU: История о благодарности. | EN: A thank-you adventure.',
                 'is_free' => false,
                 'template_type' => 'story',
                 'is_active' => true,
@@ -49,7 +45,6 @@ class BookTemplateSeeder extends Seeder
             [
                 'title' => 'Мой маленький шаг',
                 'goal_name' => 'Развивать самостоятельность',
-                'description' => 'RU: История самостоятельности. | EN: Growing independence.',
                 'is_free' => false,
                 'template_type' => 'story',
                 'is_active' => true,
@@ -57,7 +52,6 @@ class BookTemplateSeeder extends Seeder
             [
                 'title' => 'Спокойные чувства',
                 'goal_name' => 'Управлять эмоциями',
-                'description' => 'RU: История об эмоциях. | EN: Emotional regulation story.',
                 'is_free' => false,
                 'template_type' => 'story',
                 'is_active' => true,
@@ -65,7 +59,6 @@ class BookTemplateSeeder extends Seeder
             [
                 'title' => 'Дружная компания',
                 'goal_name' => 'Дружить и общаться',
-                'description' => 'RU: История о дружбе. | EN: Friendship and communication.',
                 'is_free' => false,
                 'template_type' => 'story',
                 'is_active' => true,
@@ -81,7 +74,6 @@ class BookTemplateSeeder extends Seeder
                 ['title' => $template['title']],
                 [
                     'story_goal_id' => $storyGoal->id,
-                    'description' => $template['description'],
                     'is_free' => $template['is_free'],
                     'template_type' => $template['template_type'],
                     'is_active' => $template['is_active'],

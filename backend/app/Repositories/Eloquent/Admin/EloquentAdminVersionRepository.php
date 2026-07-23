@@ -59,6 +59,8 @@ class EloquentAdminVersionRepository implements AdminVersionRepositoryInterface
      */
     private function bookTemplateSnapshot(BookTemplate $template): array
     {
+        $template->loadMissing('storyGoal');
+
         return [
             'title' => $template->title,
             'description' => $template->description,

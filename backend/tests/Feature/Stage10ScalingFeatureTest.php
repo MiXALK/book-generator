@@ -127,7 +127,6 @@ class Stage10ScalingFeatureTest extends TestCase
             ['story_goal_id' => $goal->id],
             [
                 'title' => 'Щедрый друг',
-                'description' => 'Free template',
                 'is_free' => true,
                 'template_type' => 'story',
                 'is_active' => true,

@@ -10,6 +10,7 @@ export interface StoryGoal {
 export interface BookTemplate {
   id: number;
   title: string;
+  /** Borrowed from linked StoryGoal; not stored on the template. */
   description: string | null;
   is_free: boolean;
   template_type: string;
@@ -17,7 +18,7 @@ export interface BookTemplate {
   publication_status: PublicationStatus;
   version: number;
   story_goal_id: number | null;
-  story_goal?: { id: number; name: string } | null;
+  story_goal?: { id: number; name: string; description?: string | null } | null;
 }
 
 export interface StoryPrompt {
