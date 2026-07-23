@@ -14,6 +14,7 @@ import {
   updateTemplate,
 } from "@/app/lib/adminApi";
 import { BookTemplate, StoryGoal } from "@/app/types/admin";
+import { AdminDeleteIcon } from "../AdminActionIcons";
 import styles from "../admin.module.css";
 
 function statusClass(status: string) {
@@ -159,10 +160,12 @@ export default function AdminTemplatesPage() {
                 </button>
                 <button
                   type="button"
-                  className={`${styles.button} ${styles.buttonDanger}`}
+                  className={`${styles.button} ${styles.buttonDanger} ${styles.iconButton}`}
                   onClick={() => token && deleteTemplate(token, item.id).then(reload)}
+                  aria-label={t.adminDelete}
+                  title={t.adminDelete}
                 >
-                  {t.adminDelete}
+                  <AdminDeleteIcon />
                 </button>
               </td>
             </tr>

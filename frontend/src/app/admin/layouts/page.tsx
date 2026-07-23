@@ -12,6 +12,7 @@ import {
   submitLayoutReview,
 } from "@/app/lib/adminApi";
 import { LayoutTemplate } from "@/app/types/admin";
+import { AdminDeleteIcon } from "../AdminActionIcons";
 import styles from "../admin.module.css";
 
 function statusClass(status: string) {
@@ -155,8 +156,14 @@ export default function AdminLayoutsPage() {
                 <button type="button" className={styles.button} onClick={() => token && publishLayout(token, item.id).then(reload)}>
                   {t.adminPublish}
                 </button>
-                <button type="button" className={`${styles.button} ${styles.buttonDanger}`} onClick={() => token && deleteLayout(token, item.id).then(reload)}>
-                  {t.adminDelete}
+                <button
+                  type="button"
+                  className={`${styles.button} ${styles.buttonDanger} ${styles.iconButton}`}
+                  onClick={() => token && deleteLayout(token, item.id).then(reload)}
+                  aria-label={t.adminDelete}
+                  title={t.adminDelete}
+                >
+                  <AdminDeleteIcon />
                 </button>
               </td>
             </tr>

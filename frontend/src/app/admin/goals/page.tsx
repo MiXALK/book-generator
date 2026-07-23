@@ -5,6 +5,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { locales } from "@/app/context/locales";
 import { createGoal, deleteGoal, fetchGoals, updateGoal } from "@/app/lib/adminApi";
 import { StoryGoal } from "@/app/types/admin";
+import { AdminDeleteIcon, AdminEditIcon } from "../AdminActionIcons";
 import styles from "../admin.module.css";
 
 export default function AdminGoalsPage() {
@@ -113,11 +114,23 @@ export default function AdminGoalsPage() {
               <td>{goal.name}</td>
               <td>{goal.description}</td>
               <td className={styles.actions}>
-                <button type="button" className={`${styles.button} ${styles.buttonSecondary}`} onClick={() => onEdit(goal)}>
-                  {t.adminEdit}
+                <button
+                  type="button"
+                  className={`${styles.button} ${styles.buttonSecondary} ${styles.iconButton}`}
+                  onClick={() => onEdit(goal)}
+                  aria-label={t.adminEdit}
+                  title={t.adminEdit}
+                >
+                  <AdminEditIcon />
                 </button>
-                <button type="button" className={`${styles.button} ${styles.buttonDanger}`} onClick={() => onDelete(goal.id)}>
-                  {t.adminDelete}
+                <button
+                  type="button"
+                  className={`${styles.button} ${styles.buttonDanger} ${styles.iconButton}`}
+                  onClick={() => onDelete(goal.id)}
+                  aria-label={t.adminDelete}
+                  title={t.adminDelete}
+                >
+                  <AdminDeleteIcon />
                 </button>
               </td>
             </tr>
