@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property PublicationStatus $publication_status
  * @property-read string|null $description
  */
-#[Fillable(['title', 'is_free', 'template_type', 'is_active', 'publication_status', 'version', 'story_goal_id'])]
+#[Fillable(['title', 'is_free', 'is_active', 'publication_status', 'version', 'story_goal_id'])]
 class BookTemplate extends Model
 {
     use HasFactory;

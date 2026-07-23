@@ -65,7 +65,6 @@ class EloquentAdminVersionRepository implements AdminVersionRepositoryInterface
             'title' => $template->title,
             'description' => $template->description,
             'is_free' => $template->is_free,
-            'template_type' => $template->template_type,
             'is_active' => $template->is_active,
             'story_goal_id' => $template->story_goal_id,
         ];

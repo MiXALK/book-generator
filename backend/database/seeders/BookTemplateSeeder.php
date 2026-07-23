@@ -18,49 +18,42 @@ class BookTemplateSeeder extends Seeder
                 'title' => 'Маленький обмен',
                 'goal_name' => 'Делиться игрушками',
                 'is_free' => true,
-                'template_type' => 'story',
                 'is_active' => true,
             ],
             [
                 'title' => 'Сонный фонарик',
                 'goal_name' => 'Засыпать самостоятельно',
                 'is_free' => true,
-                'template_type' => 'story',
                 'is_active' => true,
             ],
             [
                 'title' => 'Смелый шаг',
                 'goal_name' => 'Преодолевать страхи',
                 'is_free' => false,
-                'template_type' => 'story',
                 'is_active' => true,
             ],
             [
                 'title' => 'Волшебное спасибо',
                 'goal_name' => 'Говорить «спасибо»',
                 'is_free' => false,
-                'template_type' => 'story',
                 'is_active' => true,
             ],
             [
                 'title' => 'Мой маленький шаг',
                 'goal_name' => 'Развивать самостоятельность',
                 'is_free' => false,
-                'template_type' => 'story',
                 'is_active' => true,
             ],
             [
                 'title' => 'Спокойные чувства',
                 'goal_name' => 'Управлять эмоциями',
                 'is_free' => false,
-                'template_type' => 'story',
                 'is_active' => true,
             ],
             [
                 'title' => 'Дружная компания',
                 'goal_name' => 'Дружить и общаться',
                 'is_free' => false,
-                'template_type' => 'story',
                 'is_active' => true,
             ],
         ];
@@ -75,7 +68,6 @@ class BookTemplateSeeder extends Seeder
                 [
                     'story_goal_id' => $storyGoal->id,
                     'is_free' => $template['is_free'],
-                    'template_type' => $template['template_type'],
                     'is_active' => $template['is_active'],
                 ],
             );

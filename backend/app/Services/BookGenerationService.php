@@ -500,7 +500,6 @@ class BookGenerationService
             'title' => $template->title,
             'description' => $template->description,
             'is_free' => $template->is_free,
-            'template_type' => $template->template_type,
         ];
     }
 

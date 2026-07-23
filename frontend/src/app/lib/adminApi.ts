@@ -58,7 +58,6 @@ export function createTemplate(
   body: {
     title: string;
     is_free: boolean;
-    template_type: string;
     story_goal_id?: number | null;
   },
 ) {

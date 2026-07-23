@@ -82,7 +82,6 @@ export default function AdminTemplatesPage() {
       await createTemplate(token, {
         title,
         is_free: isFree,
-        template_type: "story",
         story_goal_id: storyGoalId ? Number(storyGoalId) : null,
       });
       setTitle("");

@@ -20,7 +20,6 @@ class UpdateBookTemplateRequest extends FormRequest
         return [
             'title' => 'sometimes|required|string|max:255',
             'is_free' => 'sometimes|required|boolean',
-            'template_type' => 'sometimes|required|string|in:story',
             'is_active' => 'sometimes|boolean',
             'story_goal_id' => [
                 'nullable',

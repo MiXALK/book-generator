@@ -67,7 +67,6 @@ class AdminContentFeatureTest extends TestCase
         $templateResponse = $this->withToken('admin-token')->postJson('/api/admin/templates', [
             'title' => 'Test Template',
             'is_free' => true,
-            'template_type' => 'story',
             'story_goal_id' => $goalId,
         ]);
 

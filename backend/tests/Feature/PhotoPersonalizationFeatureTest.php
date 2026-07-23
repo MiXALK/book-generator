@@ -134,7 +134,6 @@ class PhotoPersonalizationFeatureTest extends TestCase
             'title' => 'Делимся',
             'story_goal_id' => $goal->id,
             'is_free' => true,
-            'template_type' => 'story',
             'is_active' => true,
         ]);
 
@@ -207,7 +206,6 @@ class PhotoPersonalizationFeatureTest extends TestCase
             'title' => 'Делимся',
             'story_goal_id' => $goal->id,
             'is_free' => true,
-            'template_type' => 'story',
             'is_active' => true,
         ]);
 

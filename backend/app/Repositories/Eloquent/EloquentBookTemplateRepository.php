@@ -16,7 +16,7 @@ class EloquentBookTemplateRepository implements BookTemplateRepositoryInterface
             ->where('is_active', true)
             ->where('publication_status', PublicationStatus::Published)
             ->orderBy('title')
-            ->get(['id', 'title', 'is_free', 'template_type', 'story_goal_id']);
+            ->get(['id', 'title', 'is_free', 'story_goal_id']);
     }
 
     public function findActiveById(int $id): BookTemplate

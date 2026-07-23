@@ -167,7 +167,6 @@ class PrivacyComplianceFeatureTest extends TestCase
             'title' => 'Тестовая сказка',
             'story_goal_id' => $goal->id,
             'is_free' => true,
-            'template_type' => 'story',
             'is_active' => true,
         ]);
 

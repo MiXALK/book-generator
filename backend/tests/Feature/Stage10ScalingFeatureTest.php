@@ -128,7 +128,6 @@ class Stage10ScalingFeatureTest extends TestCase
             [
                 'title' => 'Щедрый друг',
                 'is_free' => true,
-                'template_type' => 'story',
                 'is_active' => true,
             ],
         );

@@ -13,7 +13,6 @@ export interface BookTemplate {
   /** Borrowed from linked StoryGoal; not stored on the template. */
   description: string | null;
   is_free: boolean;
-  template_type: string;
   is_active: boolean;
   publication_status: PublicationStatus;
   version: number;

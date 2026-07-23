@@ -19,7 +19,6 @@ class StoreBookTemplateRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'is_free' => 'required|boolean',
-            'template_type' => 'required|string|in:story',
             'is_active' => 'sometimes|boolean',
             'story_goal_id' => 'nullable|integer|exists:story_goals,id|unique:book_templates,story_goal_id',
         ];

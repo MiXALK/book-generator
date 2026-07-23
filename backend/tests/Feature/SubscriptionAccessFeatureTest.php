@@ -73,7 +73,6 @@ class SubscriptionAccessFeatureTest extends TestCase
             'title' => 'Спокойные чувства',
             'story_goal_id' => $goal->id,
             'is_free' => false,
-            'template_type' => 'story',
             'is_active' => true,
         ]);
 
@@ -109,7 +108,6 @@ class SubscriptionAccessFeatureTest extends TestCase
             'title' => 'Дружная компания',
             'story_goal_id' => $goal->id,
             'is_free' => false,
-            'template_type' => 'story',
             'is_active' => true,
         ]);
 
