@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Services\TemplateCatalogCacheService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -20,5 +21,7 @@ class DatabaseSeeder extends Seeder
             StoryPromptSeeder::class,
             LayoutTemplateSeeder::class,
         ]);
+
+        app(TemplateCatalogCacheService::class)->bumpVersion();
     }
 }
