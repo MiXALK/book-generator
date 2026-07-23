@@ -159,7 +159,6 @@ class AdminContentFeatureTest extends TestCase
         $layoutResponse = $this->withToken('admin-token')->postJson('/api/admin/layouts', [
             'key' => 'test_layout',
             'title' => 'Test Layout',
-            'ratio_profile' => '80_20',
             'text_position' => 'bottom',
             'sort_order' => 99,
         ]);

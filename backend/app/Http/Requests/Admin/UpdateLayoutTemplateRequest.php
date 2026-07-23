@@ -26,7 +26,6 @@ class UpdateLayoutTemplateRequest extends FormRequest
                 Rule::unique('layout_templates', 'key')->ignore($this->route('id')),
             ],
             'title' => 'sometimes|required|string|max:255',
-            'ratio_profile' => 'sometimes|required|string|in:80_20',
             'text_position' => 'sometimes|required|string|in:top,bottom,left,right,overlay',
             'sort_order' => 'sometimes|required|integer|min:0',
             'is_active' => 'sometimes|boolean',

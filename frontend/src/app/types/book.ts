@@ -1,7 +1,6 @@
 export interface LayoutTemplate {
   id: number;
   key: string;
-  ratio_profile: string;
   text_position: "top" | "bottom" | "left" | "right";
 }
 

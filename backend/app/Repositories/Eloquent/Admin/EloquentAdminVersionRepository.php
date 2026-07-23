@@ -94,7 +94,6 @@ class EloquentAdminVersionRepository implements AdminVersionRepositoryInterface
         return [
             'key' => $layout->key,
             'title' => $layout->title,
-            'ratio_profile' => $layout->ratio_profile,
             'text_position' => $layout->text_position,
             'sort_order' => $layout->sort_order,
             'is_active' => $layout->is_active,

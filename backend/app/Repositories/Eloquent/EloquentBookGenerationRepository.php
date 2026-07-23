@@ -88,7 +88,7 @@ class EloquentBookGenerationRepository implements BookGenerationRepositoryInterf
                 'bookPages' => fn ($query) => $query
                     ->select(['id', 'book_generation_id', 'page_number', 'text', 'image_url', 'layout_template_id'])
                     ->orderBy('page_number')
-                    ->with('layoutTemplate:id,key,ratio_profile,text_position'),
+                    ->with('layoutTemplate:id,key,text_position'),
             ])
             ->latest()
             ->get();

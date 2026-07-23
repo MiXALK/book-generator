@@ -39,7 +39,6 @@ export interface LayoutTemplate {
   id: number;
   key: string;
   title: string;
-  ratio_profile: string;
   text_position: string;
   sort_order: number;
   is_active: boolean;

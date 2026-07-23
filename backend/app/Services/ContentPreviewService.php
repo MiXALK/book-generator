@@ -76,7 +76,7 @@ readonly class ContentPreviewService
                 'key' => $layout !== null ? $layout->key : 'preview',
                 'title' => $layout !== null ? $layout->title : 'Preview',
                 'text_position' => $textPosition,
-                'ratio_profile' => $layout !== null ? $layout->ratio_profile : '80_20',
+                'ratio_profile' => LayoutTemplate::RATIO_PROFILE,
             ],
         ];
     }

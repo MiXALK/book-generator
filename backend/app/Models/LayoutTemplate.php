@@ -12,10 +12,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $version
  * @property PublicationStatus $publication_status
  */
-#[Fillable(['key', 'title', 'ratio_profile', 'text_position', 'sort_order', 'is_active', 'publication_status', 'version'])]
+#[Fillable(['key', 'title', 'text_position', 'sort_order', 'is_active', 'publication_status', 'version'])]
 class LayoutTemplate extends Model
 {
     use HasFactory;
+
+    public const string RATIO_PROFILE = '80_20';
 
     /**
      * @return array<string, string>
