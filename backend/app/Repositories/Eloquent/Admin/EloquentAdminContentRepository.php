@@ -82,7 +82,7 @@ class EloquentAdminContentRepository implements AdminContentRepositoryInterface
         return StoryPrompt::query()
             ->with('storyGoal:id,name')
             ->orderByDesc('quality_score')
-            ->orderBy('title')
+            ->orderBy('id')
             ->get();
     }
 
@@ -165,12 +165,13 @@ class EloquentAdminContentRepository implements AdminContentRepositoryInterface
             ]);
 
         $prompts = StoryPrompt::query()
+            ->with('storyGoal:id,name')
             ->where('publication_status', PublicationStatus::PendingReview)
             ->get()
             ->map(fn (StoryPrompt $item) => [
                 'type' => 'story_prompt',
                 'id' => $item->id,
-                'title' => $item->title,
+                'title' => $item->storyGoal?->name ?? 'Prompt #'.$item->id,
                 'updated_at' => $item->updated_at?->toIso8601String(),
             ]);
 

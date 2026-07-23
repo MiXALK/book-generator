@@ -76,7 +76,6 @@ class EloquentAdminVersionRepository implements AdminVersionRepositoryInterface
     private function storyPromptSnapshot(StoryPrompt $prompt): array
     {
         return [
-            'title' => $prompt->title,
             'prompt_text' => $prompt->prompt_text,
             'language' => $prompt->language,
             'age_range' => $prompt->age_range?->value,

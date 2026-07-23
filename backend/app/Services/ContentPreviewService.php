@@ -29,14 +29,17 @@ readonly class ContentPreviewService
 
     public function previewStoryPrompt(StoryPrompt $prompt): array
     {
+        $prompt->loadMissing('storyGoal');
+        $label = $prompt->storyGoal?->name ?? 'Story prompt';
+
         return [
             'type' => 'story_prompt',
-            'title' => $prompt->title,
+            'title' => $label,
             'prompt_text' => $prompt->prompt_text,
             'quality_score' => $prompt->quality_score,
             'rating_count' => $prompt->rating_count,
             'pages' => [
-                $this->samplePage(1, 'bottom', $prompt->title),
+                $this->samplePage(1, 'bottom', $label),
                 $this->samplePage(2, 'left', self::SAMPLE_TEXT),
                 $this->samplePage(3, 'bottom', 'Финал истории'),
             ],

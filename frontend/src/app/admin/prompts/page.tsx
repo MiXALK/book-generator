@@ -32,7 +32,6 @@ export default function AdminPromptsPage() {
   const t = locales[locale] || locales.ru;
   const [items, setItems] = useState<StoryPrompt[]>([]);
   const [goals, setGoals] = useState<StoryGoal[]>([]);
-  const [title, setTitle] = useState("");
   const [promptText, setPromptText] = useState("");
   const [language, setLanguage] = useState("ru");
   const [storyGoalId, setStoryGoalId] = useState("");
@@ -81,12 +80,10 @@ export default function AdminPromptsPage() {
     setError(null);
     try {
       await createPrompt(token, {
-        title,
         prompt_text: promptText,
         language,
         story_goal_id: storyGoalId ? Number(storyGoalId) : null,
       });
-      setTitle("");
       setPromptText("");
       await reload();
     } catch (err) {
@@ -112,10 +109,6 @@ export default function AdminPromptsPage() {
       {error && <p className={styles.error}>{error}</p>}
       <form className={styles.form} onSubmit={onSubmit}>
         <label className={styles.label}>
-          {t.adminTitleLabel}
-          <input className={styles.input} value={title} onChange={(e) => setTitle(e.target.value)} required />
-        </label>
-        <label className={styles.label}>
           {t.adminPromptText}
           <textarea className={styles.textarea} value={promptText} onChange={(e) => setPromptText(e.target.value)} required />
         </label>
@@ -140,7 +133,8 @@ export default function AdminPromptsPage() {
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>{t.adminTitleLabel}</th>
+            <th>{t.adminGoal}</th>
+            <th>{t.adminLanguage}</th>
             <th>{t.adminQualityScore}</th>
             <th>{t.adminStatus}</th>
             <th>{t.adminActions}</th>
@@ -149,7 +143,8 @@ export default function AdminPromptsPage() {
         <tbody>
           {items.map((item) => (
             <tr key={item.id}>
-              <td>{item.title}</td>
+              <td>{item.story_goal?.name ?? `Prompt #${item.id}`}</td>
+              <td>{item.language}</td>
               <td>{item.quality_score} ({item.rating_count})</td>
               <td>
                 <span className={`${styles.status} ${statusClass(item.publication_status)}`}>

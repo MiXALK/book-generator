@@ -19,7 +19,6 @@ class StoreStoryPromptRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255',
             'prompt_text' => 'required|string|max:10000',
             'language' => 'required|string|size:2|in:ru,en',
             'age_range' => ['nullable', Rule::enum(AgeRange::class)],

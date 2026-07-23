@@ -85,7 +85,6 @@ class AdminContentFeatureTest extends TestCase
         $this->createAdmin();
 
         $promptResponse = $this->withToken('admin-token')->postJson('/api/admin/prompts', [
-            'title' => 'Test Prompt',
             'prompt_text' => 'Write a story about {name}.',
             'language' => 'ru',
         ]);

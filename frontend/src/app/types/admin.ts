@@ -22,7 +22,6 @@ export interface BookTemplate {
 
 export interface StoryPrompt {
   id: number;
-  title: string;
   prompt_text: string;
   language: string;
   age_range: string | null;

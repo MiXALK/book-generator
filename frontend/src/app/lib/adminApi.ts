@@ -106,7 +106,6 @@ export function fetchPrompts(token: string) {
 export function createPrompt(
   token: string,
   body: {
-    title: string;
     prompt_text: string;
     language: string;
     age_range?: string | null;
@@ -123,7 +122,6 @@ export function updatePrompt(
   token: string,
   id: number,
   body: Partial<{
-    title: string;
     prompt_text: string;
     language: string;
     age_range: string | null;

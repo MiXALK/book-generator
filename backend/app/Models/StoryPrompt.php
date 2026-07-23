@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property AgeRange|null $age_range
  */
 #[Fillable([
-    'title',
     'prompt_text',
     'language',
     'age_range',
