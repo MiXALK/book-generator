@@ -129,11 +129,11 @@ return [
     ],
 
     'cost' => [
-        'text_input_token_usd' => 0.0000001,
-        'text_output_token_usd' => 0.0000003,
-        'image_generation_usd' => 0.02,
+        'text_input_token_usd' => 0.00000025, // qwen 3.6 flash
+        'text_output_token_usd' => 0.0000015, // qwen 3.6 flash
+        'image_generation_usd' => 0.0285, // yandexArt
         'layout_cpu_second_usd' => 0.0,
-        'storage_gb_month_usd' => 0.023,
-        'bandwidth_gb_usd' => 0.09,
+        'storage_gb_month_usd' => 0.023, // цена за хранение 1GB данных в месяц
+        'bandwidth_gb_usd' => 0.09, // расходы на 1GB исходящего трафика
     ],
 ];
