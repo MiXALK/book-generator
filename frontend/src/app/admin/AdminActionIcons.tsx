@@ -41,3 +41,14 @@ export function AdminDeleteIcon(props: IconProps) {
     </AdminIcon>
   );
 }
+
+export function AdminPublishIcon(props: IconProps) {
+  return (
+    <AdminIcon {...props}>
+      <path d="M12 3v12" />
+      <path d="m7 8 5-5 5 5" />
+      <path d="M5 21h14" />
+      <path d="M5 16h14" />
+    </AdminIcon>
+  );
+}

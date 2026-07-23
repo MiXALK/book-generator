@@ -14,7 +14,7 @@ import {
   submitPromptReview,
 } from "@/app/lib/adminApi";
 import { StoryGoal, StoryPrompt } from "@/app/types/admin";
-import { AdminDeleteIcon } from "../AdminActionIcons";
+import { AdminDeleteIcon, AdminPublishIcon } from "../AdminActionIcons";
 import styles from "../admin.module.css";
 
 function statusClass(status: string) {
@@ -164,8 +164,21 @@ export default function AdminPromptsPage() {
                 <button type="button" className={`${styles.button} ${styles.buttonSecondary}`} onClick={() => token && submitPromptReview(token, item.id).then(reload)}>
                   {t.adminSubmitReview}
                 </button>
-                <button type="button" className={styles.button} onClick={() => token && publishPrompt(token, item.id).then(reload).catch((err: Error) => setError(err.message))}>
-                  {t.adminPublish}
+                <button
+                  type="button"
+                  className={`${styles.button} ${styles.iconButton}`}
+                  onClick={() => {
+                    if (!token || !window.confirm(t.adminPublishConfirm)) {
+                      return;
+                    }
+                    void publishPrompt(token, item.id)
+                      .then(reload)
+                      .catch((err: Error) => setError(err.message));
+                  }}
+                  aria-label={t.adminPublish}
+                  title={t.adminPublish}
+                >
+                  <AdminPublishIcon />
                 </button>
                 <button
                   type="button"

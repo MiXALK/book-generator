@@ -14,7 +14,7 @@ import {
   updateTemplate,
 } from "@/app/lib/adminApi";
 import { BookTemplate, StoryGoal } from "@/app/types/admin";
-import { AdminDeleteIcon } from "../AdminActionIcons";
+import { AdminDeleteIcon, AdminPublishIcon } from "../AdminActionIcons";
 import styles from "../admin.module.css";
 
 function statusClass(status: string) {
@@ -146,10 +146,17 @@ export default function AdminTemplatesPage() {
                 </button>
                 <button
                   type="button"
-                  className={styles.button}
-                  onClick={() => token && publishTemplate(token, item.id).then(reload)}
+                  className={`${styles.button} ${styles.iconButton}`}
+                  onClick={() => {
+                    if (!token || !window.confirm(t.adminPublishConfirm)) {
+                      return;
+                    }
+                    void publishTemplate(token, item.id).then(reload);
+                  }}
+                  aria-label={t.adminPublish}
+                  title={t.adminPublish}
                 >
-                  {t.adminPublish}
+                  <AdminPublishIcon />
                 </button>
                 <button
                   type="button"
