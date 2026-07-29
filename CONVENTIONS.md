@@ -152,12 +152,16 @@ Illustration generation uses provider abstractions:
 - Contract: `backend/app/Services/Ai/Contracts/IllustrationGenerationProviderInterface.php`
 - Default driver: `yandexart` (Yandex Cloud Foundation Models YandexART async REST API)
 - HTTP transport: `backend/app/Services/Ai/Providers/YandexArtIllustrationProvider.php`
+- New-model driver: `aliceaiart` (Alice AI ART 3.0 through the synchronous
+  OpenAI-compatible Yandex AI Studio Images API), implemented by
+  `AliceAiArtIllustrationProvider`.
 - Alternate driver: `openai` via `OpenAiCompatibleIllustrationProvider` (OpenAI-compatible `/images/generations` API)
 - Driver resolution: `backend/app/Services/Ai/IllustrationGenerationProviderFactory.php`
 - Prompt composition: `IllustrationPromptComposer` (page fragment + shared style bible) and `CharacterBibleComposer`
 - Queue: `GenerateBookIllustrationsJob` on the `generation-image` queue
-- Configure via `AI_IMAGE_DRIVER`, `AI_IMAGE_API_KEY`, and `AI_IMAGE_FOLDER_ID` in `.env`. Driver `base_url`, `model`, `timeout`, `operations_url`, `poll_interval_seconds`, and `aspect_ratio` (YandexART) or `size` (OpenAI) live in `config/services.php` under `ai_image.drivers`.
-- YandexART auth uses `Authorization: Api-Key <key>`; the service account API key needs `yc.ai.imageGeneration.execute`.
+- Configure via `AI_IMAGE_DRIVER`, `AI_IMAGE_API_KEY`, and `AI_IMAGE_FOLDER_ID` in `.env`. Driver `base_url`, `model`, `timeout`, `operations_url`, `poll_interval_seconds`, and `aspect_ratio` (YandexART) or `size` (Alice AI ART and OpenAI) live in `config/services.php` under `ai_image.drivers`.
+- Yandex image auth uses `Authorization: Api-Key <key>`; the service account
+  needs the `ai.imageGeneration.user` role or higher.
 - When the image provider is not configured, book generation keeps SVG placeholder illustrations and still deletes uploaded photos after successful generation.
 
 Photo upload validation limits are defined in `config/services.php` under `book_photo`.

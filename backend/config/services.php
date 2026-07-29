@@ -63,6 +63,13 @@ return [
         'api_key' => env('AI_IMAGE_API_KEY'),
         'folder_id' => env('AI_IMAGE_FOLDER_ID'),
         'drivers' => [
+            'aliceaiart' => [
+                'base_url' => 'https://ai.api.cloud.yandex.net/v1',
+                'model' => 'aliceai-image-art-3.0',
+                'timeout' => 480,
+                'max_prompt_length' => 500,
+                'size' => '666x832',
+            ],
             'yandexart' => [
                 'base_url' => 'https://llm.api.cloud.yandex.net/foundationModels/v1',
                 'operations_url' => 'https://llm.api.cloud.yandex.net/operations',

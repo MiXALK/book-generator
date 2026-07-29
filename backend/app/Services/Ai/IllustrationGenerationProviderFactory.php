@@ -3,6 +3,7 @@
 namespace App\Services\Ai;
 
 use App\Services\Ai\Contracts\IllustrationGenerationProviderInterface;
+use App\Services\Ai\Providers\AliceAiArtIllustrationProvider;
 use App\Services\Ai\Providers\OpenAiCompatibleIllustrationProvider;
 use App\Services\Ai\Providers\YandexArtIllustrationProvider;
 use InvalidArgumentException;
@@ -16,9 +17,18 @@ readonly class IllustrationGenerationProviderFactory
 
         $apiKey = (string) config('services.ai_image.api_key');
         $timeout = $this->presetInt($preset, 'timeout');
+        $size = $this->presetString($preset, 'size');
 
-        if ($driver === 'yandexart') {
-            return new YandexArtIllustrationProvider(
+        return match ($driver) {
+            'aliceaiart' => new AliceAiArtIllustrationProvider(
+                apiKey: $apiKey,
+                folderId: (string) config('services.ai_image.folder_id'),
+                baseUrl: $this->presetString($preset, 'base_url'),
+                model: $this->presetString($preset, 'model'),
+                timeoutSeconds: $timeout,
+                size: $size !== '' ? $size : '666x832',
+            ),
+            'yandexart' => new YandexArtIllustrationProvider(
                 apiKey: $apiKey,
                 folderId: (string) config('services.ai_image.folder_id'),
                 baseUrl: $this->presetString($preset, 'base_url'),
@@ -27,22 +37,16 @@ readonly class IllustrationGenerationProviderFactory
                 timeoutSeconds: $timeout,
                 pollIntervalSeconds: $this->presetPollInterval($preset),
                 aspectRatio: $this->presetAspectRatio($preset),
-            );
-        }
-
-        if ($driver === 'openai') {
-            $size = $this->presetString($preset, 'size');
-
-            return new OpenAiCompatibleIllustrationProvider(
+            ),
+            'openai' => new OpenAiCompatibleIllustrationProvider(
                 apiKey: $apiKey,
                 baseUrl: $this->presetString($preset, 'base_url'),
                 model: $this->presetString($preset, 'model'),
                 timeoutSeconds: $timeout,
                 size: $size !== '' ? $size : '1024x1024',
-            );
-        }
-
-        throw new InvalidArgumentException("Unsupported AI image driver [{$driver}].");
+            ),
+            default => throw new InvalidArgumentException("Unsupported AI image driver [{$driver}]."),
+        };
     }
 
     private function resolveDriver(string $driver): string
