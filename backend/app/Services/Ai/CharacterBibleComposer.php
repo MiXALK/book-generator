@@ -18,10 +18,10 @@ readonly class CharacterBibleComposer
             return $existing->style_bible;
         }
 
-        $preset = ChildGender::from($childGender) === ChildGender::Boy
-            ? 'Boy: chestnut hair, brown eyes, blue overalls, yellow scarf.'
-            : 'Girl: brown bob, brown eyes, lavender dress, yellow scarf.';
+        $gender = ChildGender::from($childGender) === ChildGender::Boy
+            ? ChildGender::Boy->value
+            : ChildGender::Girl->value;
 
-        return "Storybook watercolor. Hero: {$childName}, age {$childAge}. {$preset} Warm pastels, consistent character, no text in image.";
+        return "Illustration in the style of Disney cartoons. Hero: {$childName}, age {$childAge}, gender {$gender}. Consistent characters, no text in image.";
     }
 }
