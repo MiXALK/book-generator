@@ -331,8 +331,6 @@ readonly class IllustrationGenerationService
 
         $input = new IllustrationGenerationInput(
             prompt: $prompt,
-            childName: $generation->child_name,
-            childAge: $generation->child_age,
             pageNumber: $page->page_number,
         );
 

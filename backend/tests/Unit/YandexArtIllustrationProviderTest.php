@@ -172,8 +172,6 @@ class YandexArtIllustrationProviderTest extends TestCase
     {
         return new IllustrationGenerationInput(
             prompt: 'A cozy forest scene.',
-            childName: 'Anna',
-            childAge: 5,
             pageNumber: 1,
         );
     }
