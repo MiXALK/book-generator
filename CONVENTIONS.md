@@ -157,10 +157,11 @@ Illustration generation uses provider abstractions:
   `AliceAiArtIllustrationProvider`.
 - Alternate driver: `openai` via `OpenAiCompatibleIllustrationProvider` (OpenAI-compatible `/images/generations` API)
 - Driver resolution: `backend/app/Services/Ai/IllustrationGenerationProviderFactory.php`
-- Prompt composition: `IllustrationPromptComposer` (page fragment + shared style bible) and `CharacterBibleComposer`
+- Prompt composition: `IllustrationPromptComposer` and `CharacterBibleComposer`.
+  Page prompt shape: style once at the top, then compact `Scene:` and `Hero:`
+  lines. The hero passport is appearance/outfit only (no style duplication).
 - Every final page illustration prompt is capped at 500 Unicode characters.
-  Page plot, action, and all characters mentioned in the page text take
-  priority over the main-character reference when truncation is required.
+  Scene text takes priority over the hero passport when truncation is required.
 - Queue: `GenerateBookIllustrationsJob` on the `generation-image` queue
 - Configure via `AI_IMAGE_DRIVER`, `AI_IMAGE_API_KEY`, and `AI_IMAGE_FOLDER_ID` in `.env`. Driver `base_url`, `model`, `timeout`, `operations_url`, `poll_interval_seconds`, and `aspect_ratio` (YandexART) or `size` (Alice AI ART and OpenAI) live in `config/services.php` under `ai_image.drivers`.
 - Yandex image auth uses `Authorization: Api-Key <key>`; the service account

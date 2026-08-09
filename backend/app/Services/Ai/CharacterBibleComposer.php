@@ -21,12 +21,14 @@ readonly class CharacterBibleComposer
 
         $isBoy = ChildGender::from($childGender) === ChildGender::Boy;
         $gender = $isBoy ? ChildGender::Boy->value : ChildGender::Girl->value;
-        $defaultAppearance = $isBoy ? 'Oval face, fair skin, blue eyes, short light-brown hair.' : 'Oval face, fair skin, green-blue eyes, long light-brown hair in side braid.';
+        $defaultAppearance = $isBoy
+            ? 'Oval face, fair skin, blue eyes, short light-brown hair'
+            : 'Oval face, fair skin, green-blue eyes, long light-brown hair in side braid';
         $outfit = $isBoy ? 'blue long plum' : 'dark navy blue sequined dress';
         $appearance = $this->normalizeAppearance($appearanceProfile) ?? $defaultAppearance;
         $name = trim($childName);
 
-        return "Main character: {$name}, age {$childAge}, {$gender}; {$appearance}; wearing {$outfit}.";
+        return "{$name}, {$childAge}, {$gender}; {$appearance}; {$outfit}.";
     }
 
     private function normalizeAppearance(?string $appearance): ?string
@@ -36,6 +38,7 @@ readonly class CharacterBibleComposer
         }
 
         $appearance = trim((string) preg_replace('/\s+/u', ' ', $appearance));
+        $appearance = rtrim($appearance, " \t.;");
 
         if ($appearance === '') {
             return null;

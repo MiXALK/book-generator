@@ -7,66 +7,61 @@ readonly class IllustrationPromptComposer
     public function composePagePrompt(
         string $mainCharacter,
         string $pageText,
-        ?int   $maxLength = null,
+        ?int $maxLength = null,
     ): string {
-        $scene = '3D CGI style: soft cinematic lighting.';
-        $direction = 'Prioritize the plot and action. Include every character mentioned in the scene. Use the main character reference only when the main character appears in the scene.';
+        $style = '3D CGI, soft cinematic light. No text.';
 
         if ($maxLength === null) {
-            return $this->buildPrompt($mainCharacter, $scene, $pageText, $direction);
+            return $this->buildPrompt($mainCharacter, $style, $pageText);
         }
 
-        return $this->fitPromptToMaxLength($mainCharacter, $scene, $pageText, $direction, $maxLength);
+        return $this->fitPromptToMaxLength($mainCharacter, $style, $pageText, $maxLength);
     }
 
     private function buildPrompt(
         string $mainCharacter,
-        string $scene,
+        string $style,
         string $pageText,
-        string $direction,
     ): string {
         $parts = [
-            $scene,
-            "Plot and cast: {$pageText}",
-            $direction,
+            "Style: {$style}",
+            "Scene: {$pageText}",
         ];
 
         if ($mainCharacter !== '') {
-            $parts[] = $mainCharacter;
+            $parts[] = "Hero: {$mainCharacter}";
         }
 
         return implode("\n", $parts);
     }
 
     private function fitPromptToMaxLength(
-        string $styleBible,
-        string $scene,
+        string $mainCharacter,
+        string $style,
         string $pageText,
-        string $direction,
         int $maxLength,
     ): string {
-        $styleBible = trim($styleBible);
-        $scene = trim($scene);
+        $mainCharacter = trim($mainCharacter);
+        $style = trim($style);
         $pageText = trim($pageText);
-        $direction = trim($direction);
-        $plotPrompt = $this->buildPrompt('', $scene, $pageText, $direction);
+        $plotPrompt = $this->buildPrompt('', $style, $pageText);
 
         if (mb_strlen($plotPrompt) > $maxLength) {
-            $promptWithoutPlot = $this->buildPrompt('', $scene, '', $direction);
+            $promptWithoutPlot = $this->buildPrompt('', $style, '');
             $pageBudget = $maxLength - mb_strlen($promptWithoutPlot);
             $pageText = $this->truncateText($pageText, max(0, $pageBudget));
-            $plotPrompt = $this->buildPrompt('', $scene, $pageText, $direction);
+            $plotPrompt = $this->buildPrompt('', $style, $pageText);
         }
 
-        if (mb_strlen($plotPrompt) >= $maxLength || $styleBible === '') {
+        if (mb_strlen($plotPrompt) >= $maxLength || $mainCharacter === '') {
             return $this->truncateText($plotPrompt, $maxLength);
         }
 
-        $stylePrefix = "\nMain character: ";
-        $styleBudget = $maxLength - mb_strlen($plotPrompt) - mb_strlen($stylePrefix);
-        $styleBible = $this->truncateText($styleBible, max(0, $styleBudget));
+        $heroPrefix = "\nHero: ";
+        $heroBudget = $maxLength - mb_strlen($plotPrompt) - mb_strlen($heroPrefix);
+        $mainCharacter = $this->truncateText($mainCharacter, max(0, $heroBudget));
 
-        return $this->buildPrompt($styleBible, $scene, $pageText, $direction);
+        return $this->buildPrompt($mainCharacter, $style, $pageText);
     }
 
     private function truncateText(string $text, int $maxLength): string

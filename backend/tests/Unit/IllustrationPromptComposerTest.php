@@ -20,7 +20,8 @@ class IllustrationPromptComposerTest extends TestCase
         );
 
         $this->assertLessThanOrEqual(500, mb_strlen($prompt));
-        $this->assertStringContainsString('Plot and cast:', $prompt);
+        $this->assertStringContainsString('Scene:', $prompt);
+        $this->assertStringContainsString('No text.', $prompt);
     }
 
     public function test_compose_page_prompt_preserves_plot_before_truncating_character_reference(): void
@@ -36,9 +37,9 @@ class IllustrationPromptComposerTest extends TestCase
         );
 
         $this->assertLessThanOrEqual(500, mb_strlen($prompt));
-        $this->assertStringContainsString("Plot and cast: {$pageText}", $prompt);
-        $this->assertStringContainsString('including secondary characters', $prompt);
-        $this->assertStringContainsString('Main character reference:', $prompt);
+        $this->assertStringContainsString("Scene: {$pageText}", $prompt);
+        $this->assertStringContainsString('Hero:', $prompt);
+        $this->assertStringContainsString('No text.', $prompt);
         $this->assertStringNotContainsString(trim($styleBible), $prompt);
     }
 
@@ -53,11 +54,9 @@ class IllustrationPromptComposerTest extends TestCase
         );
 
         $this->assertSame(
-            "Pixar 3D CGI style: soft cinematic lighting.\n".
-            "Plot and cast: Short scene.\n".
-            'Prioritize the plot and action. Include every character mentioned in the scene, including secondary characters. '.
-            "Use the main-character reference only when the hero appears in the scene.\n".
-            'Main character reference: Short style bible.',
+            "Style: 3D CGI, soft cinematic light. No text.\n".
+            "Scene: Short scene.\n".
+            'Hero: Short style bible.',
             $prompt,
         );
     }
@@ -73,6 +72,7 @@ class IllustrationPromptComposerTest extends TestCase
         );
 
         $this->assertLessThanOrEqual(500, mb_strlen($prompt));
-        $this->assertStringContainsString('Plot and cast:', $prompt);
+        $this->assertStringContainsString('Scene:', $prompt);
+        $this->assertStringContainsString('No text.', $prompt);
     }
 }

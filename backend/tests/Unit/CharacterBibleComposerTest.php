@@ -26,10 +26,10 @@ class CharacterBibleComposerTest extends TestCase
 
         $result = $composer->compose('Masha', 6, 'girl', null);
 
-        $this->assertStringContainsString('Masha', $result);
-        $this->assertStringContainsString('age 6', $result);
-        $this->assertStringContainsString('lavender dress', $result);
-        $this->assertStringContainsString('Render exactly these face', $result);
+        $this->assertSame(
+            'Masha, 6, girl; Oval face, fair skin, green-blue eyes, long light-brown hair in side braid; dark navy blue sequined dress.',
+            $result,
+        );
     }
 
     public function test_builds_boy_default_preset(): void
@@ -38,8 +38,10 @@ class CharacterBibleComposerTest extends TestCase
 
         $result = $composer->compose('Misha', 5, 'boy', null);
 
-        $this->assertStringContainsString('Misha', $result);
-        $this->assertStringContainsString('blue overalls', $result);
+        $this->assertSame(
+            'Misha, 5, boy; Oval face, fair skin, blue eyes, short light-brown hair; blue long plum.',
+            $result,
+        );
     }
 
     public function test_uses_compact_photo_appearance_instead_of_default_face(): void
@@ -50,8 +52,10 @@ class CharacterBibleComposerTest extends TestCase
         $result = $composer->compose('Masha', 6, 'girl', null, false, $appearance);
 
         $this->assertStringContainsString($appearance, $result);
-        $this->assertStringNotContainsString('brown bob', $result);
-        $this->assertStringContainsString('lavender dress', $result);
+        $this->assertStringNotContainsString('side braid', $result);
+        $this->assertStringContainsString('dark navy blue sequined dress', $result);
+        $this->assertStringNotContainsString('wearing', $result);
+        $this->assertStringNotContainsString('age ', $result);
     }
 
     public function test_ignores_existing_bible_when_reuse_is_disabled(): void
@@ -72,7 +76,6 @@ class CharacterBibleComposerTest extends TestCase
 
         $this->assertNotSame('Old bible.', $result);
         $this->assertStringContainsString(trim($appearance), $result);
-        $this->assertStringContainsString('Main character:', $result);
-        $this->assertStringContainsString('No text.', $result);
+        $this->assertStringStartsWith('Masha, 6, girl;', $result);
     }
 }
