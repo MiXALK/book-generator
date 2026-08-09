@@ -21,6 +21,7 @@ class IllustrationPromptComposerTest extends TestCase
 
         $this->assertLessThanOrEqual(500, mb_strlen($prompt));
         $this->assertStringContainsString('Scene:', $prompt);
+        $this->assertStringContainsString('Not a photo, not photorealistic.', $prompt);
         $this->assertStringContainsString('No text, letters, captions, watermarks.', $prompt);
     }
 
@@ -39,7 +40,7 @@ class IllustrationPromptComposerTest extends TestCase
         $this->assertLessThanOrEqual(500, mb_strlen($prompt));
         $this->assertStringContainsString("Scene: {$pageText}", $prompt);
         $this->assertStringContainsString('Hero:', $prompt);
-        $this->assertStringContainsString('No text, letters, captions, watermarks.', $prompt);
+        $this->assertStringContainsString('Not a photo, not photorealistic.', $prompt);
         $this->assertStringNotContainsString(trim($styleBible), $prompt);
     }
 
@@ -54,7 +55,7 @@ class IllustrationPromptComposerTest extends TestCase
         );
 
         $this->assertSame(
-            "Style: Pixar 3D CGI, soft cinematic light. No text, letters, captions, watermarks.\n".
+            "Style: Pixar-like 3D CGI cartoon, stylized storybook render, soft cinematic light. Not a photo, not photorealistic. No text, letters, captions, watermarks.\n".
             "Scene: Short scene.\n".
             'Hero: Short style bible.',
             $prompt,
@@ -73,6 +74,6 @@ class IllustrationPromptComposerTest extends TestCase
 
         $this->assertLessThanOrEqual(500, mb_strlen($prompt));
         $this->assertStringContainsString('Scene:', $prompt);
-        $this->assertStringContainsString('No text, letters, captions, watermarks.', $prompt);
+        $this->assertStringContainsString('Not a photo, not photorealistic.', $prompt);
     }
 }

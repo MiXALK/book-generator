@@ -158,9 +158,9 @@ Illustration generation uses provider abstractions:
 - Alternate driver: `openai` via `OpenAiCompatibleIllustrationProvider` (OpenAI-compatible `/images/generations` API)
 - Driver resolution: `backend/app/Services/Ai/IllustrationGenerationProviderFactory.php`
 - Prompt composition: `IllustrationPromptComposer` and `CharacterBibleComposer`.
-  Page prompt shape: style once at the top (includes a short no-text ban), then
-  compact `Scene:` and `Hero:` lines. The hero passport is appearance/outfit
-  only (no style duplication).
+  Page prompt shape: strong Pixar-like 3D CGI style once at the top (includes
+  anti-photo and no-text bans), then compact `Scene:` and `Hero:` lines. The
+  hero passport is appearance/outfit only (no style duplication).
 - YandexART also sends a negative `messages` entry (`weight: -1`) against text,
   letters, captions, and watermarks; this does not consume the 500-char budget.
 - Every final page illustration prompt is capped at 500 Unicode characters.
