@@ -7,17 +7,10 @@ readonly class IllustrationPromptComposer
     public function composePagePrompt(
         string $styleBible,
         string $pageText,
-        int $pageNumber,
         ?int $maxLength = null,
-        ?int $totalPages = null,
     ): string {
-        $scene = match (true) {
-            $pageNumber === 1 => 'Book cover scene based on the plot.',
-            $totalPages !== null && $pageNumber === $totalPages => 'Final story scene based on the plot.',
-            default => "Story scene for page {$pageNumber}.",
-        };
-        $direction = 'Prioritize the plot and action. Include every character mentioned in the scene, including secondary characters. '.
-            'Use the main-character reference only when the hero appears in the scene.';
+        $scene = 'Pixar 3D CGI style: soft cinematic lighting.';
+        $direction = 'Prioritize the plot and action. Include every character mentioned in the scene, including secondary characters. Use the main-character reference only when the hero appears in the scene.';
 
         if ($maxLength === null) {
             return $this->buildPrompt($styleBible, $scene, $pageText, $direction);

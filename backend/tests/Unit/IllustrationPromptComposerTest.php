@@ -16,7 +16,6 @@ class IllustrationPromptComposerTest extends TestCase
         $prompt = $composer->composePagePrompt(
             $styleBible,
             $pageText,
-            3,
             500,
         );
 
@@ -33,7 +32,6 @@ class IllustrationPromptComposerTest extends TestCase
         $prompt = $composer->composePagePrompt(
             $styleBible,
             $pageText,
-            2,
             500,
         );
 
@@ -51,33 +49,17 @@ class IllustrationPromptComposerTest extends TestCase
         $prompt = $composer->composePagePrompt(
             'Short style bible.',
             'Short scene.',
-            1,
             500,
         );
 
         $this->assertSame(
-            "Book cover scene based on the plot.\n".
+            "Pixar 3D CGI style: soft cinematic lighting.\n".
             "Plot and cast: Short scene.\n".
             'Prioritize the plot and action. Include every character mentioned in the scene, including secondary characters. '.
             "Use the main-character reference only when the hero appears in the scene.\n".
             'Main character reference: Short style bible.',
             $prompt,
         );
-    }
-
-    public function test_compose_page_prompt_uses_ending_scene_for_last_page(): void
-    {
-        $composer = new IllustrationPromptComposer;
-
-        $prompt = $composer->composePagePrompt(
-            'Short style bible.',
-            'Short scene.',
-            5,
-            null,
-            5,
-        );
-
-        $this->assertStringContainsString('Final story scene based on the plot.', $prompt);
     }
 
     public function test_compose_page_prompt_never_exceeds_limit_with_multibyte_input(): void
@@ -87,12 +69,10 @@ class IllustrationPromptComposerTest extends TestCase
         $prompt = $composer->composePagePrompt(
             str_repeat('Одинаковый герой. ', 30),
             str_repeat('Очень длинная сцена. ', 30),
-            12,
             500,
-            12,
         );
 
         $this->assertLessThanOrEqual(500, mb_strlen($prompt));
-        $this->assertStringContainsString('Final story scene based on the plot.', $prompt);
+        $this->assertStringContainsString('Plot and cast:', $prompt);
     }
 }

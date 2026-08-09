@@ -320,13 +320,10 @@ readonly class IllustrationGenerationService
             return false;
         }
 
-        $totalPages = $generation->bookPages()->count();
         $prompt = $this->promptComposer->composePagePrompt(
             $character->style_bible,
             $page->text,
-            $page->page_number,
             $this->maxPromptLength(),
-            $totalPages > 0 ? $totalPages : null,
         );
 
         $input = new IllustrationGenerationInput(

@@ -21,16 +21,12 @@ readonly class CharacterBibleComposer
 
         $isBoy = ChildGender::from($childGender) === ChildGender::Boy;
         $gender = $isBoy ? ChildGender::Boy->value : ChildGender::Girl->value;
-        $defaultAppearance = $isBoy
-            ? 'Oval face, fair skin, blue eyes, short light-brown hair.'
-            : 'Oval face, fair skin, green eyes, long light-brown hair in side braid.';
-        $outfit = $isBoy
-            ? 'blue long plum'
-            : 'dark navy blue sequined dress';
+        $defaultAppearance = $isBoy ? 'Oval face, fair skin, blue eyes, short light-brown hair.' : 'Oval face, fair skin, green-blue eyes, long light-brown hair in side braid.';
+        $outfit = $isBoy ? 'blue long plum' : 'dark navy blue sequined dress';
         $appearance = $this->normalizeAppearance($appearanceProfile) ?? $defaultAppearance;
         $name = trim($childName);
 
-        return "Pixar 3D CGI style: soft cinematic lighting. Main character: {$name}, age {$childAge}, {$gender}; {$appearance}; wearing {$outfit}.";
+        return "Main character: {$name}, age {$childAge}, {$gender}; {$appearance}; wearing {$outfit}.";
     }
 
     private function normalizeAppearance(?string $appearance): ?string
