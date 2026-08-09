@@ -21,7 +21,7 @@ readonly class IllustrationPromptComposer
         string $pageText,
     ): string {
         $parts = [
-            'Style: Pixar 3D CGI, soft cinematic light. No text.',
+            'Style: Pixar 3D CGI, soft cinematic light. No text, letters, captions, watermarks.',
             "Scene: {$pageText}",
         ];
 

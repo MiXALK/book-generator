@@ -70,6 +70,9 @@ class YandexArtIllustrationProviderTest extends TestCase
 
             return ($body['modelUri'] ?? null) === 'art://b1gtestfolder/yandex-art/latest'
                 && ($body['messages'][0]['text'] ?? null) === 'A cozy forest scene.'
+                && ($body['messages'][0]['weight'] ?? null) === 1
+                && ($body['messages'][1]['text'] ?? null) === 'text, letters, words, caption, title, watermark, signature, typography, Cyrillic, Latin'
+                && ($body['messages'][1]['weight'] ?? null) === -1
                 && ($body['generationOptions']['aspectRatio']['widthRatio'] ?? null) === '4'
                 && ($body['generationOptions']['aspectRatio']['heightRatio'] ?? null) === '5'
                 && $request->hasHeader('Authorization', 'Api-Key test-image-key');

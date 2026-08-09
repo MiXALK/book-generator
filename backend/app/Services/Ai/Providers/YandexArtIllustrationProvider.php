@@ -77,6 +77,10 @@ readonly class YandexArtIllustrationProvider implements IllustrationGenerationPr
                         'text' => $input->prompt,
                         'weight' => 1,
                     ],
+                    [
+                        'text' => 'text, letters, words, caption, title, watermark, signature, typography, Cyrillic, Latin',
+                        'weight' => -1,
+                    ],
                 ],
             ]);
 
