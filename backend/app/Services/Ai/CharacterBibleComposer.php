@@ -13,15 +13,38 @@ readonly class CharacterBibleComposer
         string $childGender,
         ?GeneratedCharacter $existing = null,
         bool $reuseExisting = true,
+        ?string $appearanceProfile = null,
     ): string {
         if ($reuseExisting && $existing !== null && trim($existing->style_bible) !== '') {
             return $existing->style_bible;
         }
 
-        $gender = ChildGender::from($childGender) === ChildGender::Boy
-            ? ChildGender::Boy->value
-            : ChildGender::Girl->value;
+        $isBoy = ChildGender::from($childGender) === ChildGender::Boy;
+        $gender = $isBoy ? ChildGender::Boy->value : ChildGender::Girl->value;
+        $defaultAppearance = $isBoy
+            ? 'Oval face, fair skin, blue eyes, short light-brown hair.'
+            : 'Oval face, fair skin, green eyes, long light-brown hair in side braid.';
+        $outfit = $isBoy
+            ? 'blue long plum'
+            : 'dark navy blue sequined dress';
+        $appearance = $this->normalizeAppearance($appearanceProfile) ?? $defaultAppearance;
+        $name = trim($childName);
 
-        return "Illustration in the style of Disney cartoons. Hero: {$childName}, age {$childAge}, gender {$gender}. Consistent characters, no text in image.";
+        return "Pixar 3D CGI style: soft cinematic lighting. Main character: {$name}, age {$childAge}, {$gender}; {$appearance}; wearing {$outfit}.";
+    }
+
+    private function normalizeAppearance(?string $appearance): ?string
+    {
+        if ($appearance === null) {
+            return null;
+        }
+
+        $appearance = trim((string) preg_replace('/\s+/u', ' ', $appearance));
+
+        if ($appearance === '') {
+            return null;
+        }
+
+        return $appearance;
     }
 }

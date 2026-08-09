@@ -27,6 +27,8 @@ use App\Repositories\Eloquent\EloquentStoryGoalRepository;
 use App\Repositories\Eloquent\EloquentStoryPromptRepository;
 use App\Repositories\Eloquent\EloquentUploadedPhotoRepository;
 use App\Repositories\Eloquent\EloquentUserRepository;
+use App\Services\Ai\CharacterAppearanceProviderFactory;
+use App\Services\Ai\Contracts\CharacterAppearanceProviderInterface;
 use App\Services\Ai\Contracts\IllustrationGenerationProviderInterface;
 use App\Services\Ai\Contracts\StoryTextGenerationProviderInterface;
 use App\Services\Ai\IllustrationGenerationProviderFactory;
@@ -60,6 +62,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(StoryTextGenerationProviderInterface::class, function ($app) {
             return $app->make(StoryTextGenerationProviderFactory::class)->make();
+        });
+
+        $this->app->singleton(CharacterAppearanceProviderInterface::class, function ($app) {
+            return $app->make(CharacterAppearanceProviderFactory::class)->make();
         });
 
         $this->app->singleton(IllustrationGenerationProviderInterface::class, function ($app) {

@@ -158,6 +158,9 @@ Illustration generation uses provider abstractions:
 - Alternate driver: `openai` via `OpenAiCompatibleIllustrationProvider` (OpenAI-compatible `/images/generations` API)
 - Driver resolution: `backend/app/Services/Ai/IllustrationGenerationProviderFactory.php`
 - Prompt composition: `IllustrationPromptComposer` (page fragment + shared style bible) and `CharacterBibleComposer`
+- Every final page illustration prompt is capped at 500 Unicode characters.
+  Page plot, action, and all characters mentioned in the page text take
+  priority over the main-character reference when truncation is required.
 - Queue: `GenerateBookIllustrationsJob` on the `generation-image` queue
 - Configure via `AI_IMAGE_DRIVER`, `AI_IMAGE_API_KEY`, and `AI_IMAGE_FOLDER_ID` in `.env`. Driver `base_url`, `model`, `timeout`, `operations_url`, `poll_interval_seconds`, and `aspect_ratio` (YandexART) or `size` (Alice AI ART and OpenAI) live in `config/services.php` under `ai_image.drivers`.
 - Yandex image auth uses `Authorization: Api-Key <key>`; the service account
@@ -173,10 +176,18 @@ Character rules:
   AI page illustrations when the image provider is configured.
 - Paid uploads are character-basis inputs only. They generate or refresh a
   reusable personalized character for the whole book, not a per-page image
-  reference.
+  reference. Before page jobs start, the configured Qwen `qwen3.6-flash`
+  multimodal model analyzes the private photo once and stores a compact,
+  non-identifying visible-traits profile in
+  `GeneratedCharacter.appearance_profile`.
 - Character reuse: one `GeneratedCharacter` per `ChildProfile` (unique per
   `user_id` + `child_name`). New uploads refresh the linked photo reference but
-  keep the existing style bible for visual consistency across books.
+  rebuild the appearance profile and style bible; retries and later books reuse
+  the stored profile. Existing characters are not backfilled until a new photo
+  is uploaded.
+- Photo analysis reuses the Qwen text-generation configuration and
+  `AI_TEXT_API_KEY`. Uploaded photo bytes and private storage paths must not be
+  logged or exposed through public URLs.
 
 ## Privacy And Data Deletion
 

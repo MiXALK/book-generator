@@ -158,6 +158,33 @@ readonly class BookIllustrationStorageService
         }
     }
 
+    /**
+     * @return array{binary: string, content_type: string}|null
+     */
+    public function readPrivateImage(string $path): ?array
+    {
+        try {
+            $disk = Storage::disk('s3');
+
+            if (! $disk->exists($path)) {
+                return null;
+            }
+
+            $binary = $disk->get($path);
+
+            return [
+                'binary' => $binary,
+                'content_type' => $this->resolveContentType($binary, $path),
+            ];
+        } catch (Throwable $exception) {
+            Log::warning('Failed to read private image from storage', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
     public function signedUrlTtlSeconds(): int
     {
         return (int) config('services.privacy.signed_url_ttl_minutes', 60) * 60;

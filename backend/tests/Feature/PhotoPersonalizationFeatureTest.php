@@ -6,14 +6,18 @@ use App\Jobs\AssembleBookLayoutJob;
 use App\Jobs\GenerateBookIllustrationsJob;
 use App\Jobs\GenerateBookPageIllustrationJob;
 use App\Jobs\GenerateBookTextJob;
+use App\Models\BookGeneration;
 use App\Models\BookTemplate;
+use App\Models\ChildProfile;
 use App\Models\StoryGoal;
+use App\Models\UploadedPhoto;
 use App\Models\User;
 use App\Services\BookGenerationService;
 use App\Services\IllustrationGenerationService;
 use Database\Seeders\LayoutTemplateSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\Support\TestImageFactory;
@@ -118,9 +122,23 @@ class PhotoPersonalizationFeatureTest extends TestCase
     {
         Storage::fake('s3');
         Queue::fake();
+        Http::fake(function ($request) {
+            $content = $request->data()['messages'][0]['content'] ?? null;
+            $result = is_array($content)
+                ? ['appearance' => 'oval face, green eyes, long curly black hair']
+                : ['story' => 'Маша нашла игрушку. Она поделилась ею с другом.'];
+
+            return Http::response([
+                'choices' => [[
+                    'message' => [
+                        'content' => json_encode($result),
+                    ],
+                ]],
+            ]);
+        });
         $this->seed(LayoutTemplateSeeder::class);
         config([
-            'services.ai_text.api_key' => '',
+            'services.ai_text.api_key' => 'test-qwen-key',
             'services.ai_image.api_key' => 'test-image-key',
             'services.ai_image.folder_id' => 'b1gtestfolder',
         ]);
@@ -184,6 +202,52 @@ class PhotoPersonalizationFeatureTest extends TestCase
         );
 
         Queue::assertPushed(GenerateBookPageIllustrationJob::class);
+        $this->assertDatabaseHas('generated_characters', [
+            'appearance_profile' => 'oval face, green eyes, long curly black hair',
+        ]);
+        Http::assertSentCount(2);
+
+        Queue::pushed(GenerateBookIllustrationsJob::class)->each(
+            fn (GenerateBookIllustrationsJob $job) => $job->handle(app(IllustrationGenerationService::class)),
+        );
+
+        Http::assertSentCount(2);
+
+        $profile = ChildProfile::query()->firstOrFail();
+        $replacementPath = "private/users/{$profile->user_id}/photos/replacement.jpg";
+        $replacementBinary = "\xFF\xD8\xFFreplacement-image";
+        Storage::disk('s3')->put($replacementPath, $replacementBinary);
+        $replacementPhoto = UploadedPhoto::query()->create([
+            'user_id' => $profile->user_id,
+            'child_profile_id' => $profile->id,
+            'storage_path' => $replacementPath,
+            'mime_type' => 'image/jpeg',
+            'file_size_bytes' => strlen($replacementBinary),
+            'width' => 10,
+            'height' => 10,
+            'parental_consent_at' => now(),
+            'status' => 'pending',
+        ]);
+        $service = app(IllustrationGenerationService::class);
+        $character = $service->resolveOrCreateCharacter(
+            $profile,
+            'Маша',
+            5,
+            'girl',
+            $replacementPhoto,
+        );
+
+        $this->assertNull($character->appearance_profile);
+
+        $generation = BookGeneration::query()->firstOrFail();
+        $generation->update(['uploaded_photo_id' => $replacementPhoto->id]);
+        $service->runForGeneration($generation->id);
+
+        $this->assertSame(
+            'oval face, green eyes, long curly black hair',
+            $character->fresh()?->appearance_profile,
+        );
+        Http::assertSentCount(3);
     }
 
     public function test_free_generation_without_upload_queues_illustrations_from_default_character(): void

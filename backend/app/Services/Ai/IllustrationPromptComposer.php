@@ -8,85 +8,72 @@ readonly class IllustrationPromptComposer
         string $styleBible,
         string $pageText,
         int $pageNumber,
-        string $childName,
         ?int $maxLength = null,
         ?int $totalPages = null,
     ): string {
         $scene = match (true) {
-            $pageNumber === 1 => "Book cover featuring {$childName} as the hero.",
-            $totalPages !== null && $pageNumber === $totalPages => "Happy ending scene with {$childName} celebrating.",
+            $pageNumber === 1 => 'Book cover scene based on the plot.',
+            $totalPages !== null && $pageNumber === $totalPages => 'Final story scene based on the plot.',
             default => "Story scene for page {$pageNumber}.",
         };
-        $footer = 'Full-bleed illustration, no captions or letters.';
+        $direction = 'Prioritize the plot and action. Include every character mentioned in the scene, including secondary characters. '.
+            'Use the main-character reference only when the hero appears in the scene.';
 
         if ($maxLength === null) {
-            return $this->buildPrompt($styleBible, $scene, $pageText, $footer);
+            return $this->buildPrompt($styleBible, $scene, $pageText, $direction);
         }
 
-        return $this->fitPromptToMaxLength($styleBible, $scene, $pageText, $footer, $maxLength);
+        return $this->fitPromptToMaxLength($styleBible, $scene, $pageText, $direction, $maxLength);
     }
 
     private function buildPrompt(
         string $styleBible,
         string $scene,
         string $pageText,
-        string $footer,
+        string $direction,
     ): string {
-        return implode("\n", [
-            $styleBible,
+        $parts = [
             $scene,
-            "Scene context: {$pageText}",
-            $footer,
-        ]);
+            "Plot and cast: {$pageText}",
+            $direction,
+        ];
+
+        if ($styleBible !== '') {
+            $parts[] = "Main character reference: {$styleBible}";
+        }
+
+        return implode("\n", $parts);
     }
 
     private function fitPromptToMaxLength(
         string $styleBible,
         string $scene,
         string $pageText,
-        string $footer,
+        string $direction,
         int $maxLength,
     ): string {
         $styleBible = trim($styleBible);
         $scene = trim($scene);
         $pageText = trim($pageText);
-        $footer = trim($footer);
-        $sceneContextPrefix = 'Scene context: ';
+        $direction = trim($direction);
+        $plotPrompt = $this->buildPrompt('', $scene, $pageText, $direction);
 
-        $tail = $this->buildTail($scene, $sceneContextPrefix, $pageText, $footer);
-        $tailLength = mb_strlen($tail);
-
-        if ($tailLength > $maxLength) {
-            $pageBudget = $maxLength
-                - mb_strlen($scene)
-                - mb_strlen("\n{$sceneContextPrefix}")
-                - mb_strlen("\n{$footer}");
-
+        if (mb_strlen($plotPrompt) > $maxLength) {
+            $promptWithoutPlot = $this->buildPrompt('', $scene, '', $direction);
+            $pageBudget = $maxLength - mb_strlen($promptWithoutPlot);
             $pageText = $this->truncateText($pageText, max(0, $pageBudget));
-            $tail = $this->buildTail($scene, $sceneContextPrefix, $pageText, $footer);
-            $tailLength = mb_strlen($tail);
+            $plotPrompt = $this->buildPrompt('', $scene, $pageText, $direction);
         }
 
-        $styleBibleBudget = $maxLength - $tailLength - ($styleBible !== '' ? 1 : 0);
-
-        if ($styleBibleBudget <= 0 || $styleBible === '') {
-            return $tail;
+        if (mb_strlen($plotPrompt) >= $maxLength || $styleBible === '') {
+            return $this->truncateText($plotPrompt, $maxLength);
         }
 
-        if (mb_strlen($styleBible) > $styleBibleBudget) {
-            $styleBible = $this->truncateText($styleBible, $styleBibleBudget);
-        }
+        $stylePrefix = "\nMain character reference: ";
+        $styleBudget = $maxLength - mb_strlen($plotPrompt) - mb_strlen($stylePrefix);
+        $styleBible = $this->truncateText($styleBible, max(0, $styleBudget));
 
-        return "{$styleBible}\n{$tail}";
-    }
-
-    private function buildTail(
-        string $scene,
-        string $sceneContextPrefix,
-        string $pageText,
-        string $footer,
-    ): string {
-        return "{$scene}\n{$sceneContextPrefix}{$pageText}\n{$footer}";
+        return $this->buildPrompt($styleBible, $scene, $pageText, $direction);
     }
 
     private function truncateText(string $text, int $maxLength): string

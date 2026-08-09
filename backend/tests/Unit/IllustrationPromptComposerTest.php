@@ -17,31 +17,31 @@ class IllustrationPromptComposerTest extends TestCase
             $styleBible,
             $pageText,
             3,
-            'Anna',
             500,
         );
 
         $this->assertLessThanOrEqual(500, mb_strlen($prompt));
-        $this->assertStringContainsString('Scene context:', $prompt);
-        $this->assertStringContainsString('Full-bleed illustration, no captions or letters.', $prompt);
+        $this->assertStringContainsString('Plot and cast:', $prompt);
     }
 
-    public function test_compose_page_prompt_preserves_plot_over_style_bible_when_limit_applied(): void
+    public function test_compose_page_prompt_preserves_plot_before_truncating_character_reference(): void
     {
         $composer = new IllustrationPromptComposer;
-        $styleBible = str_repeat('Style bible sentence. ', 20);
-        $pageText = 'Луна заглянула в окно и тихо прошептала: спи спокойно, моя хорошая.';
+        $styleBible = str_repeat('Stable character trait. ', 30);
+        $pageText = 'Луна заглянула в окно, а рядом с Аней стояли мама и рыжий кот.';
 
         $prompt = $composer->composePagePrompt(
             $styleBible,
             $pageText,
             2,
-            'Аня',
             500,
         );
 
         $this->assertLessThanOrEqual(500, mb_strlen($prompt));
-        $this->assertStringContainsString($pageText, $prompt);
+        $this->assertStringContainsString("Plot and cast: {$pageText}", $prompt);
+        $this->assertStringContainsString('including secondary characters', $prompt);
+        $this->assertStringContainsString('Main character reference:', $prompt);
+        $this->assertStringNotContainsString(trim($styleBible), $prompt);
     }
 
     public function test_compose_page_prompt_keeps_short_prompts_unchanged(): void
@@ -52,12 +52,15 @@ class IllustrationPromptComposerTest extends TestCase
             'Short style bible.',
             'Short scene.',
             1,
-            'Anna',
             500,
         );
 
         $this->assertSame(
-            "Short style bible.\nBook cover featuring Anna as the hero.\nScene context: Short scene.\nFull-bleed illustration, no captions or letters.",
+            "Book cover scene based on the plot.\n".
+            "Plot and cast: Short scene.\n".
+            'Prioritize the plot and action. Include every character mentioned in the scene, including secondary characters. '.
+            "Use the main-character reference only when the hero appears in the scene.\n".
+            'Main character reference: Short style bible.',
             $prompt,
         );
     }
@@ -70,11 +73,26 @@ class IllustrationPromptComposerTest extends TestCase
             'Short style bible.',
             'Short scene.',
             5,
-            'Anna',
             null,
             5,
         );
 
-        $this->assertStringContainsString('Happy ending scene with Anna celebrating.', $prompt);
+        $this->assertStringContainsString('Final story scene based on the plot.', $prompt);
+    }
+
+    public function test_compose_page_prompt_never_exceeds_limit_with_multibyte_input(): void
+    {
+        $composer = new IllustrationPromptComposer;
+
+        $prompt = $composer->composePagePrompt(
+            str_repeat('Одинаковый герой. ', 30),
+            str_repeat('Очень длинная сцена. ', 30),
+            12,
+            500,
+            12,
+        );
+
+        $this->assertLessThanOrEqual(500, mb_strlen($prompt));
+        $this->assertStringContainsString('Final story scene based on the plot.', $prompt);
     }
 }

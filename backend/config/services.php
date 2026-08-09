@@ -86,6 +86,7 @@ return [
                 'base_url' => 'https://api.openai.com/v1',
                 'model' => 'dall-e-3',
                 'timeout' => 480,
+                'max_prompt_length' => 500,
                 'size' => '1024x1024',
             ],
         ],

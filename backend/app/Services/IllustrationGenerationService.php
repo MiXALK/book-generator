@@ -15,6 +15,7 @@ use App\Repositories\Contracts\BookPageRepositoryInterface;
 use App\Repositories\Contracts\GeneratedCharacterRepositoryInterface;
 use App\Repositories\Contracts\UploadedPhotoRepositoryInterface;
 use App\Services\Ai\CharacterBibleComposer;
+use App\Services\Ai\Contracts\CharacterAppearanceProviderInterface;
 use App\Services\Ai\Contracts\IllustrationGenerationProviderInterface;
 use App\Services\Ai\Data\IllustrationGenerationInput;
 use App\Services\Ai\IllustrationPromptComposer;
@@ -28,6 +29,7 @@ readonly class IllustrationGenerationService
         private UploadedPhotoRepositoryInterface $uploadedPhotos,
         private GeneratedCharacterRepositoryInterface $generatedCharacters,
         private BookIllustrationStorageService $illustrationStorage,
+        private CharacterAppearanceProviderInterface $appearanceProvider,
         private IllustrationGenerationProviderInterface $illustrationProvider,
         private IllustrationPromptComposer $promptComposer,
         private CharacterBibleComposer $characterBibleComposer,
@@ -69,7 +71,9 @@ readonly class IllustrationGenerationService
                 $this->bookGenerations->updateIllustrationStatus($generation, 'processing');
                 $this->bookGenerations->updateStatus($generation, 'processing');
 
-                if ($this->characterForGeneration($generation) === null) {
+                $character = $this->characterForGeneration($generation);
+
+                if ($character === null) {
                     $this->failGeneration($generation, 'Character profile is missing for illustration generation.');
 
                     return;
@@ -78,6 +82,10 @@ readonly class IllustrationGenerationService
                 if (! $this->hasPhotoProcessingConsent($generation)) {
                     $this->failGeneration($generation, 'Parental consent is required before photo processing.');
 
+                    return;
+                }
+
+                if (! $this->prepareCharacterAppearance($generation, $character)) {
                     return;
                 }
 
@@ -265,10 +273,16 @@ readonly class IllustrationGenerationService
 
         if ($existing !== null) {
             if ($photo !== null) {
-                $this->generatedCharacters->update($existing, [
+                $attributes = [
                     'uploaded_photo_id' => $photo->id,
                     'style_bible' => $styleBible,
-                ]);
+                ];
+
+                if ((int) $existing->uploaded_photo_id !== (int) $photo->id) {
+                    $attributes['appearance_profile'] = null;
+                }
+
+                $this->generatedCharacters->update($existing, $attributes);
             } elseif (
                 $existing->uploaded_photo_id === null
                 && $existing->style_bible !== $styleBible
@@ -285,6 +299,7 @@ readonly class IllustrationGenerationService
             'child_profile_id' => $profile->id,
             'uploaded_photo_id' => $photo?->id,
             'style_bible' => $styleBible,
+            'appearance_profile' => null,
         ]);
     }
 
@@ -310,7 +325,6 @@ readonly class IllustrationGenerationService
             $character->style_bible,
             $page->text,
             $page->page_number,
-            $generation->child_name,
             $this->maxPromptLength(),
             $totalPages > 0 ? $totalPages : null,
         );
@@ -382,6 +396,59 @@ readonly class IllustrationGenerationService
         return $this->generatedCharacters->findById((int) $generation->generated_character_id);
     }
 
+    private function prepareCharacterAppearance(
+        BookGeneration $generation,
+        GeneratedCharacter $character,
+    ): bool {
+        if ($generation->uploaded_photo_id === null || trim((string) $character->appearance_profile) !== '') {
+            return true;
+        }
+
+        if (! $this->appearanceProvider->isConfigured()) {
+            $this->failGeneration($generation, 'Character appearance provider is not configured.');
+
+            return false;
+        }
+
+        $photo = $this->uploadedPhotos->findForUser(
+            (int) $generation->user_id,
+            (int) $generation->uploaded_photo_id,
+        );
+        $storedImage = $photo !== null
+            ? $this->illustrationStorage->readPrivateImage($photo->storage_path)
+            : null;
+
+        if ($storedImage === null) {
+            throw new TransientGenerationException('Uploaded character photo could not be read.');
+        }
+
+        $appearance = $this->appearanceProvider->describe(
+            $storedImage['binary'],
+            $storedImage['content_type'],
+        );
+
+        if ($appearance === null || trim($appearance) === '') {
+            throw new TransientGenerationException('Character appearance analysis failed.');
+        }
+
+        $styleBible = $this->characterBibleComposer->compose(
+            (string) $generation->child_name,
+            (int) $generation->child_age,
+            (string) $generation->child_gender,
+            $character,
+            false,
+            $appearance,
+        );
+        $normalizedAppearance = trim((string) preg_replace('/\s+/u', ' ', $appearance));
+
+        $this->generatedCharacters->update($character, [
+            'appearance_profile' => $normalizedAppearance,
+            'style_bible' => $styleBible,
+        ]);
+
+        return true;
+    }
+
     private function pageNeedsGeneratedImage(BookPage $page): bool
     {
         $path = $page->getAttributes()['image_url'] ?? null;
@@ -414,16 +481,16 @@ readonly class IllustrationGenerationService
         $this->bookGenerations->updateStatus($generation, 'failed');
     }
 
-    private function maxPromptLength(): ?int
+    private function maxPromptLength(): int
     {
         $driver = (string) config('services.ai_image.driver', 'yandexart');
         $configured = config('services.ai_image.drivers.'.$driver.'.max_prompt_length');
 
         if (! is_numeric($configured)) {
-            return null;
+            return 500;
         }
 
-        return (int) $configured;
+        return min(500, max(1, (int) $configured));
     }
 
     private function hasPhotoProcessingConsent(BookGeneration $generation): bool

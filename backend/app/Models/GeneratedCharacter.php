@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'uploaded_photo_id',
     'storage_path',
     'style_bible',
+    'appearance_profile',
 ])]
 class GeneratedCharacter extends Model
 {

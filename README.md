@@ -25,6 +25,10 @@ cp backend/.env.example backend/.env
 cp .env.example .env
 ```
 
+Paid photo personalization reuses the configured Qwen `qwen3.6-flash` model
+and `AI_TEXT_API_KEY` to analyze the uploaded character photo before page
+illustrations are generated.
+
 Example files list variable names only. For local Docker Compose, service
 defaults in `docker-compose.yml` apply when a variable is unset or empty.
 
