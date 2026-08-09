@@ -5,22 +5,22 @@ namespace App\Services\Ai;
 readonly class IllustrationPromptComposer
 {
     public function composePagePrompt(
-        string $styleBible,
+        string $mainCharacter,
         string $pageText,
-        ?int $maxLength = null,
+        ?int   $maxLength = null,
     ): string {
-        $scene = 'Pixar 3D CGI style: soft cinematic lighting.';
-        $direction = 'Prioritize the plot and action. Include every character mentioned in the scene, including secondary characters. Use the main-character reference only when the hero appears in the scene.';
+        $scene = '3D CGI style: soft cinematic lighting.';
+        $direction = 'Prioritize the plot and action. Include every character mentioned in the scene. Use the main character reference only when the main character appears in the scene.';
 
         if ($maxLength === null) {
-            return $this->buildPrompt($styleBible, $scene, $pageText, $direction);
+            return $this->buildPrompt($mainCharacter, $scene, $pageText, $direction);
         }
 
-        return $this->fitPromptToMaxLength($styleBible, $scene, $pageText, $direction, $maxLength);
+        return $this->fitPromptToMaxLength($mainCharacter, $scene, $pageText, $direction, $maxLength);
     }
 
     private function buildPrompt(
-        string $styleBible,
+        string $mainCharacter,
         string $scene,
         string $pageText,
         string $direction,
@@ -31,8 +31,8 @@ readonly class IllustrationPromptComposer
             $direction,
         ];
 
-        if ($styleBible !== '') {
-            $parts[] = "Main character reference: {$styleBible}";
+        if ($mainCharacter !== '') {
+            $parts[] = $mainCharacter;
         }
 
         return implode("\n", $parts);
@@ -62,7 +62,7 @@ readonly class IllustrationPromptComposer
             return $this->truncateText($plotPrompt, $maxLength);
         }
 
-        $stylePrefix = "\nMain character reference: ";
+        $stylePrefix = "\nMain character: ";
         $styleBudget = $maxLength - mb_strlen($plotPrompt) - mb_strlen($stylePrefix);
         $styleBible = $this->truncateText($styleBible, max(0, $styleBudget));
 

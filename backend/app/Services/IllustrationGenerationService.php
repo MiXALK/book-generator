@@ -262,7 +262,6 @@ readonly class IllustrationGenerationService
     ): GeneratedCharacter {
         $existing = $this->generatedCharacters->findForChildProfile($profile);
         $reuseExisting = $photo !== null;
-
         $styleBible = $this->characterBibleComposer->compose(
             $childName,
             $childAge,
@@ -303,10 +302,10 @@ readonly class IllustrationGenerationService
         ]);
     }
 
-    public function finalizeWithoutProvider(BookGeneration $generation, ?UploadedPhoto $photo): void
+    public function finalizeWithoutProvider(BookGeneration $generation): void
     {
         $this->consumeUploadedPhoto($generation);
-        $this->bookGenerations->updateIllustrationStatus($generation, 'completed', null);
+        $this->bookGenerations->updateIllustrationStatus($generation, 'completed');
         $this->bookGenerations->updateStatus($generation, 'completed');
         $this->observability->notifyBookReady($generation);
     }
