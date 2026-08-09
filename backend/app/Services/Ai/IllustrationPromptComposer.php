@@ -9,22 +9,19 @@ readonly class IllustrationPromptComposer
         string $pageText,
         ?int $maxLength = null,
     ): string {
-        $style = '3D CGI, soft cinematic light. No text.';
-
         if ($maxLength === null) {
-            return $this->buildPrompt($mainCharacter, $style, $pageText);
+            return $this->buildPrompt($mainCharacter, $pageText);
         }
 
-        return $this->fitPromptToMaxLength($mainCharacter, $style, $pageText, $maxLength);
+        return $this->fitPromptToMaxLength($mainCharacter, $pageText, $maxLength);
     }
 
     private function buildPrompt(
         string $mainCharacter,
-        string $style,
         string $pageText,
     ): string {
         $parts = [
-            "Style: {$style}",
+            'Style: Pixar 3D CGI, soft cinematic light. No text.',
             "Scene: {$pageText}",
         ];
 
@@ -37,20 +34,18 @@ readonly class IllustrationPromptComposer
 
     private function fitPromptToMaxLength(
         string $mainCharacter,
-        string $style,
         string $pageText,
         int $maxLength,
     ): string {
         $mainCharacter = trim($mainCharacter);
-        $style = trim($style);
         $pageText = trim($pageText);
-        $plotPrompt = $this->buildPrompt('', $style, $pageText);
+        $plotPrompt = $this->buildPrompt('', $pageText);
 
         if (mb_strlen($plotPrompt) > $maxLength) {
-            $promptWithoutPlot = $this->buildPrompt('', $style, '');
+            $promptWithoutPlot = $this->buildPrompt('', '');
             $pageBudget = $maxLength - mb_strlen($promptWithoutPlot);
             $pageText = $this->truncateText($pageText, max(0, $pageBudget));
-            $plotPrompt = $this->buildPrompt('', $style, $pageText);
+            $plotPrompt = $this->buildPrompt('', $pageText);
         }
 
         if (mb_strlen($plotPrompt) >= $maxLength || $mainCharacter === '') {
@@ -61,7 +56,7 @@ readonly class IllustrationPromptComposer
         $heroBudget = $maxLength - mb_strlen($plotPrompt) - mb_strlen($heroPrefix);
         $mainCharacter = $this->truncateText($mainCharacter, max(0, $heroBudget));
 
-        return $this->buildPrompt($mainCharacter, $style, $pageText);
+        return $this->buildPrompt($mainCharacter, $pageText);
     }
 
     private function truncateText(string $text, int $maxLength): string

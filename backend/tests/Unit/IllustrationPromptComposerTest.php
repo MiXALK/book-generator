@@ -54,7 +54,7 @@ class IllustrationPromptComposerTest extends TestCase
         );
 
         $this->assertSame(
-            "Style: 3D CGI, soft cinematic light. No text.\n".
+            "Style: Pixar 3D CGI, soft cinematic light. No text.\n".
             "Scene: Short scene.\n".
             'Hero: Short style bible.',
             $prompt,
